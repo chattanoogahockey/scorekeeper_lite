@@ -29,6 +29,8 @@ class ScorekeeperApp {
                 return this.getAttendanceHTML();
             case 'scoring':
                 return this.getScoringHTML();
+            case 'goal-details':
+                return this.getGoalDetailsHTML();
             default:
                 return this.getMainMenuHTML();
         }
@@ -170,27 +172,11 @@ class ScorekeeperApp {
                 <div class="stats-section">
                     <div class="stats-grid">
                         <div class="stat-item">
-                            <h4>Add Goal</h4>
-                            <div class="form-group">
-                                <label>Team:</label>
-                                <select id="goal-team">
-                                    <option value="${this.selectedGame.homeTeam}">${this.selectedGame.homeTeam}</option>
-                                    <option value="${this.selectedGame.awayTeam}">${this.selectedGame.awayTeam}</option>
-                                </select>
+                            <h4>Goals & Penalties</h4>
+                            <div style="display: flex; gap: 10px; margin-top: 15px;">
+                                <button class="btn btn-success" onclick="app.showGoalDetails()" style="flex: 1;">Add Goal</button>
+                                <button class="btn btn-warning" onclick="app.showPenaltyDetails()" style="flex: 1;">Add Penalty</button>
                             </div>
-                            <div class="form-group">
-                                <label>Player:</label>
-                                <select id="goal-player">
-                                    <option value="">Select Player</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label>Assist (optional):</label>
-                                <select id="goal-assist">
-                                    <option value="">No Assist</option>
-                                </select>
-                            </div>
-                            <button class="btn btn-success" onclick="app.addGoal()">Add Goal</button>
                         </div>
 
                         <div class="stat-item">
@@ -231,6 +217,87 @@ class ScorekeeperApp {
                 <div style="margin-top: 30px;">
                     <button class="btn btn-danger" onclick="app.endGame()">End Game</button>
                     <button class="btn btn-secondary" onclick="app.showAttendance()">Back to Attendance</button>
+                </div>
+            </div>
+        `;
+    }
+
+    getGoalDetailsHTML() {
+        if (!this.selectedGame) {
+            return this.getMainMenuHTML();
+        }
+
+        return `
+            <div class="card">
+                <h2>Add Goal Details</h2>
+                <p><strong>Game:</strong> ${this.selectedGame.homeTeam} vs ${this.selectedGame.awayTeam}</p>
+
+                <div class="form-group">
+                    <label>Team:</label>
+                    <select id="goal-team">
+                        <option value="${this.selectedGame.homeTeam}">${this.selectedGame.homeTeam}</option>
+                        <option value="${this.selectedGame.awayTeam}">${this.selectedGame.awayTeam}</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Player:</label>
+                    <select id="goal-player">
+                        <option value="">Select Player</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Assist (optional):</label>
+                    <select id="goal-assist">
+                        <option value="">No Assist</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Shot Type:</label>
+                    <select id="goal-shot-type">
+                        <option value="wrist" selected>Wrist Shot</option>
+                        <option value="slapshot">Slapshot</option>
+                        <option value="backhand">Backhand</option>
+                        <option value="snapshot">Snapshot</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Breakaway:</label>
+                    <select id="goal-breakaway">
+                        <option value="no" selected>No</option>
+                        <option value="yes">Yes</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Goal Type:</label>
+                    <select id="goal-type">
+                        <option value="regular" selected>Regular</option>
+                        <option value="shorthanded">Shorthanded</option>
+                        <option value="powerplay">Powerplay</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Period:</label>
+                    <select id="goal-period">
+                        <option value="1">Period 1</option>
+                        <option value="2">Period 2</option>
+                        <option value="3">Period 3</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Time (MM:SS):</label>
+                    <input type="text" id="goal-time" placeholder="00:00" maxlength="5" oninput="app.formatGoalTime(this)">
+                </div>
+
+                <div style="margin-top: 30px; display: flex; gap: 10px;">
+                    <button class="btn btn-success" onclick="app.addGoal()" style="flex: 1;">Add Goal</button>
+                    <button class="btn btn-secondary" onclick="app.showScoring()" style="flex: 1;">Cancel</button>
                 </div>
             </div>
         `;
@@ -288,6 +355,53 @@ class ScorekeeperApp {
         this.updatePlayerDropdowns();
     }
 
+    showGoalDetails() {
+        this.currentView = 'goal-details';
+        this.render();
+        this.updatePlayerDropdowns();
+    }
+
+    showPenaltyDetails() {
+        // For now, just show an alert - we can implement penalty details later
+        alert('Penalty details form coming soon!');
+    }
+
+    formatGoalTime(input) {
+        let value = input.value.replace(/[^0-9]/g, ''); // Remove non-numeric characters
+
+        if (value.length === 0) {
+            input.value = '';
+            return;
+        }
+
+        // Handle different input lengths
+        if (value.length === 1) {
+            // Single digit: 1 -> 00:01
+            input.value = `00:0${value}`;
+        } else if (value.length === 2) {
+            // Two digits: 11 -> 00:11
+            input.value = `00:${value}`;
+        } else if (value.length === 3) {
+            // Three digits: 120 -> 01:20
+            input.value = `0${value[0]}:${value.slice(1)}`;
+        } else if (value.length === 4) {
+            // Four digits: 1220 -> 12:20
+            input.value = `${value.slice(0, 2)}:${value.slice(2)}`;
+        } else if (value.length >= 5) {
+            // Five or more digits: take first 4 and format
+            value = value.slice(0, 4);
+            input.value = `${value.slice(0, 2)}:${value.slice(2)}`;
+        }
+
+        // Validate the time is within range (00:00 to 17:00)
+        const [minutes, seconds] = input.value.split(':').map(Number);
+        const totalSeconds = minutes * 60 + seconds;
+
+        if (totalSeconds > 1020) { // 17:00 = 1020 seconds
+            input.value = '17:00';
+        }
+    }
+
     updatePlayerDropdowns() {
         const goalTeamSelect = document.getElementById('goal-team');
         const penaltyTeamSelect = document.getElementById('penalty-team');
@@ -325,9 +439,19 @@ class ScorekeeperApp {
         const team = document.getElementById('goal-team').value;
         const playerId = document.getElementById('goal-player').value;
         const assistId = document.getElementById('goal-assist').value;
+        const shotType = document.getElementById('goal-shot-type').value;
+        const breakaway = document.getElementById('goal-breakaway').value;
+        const goalType = document.getElementById('goal-type').value;
+        const period = document.getElementById('goal-period').value;
+        const time = document.getElementById('goal-time').value;
 
         if (!playerId) {
             alert('Please select a player who scored the goal.');
+            return;
+        }
+
+        if (!time || !time.includes(':')) {
+            alert('Please enter a valid time in MM:SS format.');
             return;
         }
 
@@ -340,11 +464,18 @@ class ScorekeeperApp {
             player: player ? player.name : 'Unknown',
             playerId,
             assist: assist ? assist.name : null,
-            assistId: assist ? assist.id : null
+            assistId: assist ? assist.id : null,
+            shotType,
+            breakaway: breakaway === 'yes',
+            goalType,
+            period: parseInt(period),
+            time
         });
 
         this.updateScores();
         this.clearGoalForm();
+        this.showScoring(); // Go back to scoring view after adding goal
+        alert('Goal added successfully!');
     }
 
     addPenalty() {
@@ -383,6 +514,11 @@ class ScorekeeperApp {
     clearGoalForm() {
         document.getElementById('goal-player').value = '';
         document.getElementById('goal-assist').value = '';
+        document.getElementById('goal-shot-type').value = 'wrist';
+        document.getElementById('goal-breakaway').value = 'no';
+        document.getElementById('goal-type').value = 'regular';
+        document.getElementById('goal-period').value = '1';
+        document.getElementById('goal-time').value = '';
     }
 
     clearPenaltyForm() {
