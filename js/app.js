@@ -103,13 +103,18 @@ class ScorekeeperApp {
         const awayPlayers = dataManager.getPlayersForTeam(this.selectedGame.awayTeam);
 
         const createPlayerCheckboxes = (players, teamName) => {
-            return players.map(player => `
+            return players.map(player => {
+                // Uncheck players with "Sub" in their name by default
+                const isChecked = !player.name.toLowerCase().includes('sub');
+                const checkedAttr = isChecked ? 'checked' : '';
+
+                return `
                 <div class="checkbox-item">
-                    <input type="checkbox" id="player_${player.id}" value="${player.id}" checked
+                    <input type="checkbox" id="player_${player.id}" value="${player.id}" ${checkedAttr}
                            data-team="${teamName}" data-name="${player.name}">
                     <label for="player_${player.id}">${player.name} (${player.number})</label>
                 </div>
-            `).join('');
+            `}).join('');
         };
 
         return `
