@@ -195,7 +195,6 @@ class ScorekeeperApp {
 
         return `
             <div class="card">
-                <h2>Live Scoring</h2>
                 <p><strong>Game:</strong> ${this.selectedGame.homeTeam} vs ${this.selectedGame.awayTeam}</p>
 
                 <div class="score-display">
