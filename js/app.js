@@ -1,4 +1,4 @@
-// Main application logic for CHAHKY Scorekeeper
+// Main application logic for The Scorekeeper
 
 class ScorekeeperApp {
     constructor() {
@@ -41,13 +41,16 @@ class ScorekeeperApp {
     getMainMenuHTML() {
         return `
             <div class="card">
-                <h2>Welcome to CHAHKY Scorekeeper</h2>
+                <h2>Welcome to The Scorekeeper</h2>
                 <p>Select an option to get started:</p>
                 <div style="margin-top: 30px;">
                     <button class="btn" onclick="app.showGameSelection()">Score a New Game</button>
                 </div>
                 <div style="margin-top: 20px;">
                     <button class="btn btn-secondary" onclick="app.showGameHistory()">View Game History</button>
+                </div>
+                <div style="margin-top: 20px;">
+                    <button class="btn btn-secondary" onclick="alert('Statistics feature coming soon!')">Statistics</button>
                 </div>
             </div>
         `;

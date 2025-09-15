@@ -1,5 +1,5 @@
 @echo off
-echo CHAHKY Scorekeeper - GitHub Deployment Script
+echo The Scorekeeper - GitHub Deployment Script
 echo ==============================================
 
 set /p GITHUB_USERNAME="Enter your GitHub username: "

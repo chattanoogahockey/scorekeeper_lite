@@ -1,4 +1,4 @@
-// Data management for CHAHKY Scorekeeper
+// Data management for The Scorekeeper
 
 class DataManager {
     constructor() {

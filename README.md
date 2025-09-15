@@ -1,4 +1,4 @@
-# CHAHKY Scorekeeper
+# The Scorekeeper
 
 A modern web application for tracking scores, goals, penalties, and attendance for Chattanooga Roller Hockey League games.
 

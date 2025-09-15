@@ -1,6 +1,6 @@
 @echo off
 echo ========================================
-echo 🚀 CHAHKY Scorekeeper - FINAL DEPLOYMENT
+echo 🚀 The Scorekeeper - FINAL DEPLOYMENT
 echo ========================================
 echo.
 echo This script will connect your local project to GitHub

@@ -1,6 +1,6 @@
 @echo off
 echo ========================================
-echo CHAHKY Scorekeeper - GitHub Connection
+echo The Scorekeeper - GitHub Connection
 echo ========================================
 
 set /p GITHUB_USERNAME="Enter your GitHub username: "
