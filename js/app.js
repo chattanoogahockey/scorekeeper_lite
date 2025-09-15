@@ -226,14 +226,10 @@ class ScorekeeperApp {
                     <div class="form-column">
                         <div class="form-group">
                             <label>Team:</label>
-                            <div class="radio-group">
-                                <label class="radio-label">
-                                    <input type="radio" name="goal-team" value="${this.selectedGame.homeTeam}" checked> ${this.selectedGame.homeTeam}
-                                </label>
-                                <label class="radio-label">
-                                    <input type="radio" name="goal-team" value="${this.selectedGame.awayTeam}"> ${this.selectedGame.awayTeam}
-                                </label>
-                            </div>
+                            <select id="goal-team">
+                                <option value="${this.selectedGame.homeTeam}">${this.selectedGame.homeTeam}</option>
+                                <option value="${this.selectedGame.awayTeam}">${this.selectedGame.awayTeam}</option>
+                            </select>
                         </div>
 
                         <div class="form-group">
@@ -570,12 +566,14 @@ class ScorekeeperApp {
     }
 
     updatePlayerDropdowns() {
-        const goalTeamRadios = document.querySelectorAll('input[name="goal-team"]');
+        const goalTeamSelect = document.getElementById('goal-team');
         const penaltyTeamSelect = document.getElementById('penalty-team');
 
         const updatePlayers = (teamValue, playerSelectId) => {
+            if (!teamValue) return;
+
             const allPlayers = dataManager.getPlayersForTeam(teamValue);
-            
+
             // Filter players based on attendance if available
             let availablePlayers = allPlayers;
             if (dataManager.currentGame && dataManager.currentGame.attendance) {
@@ -584,43 +582,65 @@ class ScorekeeperApp {
                     .map(att => att.id);
                 availablePlayers = allPlayers.filter(player => attendedPlayerIds.includes(player.id));
             }
-            
+
             const playerSelect = document.getElementById(playerSelectId);
-            playerSelect.innerHTML = '<option value="">Select Player</option>' +
-                availablePlayers.map(player => `<option value="${player.id}">${player.name}</option>`).join('');
+            if (playerSelect) {
+                playerSelect.innerHTML = '<option value="">Select Player</option>' +
+                    availablePlayers.map(player => `<option value="${player.id}">${player.name}</option>`).join('');
+            }
         };
 
-        // Add event listeners for goal team radio buttons
-        goalTeamRadios.forEach(radio => {
-            radio.addEventListener('change', () => {
-                updatePlayers(radio.value, 'goal-player');
+        // Add event listeners for goal team dropdown
+        if (goalTeamSelect) {
+            goalTeamSelect.addEventListener('change', () => {
+                updatePlayers(goalTeamSelect.value, 'goal-player');
+                updatePlayers(goalTeamSelect.value, 'goal-assist');
             });
-        });
-
-        penaltyTeamSelect.addEventListener('change', () => updatePlayers(penaltyTeamSelect.value, 'penalty-player'));
-
-        // Initialize with home team (first radio button should be checked by default)
-        const checkedTeamRadio = document.querySelector('input[name="goal-team"]:checked');
-        if (checkedTeamRadio) {
-            updatePlayers(checkedTeamRadio.value, 'goal-player');
         }
-        updatePlayers(penaltyTeamSelect.value, 'penalty-player');
 
-        // Update assist dropdown
+        // Add event listeners for penalty team dropdown
+        if (penaltyTeamSelect) {
+            penaltyTeamSelect.addEventListener('change', () => updatePlayers(penaltyTeamSelect.value, 'penalty-player'));
+        }
+
+        // Initialize with current values
+        if (goalTeamSelect) {
+            updatePlayers(goalTeamSelect.value, 'goal-player');
+            updatePlayers(goalTeamSelect.value, 'goal-assist');
+        }
+        if (penaltyTeamSelect) {
+            updatePlayers(penaltyTeamSelect.value, 'penalty-player');
+        }
+
+        // Update assist dropdown when player changes
         const goalPlayerSelect = document.getElementById('goal-player');
         const assistSelect = document.getElementById('goal-assist');
 
-        goalPlayerSelect.addEventListener('change', () => {
-            const selectedTeam = goalTeamSelect.value;
-            const players = dataManager.getPlayersForTeam(selectedTeam);
-            assistSelect.innerHTML = '<option value="">No Assist</option>' +
-                players.filter(p => p.id !== goalPlayerSelect.value)
-                    .map(player => `<option value="${player.id}">${player.name}</option>`).join('');
-        });
+        if (goalPlayerSelect && assistSelect && goalTeamSelect) {
+            goalPlayerSelect.addEventListener('change', () => {
+                const selectedTeam = goalTeamSelect.value;
+                if (!selectedTeam) return;
+
+                const allPlayers = dataManager.getPlayersForTeam(selectedTeam);
+                let availablePlayers = allPlayers;
+
+                // Filter by attendance
+                if (dataManager.currentGame && dataManager.currentGame.attendance) {
+                    const attendedPlayerIds = dataManager.currentGame.attendance
+                        .filter(att => att.team === selectedTeam)
+                        .map(att => att.id);
+                    availablePlayers = allPlayers.filter(player => attendedPlayerIds.includes(player.id));
+                }
+
+                assistSelect.innerHTML = '<option value="">No Assist</option>' +
+                    availablePlayers.filter(p => p.id !== goalPlayerSelect.value)
+                        .map(player => `<option value="${player.id}">${player.name}</option>`).join('');
+            });
+        }
     }
 
     addGoal() {
-        const team = document.querySelector('input[name="goal-team"]:checked').value;
+        const team = document.getElementById('goal-team').value;
         const playerId = document.getElementById('goal-player').value;
         const assistId = document.getElementById('goal-assist').value;
         const shotType = document.querySelector('input[name="goal-shot-type"]:checked').value;
@@ -706,23 +726,22 @@ class ScorekeeperApp {
     }
 
     clearGoalForm() {
+        // Reset dropdown to home team
+        document.getElementById('goal-team').value = this.selectedGame.homeTeam;
+
         // Reset radio buttons to defaults
-        document.querySelector('input[name="goal-team"][value="' + this.selectedGame.homeTeam + '"]').checked = true;
         document.querySelector('input[name="goal-period"][value="1"]').checked = true;
         document.querySelector('input[name="goal-shot-type"][value="wrist"]').checked = true;
         document.querySelector('input[name="goal-breakaway"][value="no"]').checked = true;
         document.querySelector('input[name="goal-type"][value="regular"]').checked = true;
-        
+
         // Reset dropdowns and time
         document.getElementById('goal-player').value = '';
         document.getElementById('goal-assist').value = '';
         document.getElementById('goal-time').value = '';
-        
-        // Re-populate player dropdown for the default team
-        const checkedTeamRadio = document.querySelector('input[name="goal-team"]:checked');
-        if (checkedTeamRadio) {
-            this.updatePlayerDropdowns();
-        }
+
+        // Re-populate player dropdowns for the default team
+        this.updatePlayerDropdowns();
     }
 
     clearPenaltyForm() {
