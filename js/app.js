@@ -143,6 +143,9 @@ class ScorekeeperApp {
                     <input type="checkbox" id="player_${player.id}" value="${player.id}" ${checkedAttr}
                            data-team="${teamName}" data-name="${player.name}">
                     <label for="player_${player.id}">${player.name}</label>
+                    <input type="text" id="number_${player.id}" class="jersey-number-input" 
+                           placeholder="#" maxlength="2" data-player-id="${player.id}"
+                           onclick="app.showNumberDialog('${player.id}', '${player.name.replace(/'/g, "\\'")}')">
                 </div>
             `}).join('');
         };
@@ -166,6 +169,19 @@ class ScorekeeperApp {
                         <div class="checkbox-group">
                             ${createPlayerCheckboxes(awayPlayers, this.selectedGame.awayTeam)}
                         </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Number Input Dialog -->
+            <div id="number-dialog" class="modal" style="display: none;" onclick="if(event.target === this) app.closeNumberDialog()">
+                <div class="modal-content" onclick="event.stopPropagation()">
+                    <h3 id="dialog-title">Enter Jersey Number</h3>
+                    <p id="dialog-player-name"></p>
+                    <input type="text" id="number-input" maxlength="2" placeholder="00" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+                    <div style="margin-top: 20px; display: flex; gap: 10px;">
+                        <button class="btn btn-secondary" onclick="app.closeNumberDialog()">Cancel</button>
+                        <button class="btn btn-primary" onclick="app.saveJerseyNumber()">Save</button>
                     </div>
                 </div>
             </div>
@@ -416,11 +432,18 @@ class ScorekeeperApp {
     startScoring() {
         // Collect attendance data
         const checkedPlayers = document.querySelectorAll('input[type="checkbox"]:checked');
-        this.attendance = Array.from(checkedPlayers).map(cb => ({
-            id: cb.value,
-            name: cb.dataset.name,
-            team: cb.dataset.team
-        }));
+        this.attendance = Array.from(checkedPlayers).map(cb => {
+            const playerId = cb.value;
+            const numberInput = document.getElementById(`number_${playerId}`);
+            const jerseyNumber = numberInput ? numberInput.value.trim() : '';
+            
+            return {
+                id: playerId,
+                name: cb.dataset.name,
+                team: cb.dataset.team,
+                jerseyNumber: jerseyNumber
+            };
+        });
 
         // Create game in data manager
         dataManager.currentGame = dataManager.createGame({
@@ -575,7 +598,17 @@ class ScorekeeperApp {
             const playerSelect = document.getElementById(playerSelectId);
             if (playerSelect) {
                 playerSelect.innerHTML = '<option value="">Select Player</option>' +
-                    availablePlayers.map(player => `<option value="${player.id}">${player.name}</option>`).join('');
+                    availablePlayers.map(player => {
+                        // Find jersey number from attendance data
+                        let jerseyNumber = '';
+                        if (dataManager.currentGame && dataManager.currentGame.attendance) {
+                            const attendanceRecord = dataManager.currentGame.attendance.find(att => att.id === player.id && att.team === teamValue);
+                            if (attendanceRecord && attendanceRecord.jerseyNumber) {
+                                jerseyNumber = ` (#${attendanceRecord.jerseyNumber})`;
+                            }
+                        }
+                        return `<option value="${player.id}">${player.name}${jerseyNumber}</option>`;
+                    }).join('');
             }
         };
 
@@ -627,7 +660,17 @@ class ScorekeeperApp {
 
                 assistSelect.innerHTML = '<option value="">No Assist</option>' +
                     availablePlayers.filter(p => p.id !== goalPlayerSelect.value)
-                        .map(player => `<option value="${player.id}">${player.name}</option>`).join('');
+                        .map(player => {
+                            // Find jersey number from attendance data
+                            let jerseyNumber = '';
+                            if (dataManager.currentGame && dataManager.currentGame.attendance) {
+                                const attendanceRecord = dataManager.currentGame.attendance.find(att => att.id === player.id && att.team === selectedTeam);
+                                if (attendanceRecord && attendanceRecord.jerseyNumber) {
+                                    jerseyNumber = ` (#${attendanceRecord.jerseyNumber})`;
+                                }
+                            }
+                            return `<option value="${player.id}">${player.name}${jerseyNumber}</option>`;
+                        }).join('');
             };
             goalPlayerSelect.addEventListener('change', goalPlayerSelect._assistHandler);
         }
@@ -759,6 +802,59 @@ class ScorekeeperApp {
     showGameHistory() {
         // This would show past games - for now just show a placeholder
         alert('Game history feature coming soon!');
+    }
+
+    // Jersey Number Dialog Methods
+    showNumberDialog(playerId, playerName) {
+        this.currentPlayerId = playerId;
+        document.getElementById('dialog-title').textContent = 'Enter Jersey Number';
+        document.getElementById('dialog-player-name').textContent = playerName;
+        
+        // Get current value if it exists
+        const numberInput = document.getElementById(`number_${playerId}`);
+        const currentValue = numberInput ? numberInput.value : '';
+        document.getElementById('number-input').value = currentValue;
+        
+        document.getElementById('number-dialog').style.display = 'flex';
+        // Focus the input after a short delay to ensure modal is visible
+        setTimeout(() => {
+            document.getElementById('number-input').focus();
+            // Add keyboard event listeners
+            document.getElementById('number-input').addEventListener('keydown', this.handleNumberDialogKeydown.bind(this));
+        }, 100);
+    }
+
+    closeNumberDialog() {
+        document.getElementById('number-dialog').style.display = 'none';
+        // Remove keyboard event listeners
+        const numberInput = document.getElementById('number-input');
+        if (numberInput) {
+            numberInput.removeEventListener('keydown', this.handleNumberDialogKeydown.bind(this));
+        }
+        this.currentPlayerId = null;
+    }
+
+    handleNumberDialogKeydown(event) {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            this.saveJerseyNumber();
+        } else if (event.key === 'Escape') {
+            event.preventDefault();
+            this.closeNumberDialog();
+        }
+    }
+
+    saveJerseyNumber() {
+        if (!this.currentPlayerId) return;
+        
+        const numberValue = document.getElementById('number-input').value.trim();
+        const numberInput = document.getElementById(`number_${this.currentPlayerId}`);
+        
+        if (numberInput) {
+            numberInput.value = numberValue;
+        }
+        
+        this.closeNumberDialog();
     }
 }
 
