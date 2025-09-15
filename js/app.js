@@ -151,8 +151,8 @@ class ScorekeeperApp {
         };
 
         return `
+            <h1>Record Attendance</h1>
             <div class="card">
-                <h2>Mark Attendance</h2>
                 <p><strong>Game:</strong> ${this.selectedGame.homeTeam} vs ${this.selectedGame.awayTeam}</p>
                 <p><strong>Date:</strong> ${new Date(this.selectedGame.date).toLocaleDateString()}</p>
 
@@ -242,7 +242,7 @@ class ScorekeeperApp {
                     <div class="form-column">
                         <div class="form-group">
                             <label>Team:</label>
-                            <select id="goal-team">
+                            <select id="goal-team" onchange="app.updatePlayerDropdowns()">
                                 <option value="${this.selectedGame.homeTeam}" selected>${this.selectedGame.homeTeam}</option>
                                 <option value="${this.selectedGame.awayTeam}">${this.selectedGame.awayTeam}</option>
                             </select>
@@ -349,7 +349,7 @@ class ScorekeeperApp {
 
                 <div class="form-group">
                     <label>Team:</label>
-                    <select id="penalty-team">
+                    <select id="penalty-team" onchange="app.updatePlayerDropdowns()">
                         <option value="${this.selectedGame.homeTeam}" selected>${this.selectedGame.homeTeam}</option>
                         <option value="${this.selectedGame.awayTeam}">${this.selectedGame.awayTeam}</option>
                     </select>
@@ -466,7 +466,43 @@ class ScorekeeperApp {
         // Use setTimeout to ensure DOM is fully rendered before updating dropdowns
         setTimeout(() => {
             this.updatePlayerDropdowns();
-        }, 10);
+            // Also ensure the team dropdown triggers player updates
+            const goalTeamSelect = document.getElementById('goal-team');
+            if (goalTeamSelect) {
+                // Manually trigger the update for the initially selected team
+                const updatePlayers = (teamValue, playerSelectId) => {
+                    if (!teamValue) return;
+
+                    const allPlayers = dataManager.getPlayersForTeam(teamValue);
+                    let availablePlayers = allPlayers;
+                    if (dataManager.currentGame && dataManager.currentGame.attendance) {
+                        const attendedPlayerIds = dataManager.currentGame.attendance
+                            .filter(att => att.team === teamValue)
+                            .map(att => att.id);
+                        availablePlayers = allPlayers.filter(player => attendedPlayerIds.includes(player.id));
+                    }
+
+                    const playerSelect = document.getElementById(playerSelectId);
+                    if (playerSelect) {
+                        playerSelect.innerHTML = '<option value="">Select Player</option>' +
+                            availablePlayers.map(player => {
+                                let jerseyNumber = '';
+                                if (dataManager.currentGame && dataManager.currentGame.attendance) {
+                                    const attendanceRecord = dataManager.currentGame.attendance.find(att => att.id === player.id && att.team === teamValue);
+                                    if (attendanceRecord && attendanceRecord.jerseyNumber) {
+                                        jerseyNumber = ` (#${attendanceRecord.jerseyNumber})`;
+                                    }
+                                }
+                                return `<option value="${player.id}">${player.name}${jerseyNumber}</option>`;
+                            }).join('');
+                    }
+                };
+
+                // Update both player and assist dropdowns for the selected team
+                updatePlayers(goalTeamSelect.value, 'goal-player');
+                updatePlayers(goalTeamSelect.value, 'goal-assist');
+            }
+        }, 50);
     }
 
     showPenaltyDetails() {
@@ -475,7 +511,42 @@ class ScorekeeperApp {
         // Use setTimeout to ensure DOM is fully rendered before updating dropdowns
         setTimeout(() => {
             this.updatePlayerDropdowns();
-        }, 10);
+            // Also ensure the penalty team dropdown triggers player updates
+            const penaltyTeamSelect = document.getElementById('penalty-team');
+            if (penaltyTeamSelect) {
+                // Manually trigger the update for the initially selected team
+                const updatePlayers = (teamValue, playerSelectId) => {
+                    if (!teamValue) return;
+
+                    const allPlayers = dataManager.getPlayersForTeam(teamValue);
+                    let availablePlayers = allPlayers;
+                    if (dataManager.currentGame && dataManager.currentGame.attendance) {
+                        const attendedPlayerIds = dataManager.currentGame.attendance
+                            .filter(att => att.team === teamValue)
+                            .map(att => att.id);
+                        availablePlayers = allPlayers.filter(player => attendedPlayerIds.includes(player.id));
+                    }
+
+                    const playerSelect = document.getElementById(playerSelectId);
+                    if (playerSelect) {
+                        playerSelect.innerHTML = '<option value="">Select Player</option>' +
+                            availablePlayers.map(player => {
+                                let jerseyNumber = '';
+                                if (dataManager.currentGame && dataManager.currentGame.attendance) {
+                                    const attendanceRecord = dataManager.currentGame.attendance.find(att => att.id === player.id && att.team === teamValue);
+                                    if (attendanceRecord && attendanceRecord.jerseyNumber) {
+                                        jerseyNumber = ` (#${attendanceRecord.jerseyNumber})`;
+                                    }
+                                }
+                                return `<option value="${player.id}">${player.name}${jerseyNumber}</option>`;
+                            }).join('');
+                    }
+                };
+
+                // Update penalty player dropdown for the selected team
+                updatePlayers(penaltyTeamSelect.value, 'penalty-player');
+            }
+        }, 50);
     }
 
     formatGoalTimeFromValue(input, value) {
