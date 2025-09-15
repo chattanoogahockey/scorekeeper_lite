@@ -142,7 +142,7 @@ class ScorekeeperApp {
                 <div class="checkbox-item">
                     <input type="checkbox" id="player_${player.id}" value="${player.id}" ${checkedAttr}
                            data-team="${teamName}" data-name="${player.name}">
-                    <label for="player_${player.id}">${player.name} (${player.number})</label>
+                    <label for="player_${player.id}">${player.name}</label>
                 </div>
             `}).join('');
         };
@@ -589,7 +589,7 @@ class ScorekeeperApp {
             
             const playerSelect = document.getElementById(playerSelectId);
             playerSelect.innerHTML = '<option value="">Select Player</option>' +
-                availablePlayers.map(player => `<option value="${player.id}">${player.name} (${player.number})</option>`).join('');
+                availablePlayers.map(player => `<option value="${player.id}">${player.name}</option>`).join('');
         };
 
         // Add event listeners for goal team radio buttons
@@ -617,7 +617,7 @@ class ScorekeeperApp {
             const players = dataManager.getPlayersForTeam(selectedTeam);
             assistSelect.innerHTML = '<option value="">No Assist</option>' +
                 players.filter(p => p.id !== goalPlayerSelect.value)
-                    .map(player => `<option value="${player.id}">${player.name} (${player.number})</option>`).join('');
+                    .map(player => `<option value="${player.id}">${player.name}</option>`).join('');
         });
     }
 
