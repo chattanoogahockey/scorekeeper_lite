@@ -41,7 +41,6 @@ class ScorekeeperApp {
     getMainMenuHTML() {
         return `
             <div class="card">
-                <h2>Welcome to The Scorekeeper</h2>
                 <p>Select an option to get started:</p>
                 <div style="margin-top: 30px;">
                     <button class="btn" onclick="app.showGameSelection()">Score a New Game</button>
