@@ -17,9 +17,17 @@ class ScorekeeperApp {
     render() {
         const mainContent = document.getElementById('main-content');
         const topNav = document.getElementById('top-navigation');
+        const header = document.querySelector('header');
         
         mainContent.innerHTML = this.getViewHTML();
         topNav.innerHTML = this.getNavigationHTML();
+        
+        // Hide header on game selection page
+        if (this.currentView === 'game-selection') {
+            header.style.display = 'none';
+        } else {
+            header.style.display = 'block';
+        }
     }
 
     getViewHTML() {
@@ -145,17 +153,19 @@ class ScorekeeperApp {
                 <p><strong>Game:</strong> ${this.selectedGame.homeTeam} vs ${this.selectedGame.awayTeam}</p>
                 <p><strong>Date:</strong> ${new Date(this.selectedGame.date).toLocaleDateString()}</p>
 
-                <div class="form-group">
-                    <h3>${this.selectedGame.homeTeam} Players</h3>
-                    <div class="checkbox-group">
-                        ${createPlayerCheckboxes(homePlayers, this.selectedGame.homeTeam)}
+                <div class="attendance-grid">
+                    <div class="team-column">
+                        <h3>${this.selectedGame.homeTeam}</h3>
+                        <div class="checkbox-group">
+                            ${createPlayerCheckboxes(homePlayers, this.selectedGame.homeTeam)}
+                        </div>
                     </div>
-                </div>
 
-                <div class="form-group">
-                    <h3>${this.selectedGame.awayTeam} Players</h3>
-                    <div class="checkbox-group">
-                        ${createPlayerCheckboxes(awayPlayers, this.selectedGame.awayTeam)}
+                    <div class="team-column">
+                        <h3>${this.selectedGame.awayTeam}</h3>
+                        <div class="checkbox-group">
+                            ${createPlayerCheckboxes(awayPlayers, this.selectedGame.awayTeam)}
+                        </div>
                     </div>
                 </div>
 
