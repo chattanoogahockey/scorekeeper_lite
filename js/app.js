@@ -431,11 +431,22 @@ class ScorekeeperApp {
     startScoring() {
         // Collect attendance data
         const checkedPlayers = document.querySelectorAll('input[type="checkbox"]:checked');
+        console.log('Found checked players:', checkedPlayers.length);
+        console.log('Checked players elements:', checkedPlayers);
+
         this.attendance = Array.from(checkedPlayers).map(cb => {
             const playerId = cb.value;
             const numberInput = document.getElementById(`number_${playerId}`);
             const jerseyNumber = numberInput ? numberInput.value.trim() : '';
-            
+
+            console.log('Processing player:', {
+                id: playerId,
+                name: cb.dataset.name,
+                team: cb.dataset.team,
+                jerseyNumber: jerseyNumber,
+                checkbox: cb
+            });
+
             return {
                 id: playerId,
                 name: cb.dataset.name,
@@ -444,11 +455,15 @@ class ScorekeeperApp {
             };
         });
 
+        console.log('Final attendance array:', this.attendance);
+
         // Create game in data manager
         dataManager.currentGame = dataManager.createGame({
             ...this.selectedGame,
             attendance: this.attendance
         });
+
+        console.log('Created game with attendance:', dataManager.currentGame.attendance);
 
         this.showScoring();
     }
@@ -485,6 +500,11 @@ class ScorekeeperApp {
         }
 
         console.log('Populating goal player dropdown for team:', selectedTeam);
+        console.log('dataManager.currentGame exists:', !!dataManager.currentGame);
+        if (dataManager.currentGame) {
+            console.log('dataManager.currentGame.attendance exists:', !!dataManager.currentGame.attendance);
+            console.log('dataManager.currentGame.attendance length:', dataManager.currentGame.attendance ? dataManager.currentGame.attendance.length : 'N/A');
+        }
 
         // Get all players for the selected team
         const allPlayers = dataManager.getPlayersForTeam(selectedTeam);

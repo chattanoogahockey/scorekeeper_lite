@@ -79,7 +79,7 @@ class DataManager {
         return {
             id: Date.now().toString(),
             ...gameInfo,
-            attendance: [],
+            attendance: gameInfo.attendance || [],
             goals: [],
             penalties: [],
             homeScore: 0,
