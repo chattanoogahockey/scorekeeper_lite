@@ -219,13 +219,23 @@ class ScorekeeperApp {
         }
 
         return `
+            <h1>Add Goal Details</h1>
             <div class="card">
-                <h2>Add Goal Details</h2>
-                <p><strong>Game:</strong> ${this.selectedGame.homeTeam} vs ${this.selectedGame.awayTeam}</p>
-                
                 <div class="goal-form-grid">
                     <!-- Left Column -->
                     <div class="form-column">
+                        <div class="form-group">
+                            <label>Team:</label>
+                            <div class="radio-group">
+                                <label class="radio-label">
+                                    <input type="radio" name="goal-team" value="${this.selectedGame.homeTeam}" checked> ${this.selectedGame.homeTeam}
+                                </label>
+                                <label class="radio-label">
+                                    <input type="radio" name="goal-team" value="${this.selectedGame.awayTeam}"> ${this.selectedGame.awayTeam}
+                                </label>
+                            </div>
+                        </div>
+
                         <div class="form-group">
                             <label>Period:</label>
                             <div class="radio-group">
@@ -259,18 +269,6 @@ class ScorekeeperApp {
                                     <button type="button" class="keypad-btn" onclick="app.addTimeDigit('0')">0</button>
                                     <button type="button" class="keypad-btn colon-btn" onclick="app.addColon()">:</button>
                                 </div>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Team:</label>
-                            <div class="radio-group">
-                                <label class="radio-label">
-                                    <input type="radio" name="goal-team" value="${this.selectedGame.homeTeam}" checked> ${this.selectedGame.homeTeam}
-                                </label>
-                                <label class="radio-label">
-                                    <input type="radio" name="goal-team" value="${this.selectedGame.awayTeam}"> ${this.selectedGame.awayTeam}
-                                </label>
                             </div>
                         </div>
                     </div>
@@ -552,8 +550,8 @@ class ScorekeeperApp {
         const currentValue = input.value.replace(':', '');
         
         if (currentValue.length < 4) {
-            const newValue = currentValue + digit;
-            this.formatGoalTime(input, newValue);
+            input.value = currentValue + digit;
+            this.formatGoalTime(input);
         }
     }
 
