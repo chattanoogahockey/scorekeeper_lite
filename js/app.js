@@ -449,9 +449,7 @@ class ScorekeeperApp {
         this.updatePlayerDropdowns();
     }
 
-    formatGoalTime(input) {
-        let value = input.value.replace(/[^0-9]/g, ''); // Remove non-numeric characters
-
+    formatGoalTimeFromValue(input, value) {
         if (value.length === 0) {
             input.value = '';
             return;
@@ -461,10 +459,10 @@ class ScorekeeperApp {
         if (value.length === 2) {
             input.value = `${value}:`;
         } else if (value.length === 3) {
-            // Three digits: 120 -> 01:20
+            // Three digits: 225 -> 02:25
             input.value = `0${value[0]}:${value.slice(1)}`;
         } else if (value.length === 4) {
-            // Four digits: 1220 -> 12:20
+            // Four digits: 1225 -> 12:25
             input.value = `${value.slice(0, 2)}:${value.slice(2)}`;
         } else if (value.length >= 5) {
             // Five or more digits: take first 4 and format
@@ -482,6 +480,11 @@ class ScorekeeperApp {
                 input.value = '17:00';
             }
         }
+    }
+
+    formatGoalTime(input) {
+        const value = input.value.replace(/[^0-9]/g, ''); // Remove non-numeric characters
+        this.formatGoalTimeFromValue(input, value);
     }
 
     formatPenaltyTime(input) {
@@ -523,11 +526,11 @@ class ScorekeeperApp {
     // Time keypad methods
     addTimeDigit(digit) {
         const input = document.getElementById('goal-time');
-        const currentValue = input.value.replace(':', '');
+        let currentValue = input.value.replace(/[^0-9]/g, ''); // Remove all non-numeric including colon
         
         if (currentValue.length < 4) {
-            input.value = currentValue + digit;
-            this.formatGoalTime(input);
+            currentValue = currentValue + digit;
+            this.formatGoalTimeFromValue(input, currentValue);
         }
     }
 
