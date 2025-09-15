@@ -288,9 +288,9 @@ class ScorekeeperApp {
                             <label>Shot Type:</label>
                             <select id="goal-shot-type">
                                 <option value="wrist" selected>Wrist</option>
-                                <option value="slapshot">Slap</option>
+                                <option value="slapshot">Slapshot</option>
                                 <option value="backhand">Backhand</option>
-                                <option value="snapshot">Snap</option>
+                                <option value="snapshot">Snapshot</option>
                             </select>
                         </div>
 
@@ -298,8 +298,8 @@ class ScorekeeperApp {
                             <label>Goal Type:</label>
                             <select id="goal-type">
                                 <option value="regular" selected>Regular</option>
-                                <option value="shorthanded">Short</option>
-                                <option value="powerplay">Power</option>
+                                <option value="shorthanded">Shorthanded</option>
+                                <option value="powerplay">Power Play</option>
                             </select>
                         </div>
 
