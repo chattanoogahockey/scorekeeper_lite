@@ -242,7 +242,7 @@ class ScorekeeperApp {
                     <div class="form-column">
                         <div class="form-group">
                             <label>Team:</label>
-                            <select id="goal-team" onchange="app.updatePlayerDropdowns()">
+                            <select id="goal-team" onchange="app.populateGoalPlayerDropdown()">
                                 <option value="${this.selectedGame.homeTeam}" selected>${this.selectedGame.homeTeam}</option>
                                 <option value="${this.selectedGame.awayTeam}">${this.selectedGame.awayTeam}</option>
                             </select>
@@ -465,88 +465,109 @@ class ScorekeeperApp {
         this.render();
         // Use setTimeout to ensure DOM is fully rendered before updating dropdowns
         setTimeout(() => {
-            this.updatePlayerDropdowns();
-            // Also ensure the team dropdown triggers player updates
-            const goalTeamSelect = document.getElementById('goal-team');
-            if (goalTeamSelect) {
-                // Manually trigger the update for the initially selected team
-                const updatePlayers = (teamValue, playerSelectId) => {
-                    if (!teamValue) return;
-
-                    const allPlayers = dataManager.getPlayersForTeam(teamValue);
-                    let availablePlayers = allPlayers;
-                    if (dataManager.currentGame && dataManager.currentGame.attendance) {
-                        const attendedPlayerIds = dataManager.currentGame.attendance
-                            .filter(att => att.team === teamValue)
-                            .map(att => att.id);
-                        availablePlayers = allPlayers.filter(player => attendedPlayerIds.includes(player.id));
-                    }
-
-                    const playerSelect = document.getElementById(playerSelectId);
-                    if (playerSelect) {
-                        playerSelect.innerHTML = '<option value="">Select Player</option>' +
-                            availablePlayers.map(player => {
-                                let jerseyNumber = '';
-                                if (dataManager.currentGame && dataManager.currentGame.attendance) {
-                                    const attendanceRecord = dataManager.currentGame.attendance.find(att => att.id === player.id && att.team === teamValue);
-                                    if (attendanceRecord && attendanceRecord.jerseyNumber) {
-                                        jerseyNumber = ` (#${attendanceRecord.jerseyNumber})`;
-                                    }
-                                }
-                                return `<option value="${player.id}">${player.name}${jerseyNumber}</option>`;
-                            }).join('');
-                    }
-                };
-
-                // Update both player and assist dropdowns for the selected team
-                updatePlayers(goalTeamSelect.value, 'goal-player');
-                updatePlayers(goalTeamSelect.value, 'goal-assist');
-            }
+            this.populateGoalPlayerDropdown();
         }, 50);
     }
 
-    showPenaltyDetails() {
-        this.currentView = 'penalty-details';
-        this.render();
-        // Use setTimeout to ensure DOM is fully rendered before updating dropdowns
-        setTimeout(() => {
-            this.updatePlayerDropdowns();
-            // Also ensure the penalty team dropdown triggers player updates
-            const penaltyTeamSelect = document.getElementById('penalty-team');
-            if (penaltyTeamSelect) {
-                // Manually trigger the update for the initially selected team
-                const updatePlayers = (teamValue, playerSelectId) => {
-                    if (!teamValue) return;
+    populateGoalPlayerDropdown() {
+        const goalTeamSelect = document.getElementById('goal-team');
+        const goalPlayerSelect = document.getElementById('goal-player');
+        const goalAssistSelect = document.getElementById('goal-assist');
 
-                    const allPlayers = dataManager.getPlayersForTeam(teamValue);
-                    let availablePlayers = allPlayers;
-                    if (dataManager.currentGame && dataManager.currentGame.attendance) {
-                        const attendedPlayerIds = dataManager.currentGame.attendance
-                            .filter(att => att.team === teamValue)
-                            .map(att => att.id);
-                        availablePlayers = allPlayers.filter(player => attendedPlayerIds.includes(player.id));
+        if (!goalTeamSelect || !goalPlayerSelect || !goalAssistSelect) {
+            console.log('Goal dropdown elements not found');
+            return;
+        }
+
+        const selectedTeam = goalTeamSelect.value;
+        if (!selectedTeam) {
+            console.log('No team selected');
+            return;
+        }
+
+        console.log('Populating goal player dropdown for team:', selectedTeam);
+
+        // Get all players for the selected team
+        const allPlayers = dataManager.getPlayersForTeam(selectedTeam);
+        console.log('All players for team:', allPlayers.length);
+
+        // Filter by attendance if available
+        let availablePlayers = allPlayers;
+        if (dataManager.currentGame && dataManager.currentGame.attendance) {
+            const attendedPlayerIds = dataManager.currentGame.attendance
+                .filter(att => att.team === selectedTeam)
+                .map(att => att.id);
+            availablePlayers = allPlayers.filter(player => attendedPlayerIds.includes(player.id));
+            console.log('Attended players:', availablePlayers.length);
+            console.log('Attendance data:', dataManager.currentGame.attendance);
+        } else {
+            console.log('No attendance data found in currentGame');
+            console.log('currentGame:', dataManager.currentGame);
+        }
+
+        // Populate player dropdown
+        goalPlayerSelect.innerHTML = '<option value="">Select Player</option>' +
+            availablePlayers.map(player => {
+                let jerseyNumber = '';
+                if (dataManager.currentGame && dataManager.currentGame.attendance) {
+                    const attendanceRecord = dataManager.currentGame.attendance.find(att => att.id === player.id && att.team === selectedTeam);
+                    if (attendanceRecord && attendanceRecord.jerseyNumber) {
+                        jerseyNumber = ` (#${attendanceRecord.jerseyNumber})`;
                     }
+                }
+                return `<option value="${player.id}">${player.name}${jerseyNumber}</option>`;
+            }).join('');
 
-                    const playerSelect = document.getElementById(playerSelectId);
-                    if (playerSelect) {
-                        playerSelect.innerHTML = '<option value="">Select Player</option>' +
-                            availablePlayers.map(player => {
-                                let jerseyNumber = '';
-                                if (dataManager.currentGame && dataManager.currentGame.attendance) {
-                                    const attendanceRecord = dataManager.currentGame.attendance.find(att => att.id === player.id && att.team === teamValue);
-                                    if (attendanceRecord && attendanceRecord.jerseyNumber) {
-                                        jerseyNumber = ` (#${attendanceRecord.jerseyNumber})`;
-                                    }
-                                }
-                                return `<option value="${player.id}">${player.name}${jerseyNumber}</option>`;
-                            }).join('');
+        // Populate assist dropdown
+        goalAssistSelect.innerHTML = '<option value="">No Assist</option>' +
+            availablePlayers.map(player => {
+                let jerseyNumber = '';
+                if (dataManager.currentGame && dataManager.currentGame.attendance) {
+                    const attendanceRecord = dataManager.currentGame.attendance.find(att => att.id === player.id && att.team === selectedTeam);
+                    if (attendanceRecord && attendanceRecord.jerseyNumber) {
+                        jerseyNumber = ` (#${attendanceRecord.jerseyNumber})`;
                     }
-                };
+                }
+                return `<option value="${player.id}">${player.name}${jerseyNumber}</option>`;
+            }).join('');
 
-                // Update penalty player dropdown for the selected team
-                updatePlayers(penaltyTeamSelect.value, 'penalty-player');
+        console.log('Goal player dropdown populated with', availablePlayers.length, 'players');
+
+        // Set up assist dropdown update when player changes
+        goalPlayerSelect.onchange = () => {
+            const selectedPlayerId = goalPlayerSelect.value;
+            const selectedTeam = goalTeamSelect.value;
+
+            if (!selectedTeam) return;
+
+            const allPlayers = dataManager.getPlayersForTeam(selectedTeam);
+            let availablePlayers = allPlayers;
+
+            // Filter by attendance
+            if (dataManager.currentGame && dataManager.currentGame.attendance) {
+                const attendedPlayerIds = dataManager.currentGame.attendance
+                    .filter(att => att.team === selectedTeam)
+                    .map(att => att.id);
+                availablePlayers = allPlayers.filter(player => attendedPlayerIds.includes(player.id));
             }
-        }, 50);
+
+            // Filter out the selected goal scorer
+            if (selectedPlayerId) {
+                availablePlayers = availablePlayers.filter(player => player.id !== selectedPlayerId);
+            }
+
+            goalAssistSelect.innerHTML = '<option value="">No Assist</option>' +
+                availablePlayers.map(player => {
+                    let jerseyNumber = '';
+                    if (dataManager.currentGame && dataManager.currentGame.attendance) {
+                        const attendanceRecord = dataManager.currentGame.attendance.find(att => att.id === player.id && att.team === selectedTeam);
+                        if (attendanceRecord && attendanceRecord.jerseyNumber) {
+                            jerseyNumber = ` (#${attendanceRecord.jerseyNumber})`;
+                        }
+                    }
+                    return `<option value="${player.id}">${player.name}${jerseyNumber}</option>`;
+                }).join('');
+        };
     }
 
     formatGoalTimeFromValue(input, value) {
