@@ -103,7 +103,6 @@ class ScorekeeperApp {
                 <h3>${game.homeTeam} vs ${game.awayTeam}</h3>
                 <p><strong>Date:</strong> ${new Date(game.date).toLocaleDateString()}</p>
                 <p><strong>Time:</strong> ${timeDisplay}</p>
-                <p><strong>Location:</strong> ${game.location}</p>
             </div>
         `}).join('');
 
