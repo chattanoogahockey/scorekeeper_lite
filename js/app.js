@@ -62,14 +62,24 @@ class ScorekeeperApp {
             `;
         }
 
-        const gamesHTML = upcomingGames.map(game => `
+        const gamesHTML = upcomingGames.map(game => {
+            // Convert 24-hour time to 12-hour AM/PM format
+            let timeDisplay = 'TBD';
+            if (game.time && game.time.length >= 5) {
+                const [hours, minutes] = game.time.split(':').map(Number);
+                const period = hours >= 12 ? 'PM' : 'AM';
+                const displayHours = hours % 12 || 12;
+                timeDisplay = `${displayHours}:${minutes.toString().padStart(2, '0')} ${period}`;
+            }
+
+            return `
             <div class="game-item" onclick="app.selectGame('${game.id}')">
                 <h3>${game.homeTeam} vs ${game.awayTeam}</h3>
                 <p><strong>Date:</strong> ${new Date(game.date).toLocaleDateString()}</p>
-                <p><strong>Time:</strong> ${game.time ? game.time.substring(0, 5) : 'TBD'}</p>
+                <p><strong>Time:</strong> ${timeDisplay}</p>
                 <p><strong>Location:</strong> ${game.location}</p>
             </div>
-        `).join('');
+        `}).join('');
 
         return `
             <div class="card">

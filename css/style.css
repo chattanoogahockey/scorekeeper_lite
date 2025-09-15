@@ -162,6 +162,7 @@ header p {
 
 .game-list {
     display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
     gap: 16px;
 }
 
@@ -253,5 +254,9 @@ header p {
     .score-display {
         flex-direction: column;
         gap: 20px;
+    }
+
+    .game-list {
+        grid-template-columns: 1fr;
     }
 }
