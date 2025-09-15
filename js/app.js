@@ -199,15 +199,15 @@ class ScorekeeperApp {
                         <div class="stat-item">
                             <h4>Goals & Penalties</h4>
                             <div style="display: flex; gap: 10px; margin-top: 15px;">
-                                <button class="btn btn-success" onclick="app.showGoalDetails()" style="flex: 1;">Add Goal</button>
-                                <button class="btn btn-warning" onclick="app.showPenaltyDetails()" style="flex: 1;">Add Penalty</button>
+                                <button class="btn btn-primary" onclick="app.showGoalDetails()" style="flex: 1;">Add Goal</button>
+                                <button class="btn btn-primary" onclick="app.showPenaltyDetails()" style="flex: 1;">Add Penalty</button>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <div style="margin-top: 30px;">
-                    <button class="btn btn-danger" onclick="app.endGame()">End Game</button>
+                    <button class="btn btn-success" onclick="app.endGame()">Submit Game</button>
                 </div>
             </div>
         `;
@@ -307,7 +307,6 @@ class ScorekeeperApp {
                                     <button type="button" class="keypad-btn" onclick="app.addTimeDigit('9')">9</button>
                                     <button type="button" class="keypad-btn clear-btn" onclick="app.clearTime()">Clear</button>
                                     <button type="button" class="keypad-btn" onclick="app.addTimeDigit('0')">0</button>
-                                    <button type="button" class="keypad-btn colon-btn" onclick="app.addColon()">:</button>
                                 </div>
                             </div>
                         </div>
@@ -458,13 +457,9 @@ class ScorekeeperApp {
             return;
         }
 
-        // Handle different input lengths
-        if (value.length === 1) {
-            // Single digit: 1 -> 00:01
-            input.value = `00:0${value}`;
-        } else if (value.length === 2) {
-            // Two digits: 11 -> 00:11
-            input.value = `00:${value}`;
+        // Auto-insert colon after 2 digits for better UX
+        if (value.length === 2) {
+            input.value = `${value}:`;
         } else if (value.length === 3) {
             // Three digits: 120 -> 01:20
             input.value = `0${value[0]}:${value.slice(1)}`;
@@ -478,11 +473,14 @@ class ScorekeeperApp {
         }
 
         // Validate the time is within range (00:00 to 17:00)
-        const [minutes, seconds] = input.value.split(':').map(Number);
-        const totalSeconds = minutes * 60 + seconds;
+        const timeParts = input.value.split(':');
+        if (timeParts.length === 2) {
+            const [minutes, seconds] = timeParts.map(Number);
+            const totalSeconds = minutes * 60 + seconds;
 
-        if (totalSeconds > 1020) { // 17:00 = 1020 seconds
-            input.value = '17:00';
+            if (totalSeconds > 1020) { // 17:00 = 1020 seconds
+                input.value = '17:00';
+            }
         }
     }
 
