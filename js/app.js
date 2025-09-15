@@ -115,8 +115,8 @@ class ScorekeeperApp {
         `}).join('');
 
         return `
+            <h1>Select a Game to Score</h1>
             <div class="card">
-                <h2>Select a Game to Score</h2>
                 <div class="game-grid">
                     ${gamesHTML}
                 </div>
