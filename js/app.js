@@ -217,68 +217,120 @@ class ScorekeeperApp {
             <div class="card">
                 <h2>Add Goal Details</h2>
                 <p><strong>Game:</strong> ${this.selectedGame.homeTeam} vs ${this.selectedGame.awayTeam}</p>
+                
+                <div class="goal-form-grid">
+                    <!-- Left Column -->
+                    <div class="form-column">
+                        <div class="form-group">
+                            <label>Period:</label>
+                            <div class="radio-group">
+                                <label class="radio-label">
+                                    <input type="radio" name="goal-period" value="1" checked> 1
+                                </label>
+                                <label class="radio-label">
+                                    <input type="radio" name="goal-period" value="2"> 2
+                                </label>
+                                <label class="radio-label">
+                                    <input type="radio" name="goal-period" value="3"> 3
+                                </label>
+                            </div>
+                        </div>
 
-                <div class="form-group">
-                    <label>Team:</label>
-                    <select id="goal-team">
-                        <option value="${this.selectedGame.homeTeam}">${this.selectedGame.homeTeam}</option>
-                        <option value="${this.selectedGame.awayTeam}">${this.selectedGame.awayTeam}</option>
-                    </select>
-                </div>
+                        <div class="form-group">
+                            <label>Time:</label>
+                            <div class="time-input-container">
+                                <input type="text" id="goal-time" placeholder="00:00" readonly>
+                                <div class="time-keypad">
+                                    <button type="button" class="keypad-btn" onclick="app.addTimeDigit('1')">1</button>
+                                    <button type="button" class="keypad-btn" onclick="app.addTimeDigit('2')">2</button>
+                                    <button type="button" class="keypad-btn" onclick="app.addTimeDigit('3')">3</button>
+                                    <button type="button" class="keypad-btn" onclick="app.addTimeDigit('4')">4</button>
+                                    <button type="button" class="keypad-btn" onclick="app.addTimeDigit('5')">5</button>
+                                    <button type="button" class="keypad-btn" onclick="app.addTimeDigit('6')">6</button>
+                                    <button type="button" class="keypad-btn" onclick="app.addTimeDigit('7')">7</button>
+                                    <button type="button" class="keypad-btn" onclick="app.addTimeDigit('8')">8</button>
+                                    <button type="button" class="keypad-btn" onclick="app.addTimeDigit('9')">9</button>
+                                    <button type="button" class="keypad-btn clear-btn" onclick="app.clearTime()">Clear</button>
+                                    <button type="button" class="keypad-btn" onclick="app.addTimeDigit('0')">0</button>
+                                    <button type="button" class="keypad-btn colon-btn" onclick="app.addColon()">:</button>
+                                </div>
+                            </div>
+                        </div>
 
-                <div class="form-group">
-                    <label>Player:</label>
-                    <select id="goal-player">
-                        <option value="">Select Player</option>
-                    </select>
-                </div>
+                        <div class="form-group">
+                            <label>Team:</label>
+                            <div class="radio-group">
+                                <label class="radio-label">
+                                    <input type="radio" name="goal-team" value="${this.selectedGame.homeTeam}" checked> ${this.selectedGame.homeTeam}
+                                </label>
+                                <label class="radio-label">
+                                    <input type="radio" name="goal-team" value="${this.selectedGame.awayTeam}"> ${this.selectedGame.awayTeam}
+                                </label>
+                            </div>
+                        </div>
+                    </div>
 
-                <div class="form-group">
-                    <label>Assist (optional):</label>
-                    <select id="goal-assist">
-                        <option value="">No Assist</option>
-                    </select>
-                </div>
+                    <!-- Right Column -->
+                    <div class="form-column">
+                        <div class="form-group">
+                            <label>Player:</label>
+                            <select id="goal-player">
+                                <option value="">Select Player</option>
+                            </select>
+                        </div>
 
-                <div class="form-group">
-                    <label>Shot Type:</label>
-                    <select id="goal-shot-type">
-                        <option value="wrist" selected>Wrist Shot</option>
-                        <option value="slapshot">Slapshot</option>
-                        <option value="backhand">Backhand</option>
-                        <option value="snapshot">Snapshot</option>
-                    </select>
-                </div>
+                        <div class="form-group">
+                            <label>Shot Type:</label>
+                            <div class="radio-group">
+                                <label class="radio-label">
+                                    <input type="radio" name="goal-shot-type" value="wrist" checked> Wrist
+                                </label>
+                                <label class="radio-label">
+                                    <input type="radio" name="goal-shot-type" value="slapshot"> Slap
+                                </label>
+                                <label class="radio-label">
+                                    <input type="radio" name="goal-shot-type" value="backhand"> Backhand
+                                </label>
+                                <label class="radio-label">
+                                    <input type="radio" name="goal-shot-type" value="snapshot"> Snap
+                                </label>
+                            </div>
+                        </div>
 
-                <div class="form-group">
-                    <label>Breakaway:</label>
-                    <select id="goal-breakaway">
-                        <option value="no" selected>No</option>
-                        <option value="yes">Yes</option>
-                    </select>
-                </div>
+                        <div class="form-group">
+                            <label>Breakaway:</label>
+                            <div class="radio-group">
+                                <label class="radio-label">
+                                    <input type="radio" name="goal-breakaway" value="no" checked> No
+                                </label>
+                                <label class="radio-label">
+                                    <input type="radio" name="goal-breakaway" value="yes"> Yes
+                                </label>
+                            </div>
+                        </div>
 
-                <div class="form-group">
-                    <label>Goal Type:</label>
-                    <select id="goal-type">
-                        <option value="regular" selected>Regular</option>
-                        <option value="shorthanded">Shorthanded</option>
-                        <option value="powerplay">Powerplay</option>
-                    </select>
-                </div>
+                        <div class="form-group">
+                            <label>Goal Type:</label>
+                            <div class="radio-group">
+                                <label class="radio-label">
+                                    <input type="radio" name="goal-type" value="regular" checked> Regular
+                                </label>
+                                <label class="radio-label">
+                                    <input type="radio" name="goal-type" value="shorthanded"> Short
+                                </label>
+                                <label class="radio-label">
+                                    <input type="radio" name="goal-type" value="powerplay"> Power
+                                </label>
+                            </div>
+                        </div>
 
-                <div class="form-group">
-                    <label>Period:</label>
-                    <select id="goal-period">
-                        <option value="1">Period 1</option>
-                        <option value="2">Period 2</option>
-                        <option value="3">Period 3</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label>Time (MM:SS):</label>
-                    <input type="text" id="goal-time" placeholder="00:00" maxlength="5" oninput="app.formatGoalTime(this)">
+                        <div class="form-group">
+                            <label>Assist (optional):</label>
+                            <select id="goal-assist">
+                                <option value="">No Assist</option>
+                            </select>
+                        </div>
+                    </div>
                 </div>
 
                 <div style="margin-top: 30px; display: flex; gap: 10px;">
@@ -489,25 +541,67 @@ class ScorekeeperApp {
         }
     }
 
+    // Time keypad methods
+    addTimeDigit(digit) {
+        const input = document.getElementById('goal-time');
+        const currentValue = input.value.replace(':', '');
+        
+        if (currentValue.length < 4) {
+            const newValue = currentValue + digit;
+            this.formatGoalTime(input, newValue);
+        }
+    }
+
+    clearTime() {
+        const input = document.getElementById('goal-time');
+        input.value = '';
+    }
+
+    addColon() {
+        const input = document.getElementById('goal-time');
+        const currentValue = input.value;
+        
+        if (currentValue.length >= 2 && !currentValue.includes(':')) {
+            input.value = currentValue.slice(0, 2) + ':' + currentValue.slice(2);
+        }
+    }
+
     updatePlayerDropdowns() {
-        const goalTeamSelect = document.getElementById('goal-team');
+        const goalTeamRadios = document.querySelectorAll('input[name="goal-team"]');
         const penaltyTeamSelect = document.getElementById('penalty-team');
 
-        const updatePlayers = (teamSelect, playerSelectId) => {
-            const selectedTeam = teamSelect.value;
-            const players = dataManager.getPlayersForTeam(selectedTeam);
+        const updatePlayers = (teamValue, playerSelectId) => {
+            const allPlayers = dataManager.getPlayersForTeam(teamValue);
+            
+            // Filter players based on attendance if available
+            let availablePlayers = allPlayers;
+            if (dataManager.currentGame && dataManager.currentGame.attendance) {
+                const attendedPlayerIds = dataManager.currentGame.attendance
+                    .filter(att => att.team === teamValue)
+                    .map(att => att.id);
+                availablePlayers = allPlayers.filter(player => attendedPlayerIds.includes(player.id));
+            }
+            
             const playerSelect = document.getElementById(playerSelectId);
-
             playerSelect.innerHTML = '<option value="">Select Player</option>' +
-                players.map(player => `<option value="${player.id}">${player.name} (${player.number})</option>`).join('');
+                availablePlayers.map(player => `<option value="${player.id}">${player.name} (${player.number})</option>`).join('');
         };
 
-        goalTeamSelect.addEventListener('change', () => updatePlayers(goalTeamSelect, 'goal-player'));
-        penaltyTeamSelect.addEventListener('change', () => updatePlayers(penaltyTeamSelect, 'penalty-player'));
+        // Add event listeners for goal team radio buttons
+        goalTeamRadios.forEach(radio => {
+            radio.addEventListener('change', () => {
+                updatePlayers(radio.value, 'goal-player');
+            });
+        });
 
-        // Initialize with home team
-        updatePlayers(goalTeamSelect, 'goal-player');
-        updatePlayers(penaltyTeamSelect, 'penalty-player');
+        penaltyTeamSelect.addEventListener('change', () => updatePlayers(penaltyTeamSelect.value, 'penalty-player'));
+
+        // Initialize with home team (first radio button should be checked by default)
+        const checkedTeamRadio = document.querySelector('input[name="goal-team"]:checked');
+        if (checkedTeamRadio) {
+            updatePlayers(checkedTeamRadio.value, 'goal-player');
+        }
+        updatePlayers(penaltyTeamSelect.value, 'penalty-player');
 
         // Update assist dropdown
         const goalPlayerSelect = document.getElementById('goal-player');
@@ -523,13 +617,13 @@ class ScorekeeperApp {
     }
 
     addGoal() {
-        const team = document.getElementById('goal-team').value;
+        const team = document.querySelector('input[name="goal-team"]:checked').value;
         const playerId = document.getElementById('goal-player').value;
         const assistId = document.getElementById('goal-assist').value;
-        const shotType = document.getElementById('goal-shot-type').value;
-        const breakaway = document.getElementById('goal-breakaway').value;
-        const goalType = document.getElementById('goal-type').value;
-        const period = document.getElementById('goal-period').value;
+        const shotType = document.querySelector('input[name="goal-shot-type"]:checked').value;
+        const breakaway = document.querySelector('input[name="goal-breakaway"]:checked').value;
+        const goalType = document.querySelector('input[name="goal-type"]:checked').value;
+        const period = document.querySelector('input[name="goal-period"]:checked').value;
         const time = document.getElementById('goal-time').value;
 
         if (!playerId) {
@@ -609,13 +703,23 @@ class ScorekeeperApp {
     }
 
     clearGoalForm() {
+        // Reset radio buttons to defaults
+        document.querySelector('input[name="goal-team"][value="' + this.selectedGame.homeTeam + '"]').checked = true;
+        document.querySelector('input[name="goal-period"][value="1"]').checked = true;
+        document.querySelector('input[name="goal-shot-type"][value="wrist"]').checked = true;
+        document.querySelector('input[name="goal-breakaway"][value="no"]').checked = true;
+        document.querySelector('input[name="goal-type"][value="regular"]').checked = true;
+        
+        // Reset dropdowns and time
         document.getElementById('goal-player').value = '';
         document.getElementById('goal-assist').value = '';
-        document.getElementById('goal-shot-type').value = 'wrist';
-        document.getElementById('goal-breakaway').value = 'no';
-        document.getElementById('goal-type').value = 'regular';
-        document.getElementById('goal-period').value = '1';
         document.getElementById('goal-time').value = '';
+        
+        // Re-populate player dropdown for the default team
+        const checkedTeamRadio = document.querySelector('input[name="goal-team"]:checked');
+        if (checkedTeamRadio) {
+            this.updatePlayerDropdowns();
+        }
     }
 
     clearPenaltyForm() {

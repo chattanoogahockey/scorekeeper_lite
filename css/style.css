@@ -387,3 +387,112 @@ header p {
         padding: 12px;
     }
 }
+
+/* Goal Form 2-Column Layout */
+.goal-form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.form-column {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.radio-group {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.radio-label {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.radio-label input[type="radio"] {
+    margin: 0;
+}
+
+/* Time Input with Keypad */
+.time-input-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.time-input-container input {
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    font-size: 16px;
+    text-align: center;
+    background: var(--card-background);
+}
+
+.time-keypad {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+}
+
+.keypad-btn {
+    padding: 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    background: var(--card-background);
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.keypad-btn:hover {
+    background: var(--primary-color);
+    color: white;
+}
+
+.clear-btn {
+    grid-column: 1 / 3;
+    background: var(--danger-color);
+    color: white;
+}
+
+.clear-btn:hover {
+    background: #dc2626;
+}
+
+.colon-btn {
+    background: var(--secondary-color);
+    color: white;
+}
+
+/* Mobile adjustments for goal form */
+@media (max-width: 768px) {
+    .goal-form-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    
+    .radio-group {
+        gap: 10px;
+    }
+    
+    .time-keypad {
+        grid-template-columns: repeat(4, 1fr);
+    }
+    
+    .clear-btn {
+        grid-column: 1 / 4;
+    }
+    
+    .colon-btn {
+        grid-column: 4 / 5;
+    }
+}
