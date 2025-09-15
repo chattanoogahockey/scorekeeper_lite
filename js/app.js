@@ -22,7 +22,7 @@ class ScorekeeperApp {
     getViewHTML() {
         switch (this.currentView) {
             case 'main-menu':
-                return this.getMainMenuHTML();
+                return this.getStartupMenuHTML();
             case 'game-selection':
                 return this.getGameSelectionHTML();
             case 'attendance':
@@ -34,11 +34,11 @@ class ScorekeeperApp {
             case 'penalty-details':
                 return this.getPenaltyDetailsHTML();
             default:
-                return this.getMainMenuHTML();
+                return this.getStartupMenuHTML();
         }
     }
 
-    getMainMenuHTML() {
+    getStartupMenuHTML() {
         return `
             <div class="card">
                 <p>Select an option to get started:</p>
@@ -63,7 +63,7 @@ class ScorekeeperApp {
                 <div class="card">
                     <h2>Select a Game</h2>
                     <p>No upcoming games found. Please check the schedule data.</p>
-                    <button class="btn btn-secondary" onclick="app.showMainMenu()">Back to Main Menu</button>
+                    <button class="btn btn-secondary" onclick="app.showStartupMenu()">Back to Startup Menu</button>
                 </div>
             `;
         }
@@ -94,7 +94,7 @@ class ScorekeeperApp {
                     ${gamesHTML}
                 </div>
                 <div style="margin-top: 20px;">
-                    <button class="btn btn-secondary" onclick="app.showMainMenu()">Back to Main Menu</button>
+                    <button class="btn btn-secondary" onclick="app.showStartupMenu()">Back to Startup Menu</button>
                 </div>
             </div>
         `;
@@ -102,7 +102,7 @@ class ScorekeeperApp {
 
     getAttendanceHTML() {
         if (!this.selectedGame) {
-            return this.getMainMenuHTML();
+            return this.getStartupMenuHTML();
         }
 
         const homePlayers = dataManager.getPlayersForTeam(this.selectedGame.homeTeam);
@@ -153,7 +153,7 @@ class ScorekeeperApp {
 
     getScoringHTML() {
         if (!this.selectedGame) {
-            return this.getMainMenuHTML();
+            return this.getStartupMenuHTML();
         }
 
         return `
@@ -195,7 +195,7 @@ class ScorekeeperApp {
 
     getGoalDetailsHTML() {
         if (!this.selectedGame) {
-            return this.getMainMenuHTML();
+            return this.getStartupMenuHTML();
         }
 
         return `
@@ -276,7 +276,7 @@ class ScorekeeperApp {
 
     getPenaltyDetailsHTML() {
         if (!this.selectedGame) {
-            return this.getMainMenuHTML();
+            return this.getStartupMenuHTML();
         }
 
         return `
@@ -342,7 +342,7 @@ class ScorekeeperApp {
         // Events are bound through onclick attributes in HTML
     }
 
-    showMainMenu() {
+    showStartupMenu() {
         this.currentView = 'main-menu';
         this.selectedGame = null;
         this.attendance = [];
@@ -615,7 +615,7 @@ class ScorekeeperApp {
         if (confirm('Are you sure you want to end this game? This will save the final data.')) {
             dataManager.endGame();
             alert('Game ended and data saved!');
-            this.showMainMenu();
+            this.showStartupMenu();
         }
     }
 

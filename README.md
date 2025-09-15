@@ -12,7 +12,7 @@ A modern web application for tracking scores, goals, penalties, and attendance f
 
 ## How to Use
 
-1. **Start a Game**: Click "Score a New Game" from the main menu
+1. **Start a Game**: Click "Score a New Game" from the startup menu
 2. **Select Game**: Choose the game you want to score from the schedule
 3. **Mark Attendance**: Check off which players from each team are present
 4. **Score the Game**:
