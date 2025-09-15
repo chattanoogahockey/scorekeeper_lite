@@ -22,8 +22,8 @@ class ScorekeeperApp {
         mainContent.innerHTML = this.getViewHTML();
         topNav.innerHTML = this.getNavigationHTML();
         
-        // Hide header on game selection page
-        if (this.currentView === 'game-selection') {
+        // Hide header on game selection and attendance pages
+        if (this.currentView === 'game-selection' || this.currentView === 'attendance') {
             header.style.display = 'none';
         } else {
             header.style.display = 'block';
