@@ -46,10 +46,10 @@ class ScorekeeperApp {
                     <button class="btn" onclick="app.showGameSelection()">Score a New Game</button>
                 </div>
                 <div style="margin-top: 20px;">
-                    <button class="btn btn-secondary" onclick="app.showGameHistory()">View Game History</button>
+                    <button class="btn" onclick="app.showGameHistory()">View Game History</button>
                 </div>
                 <div style="margin-top: 20px;">
-                    <button class="btn btn-secondary" onclick="alert('Statistics feature coming soon!')">Statistics</button>
+                    <button class="btn" onclick="alert('Statistics feature coming soon!')">Statistics</button>
                 </div>
             </div>
         `;
