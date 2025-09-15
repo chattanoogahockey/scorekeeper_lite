@@ -237,6 +237,68 @@ class ScorekeeperApp {
                         </div>
 
                         <div class="form-group">
+                            <label>Player:</label>
+                            <select id="goal-player">
+                                <option value="">Select Player</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Assist (optional):</label>
+                            <select id="goal-assist">
+                                <option value="">No Assist</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Shot Type:</label>
+                            <div class="radio-group">
+                                <label class="radio-label">
+                                    <input type="radio" name="goal-shot-type" value="wrist" checked> Wrist
+                                </label>
+                                <label class="radio-label">
+                                    <input type="radio" name="goal-shot-type" value="slapshot"> Slap
+                                </label>
+                                <label class="radio-label">
+                                    <input type="radio" name="goal-shot-type" value="backhand"> Backhand
+                                </label>
+                                <label class="radio-label">
+                                    <input type="radio" name="goal-shot-type" value="snapshot"> Snap
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Goal Type:</label>
+                            <div class="radio-group">
+                                <label class="radio-label">
+                                    <input type="radio" name="goal-type" value="regular" checked> Regular
+                                </label>
+                                <label class="radio-label">
+                                    <input type="radio" name="goal-type" value="shorthanded"> Short
+                                </label>
+                                <label class="radio-label">
+                                    <input type="radio" name="goal-type" value="powerplay"> Power
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Breakaway:</label>
+                            <div class="radio-group">
+                                <label class="radio-label">
+                                    <input type="radio" name="goal-breakaway" value="no" checked> No
+                                </label>
+                                <label class="radio-label">
+                                    <input type="radio" name="goal-breakaway" value="yes"> Yes
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Column -->
+                    <div class="form-column">
+                        <div class="form-group">
                             <label>Period:</label>
                             <div class="radio-group">
                                 <label class="radio-label">
@@ -270,68 +332,6 @@ class ScorekeeperApp {
                                     <button type="button" class="keypad-btn colon-btn" onclick="app.addColon()">:</button>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-
-                    <!-- Right Column -->
-                    <div class="form-column">
-                        <div class="form-group">
-                            <label>Player:</label>
-                            <select id="goal-player">
-                                <option value="">Select Player</option>
-                            </select>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Shot Type:</label>
-                            <div class="radio-group">
-                                <label class="radio-label">
-                                    <input type="radio" name="goal-shot-type" value="wrist" checked> Wrist
-                                </label>
-                                <label class="radio-label">
-                                    <input type="radio" name="goal-shot-type" value="slapshot"> Slap
-                                </label>
-                                <label class="radio-label">
-                                    <input type="radio" name="goal-shot-type" value="backhand"> Backhand
-                                </label>
-                                <label class="radio-label">
-                                    <input type="radio" name="goal-shot-type" value="snapshot"> Snap
-                                </label>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Breakaway:</label>
-                            <div class="radio-group">
-                                <label class="radio-label">
-                                    <input type="radio" name="goal-breakaway" value="no" checked> No
-                                </label>
-                                <label class="radio-label">
-                                    <input type="radio" name="goal-breakaway" value="yes"> Yes
-                                </label>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Goal Type:</label>
-                            <div class="radio-group">
-                                <label class="radio-label">
-                                    <input type="radio" name="goal-type" value="regular" checked> Regular
-                                </label>
-                                <label class="radio-label">
-                                    <input type="radio" name="goal-type" value="shorthanded"> Short
-                                </label>
-                                <label class="radio-label">
-                                    <input type="radio" name="goal-type" value="powerplay"> Power
-                                </label>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Assist (optional):</label>
-                            <select id="goal-assist">
-                                <option value="">No Assist</option>
-                            </select>
                         </div>
                     </div>
                 </div>
