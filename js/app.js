@@ -56,7 +56,7 @@ class ScorekeeperApp {
             case 'game-selection':
                 return '<button class="nav-btn" onclick="app.showStartupMenu()">← Back to Menu</button>';
             case 'attendance':
-                return '<button class="nav-btn" onclick="app.showGameSelection()">← Back to Games</button>';
+                return '<button class="nav-btn" onclick="app.showGameSelection()">← Back to Games</button><button class="nav-btn primary" onclick="app.startScoring()">Start Scoring Game</button>';
             case 'scoring':
                 return '<button class="nav-btn" onclick="app.showAttendance()">← Back to Attendance</button>';
             case 'goal-details':
@@ -167,10 +167,6 @@ class ScorekeeperApp {
                             ${createPlayerCheckboxes(awayPlayers, this.selectedGame.awayTeam)}
                         </div>
                     </div>
-                </div>
-
-                <div style="margin-top: 30px;">
-                    <button class="btn" onclick="app.startScoring()">Start Scoring Game</button>
                 </div>
             </div>
         `;

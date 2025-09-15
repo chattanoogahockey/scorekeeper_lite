@@ -83,6 +83,14 @@ header p {
     transform: translateY(-1px);
 }
 
+.nav-btn.primary {
+    background: var(--primary-color);
+}
+
+.nav-btn.primary:hover {
+    background: #1d4ed8;
+}
+
 .card {
     background: var(--card-background);
     border-radius: 12px;
