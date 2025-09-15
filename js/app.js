@@ -31,6 +31,8 @@ class ScorekeeperApp {
                 return this.getScoringHTML();
             case 'goal-details':
                 return this.getGoalDetailsHTML();
+            case 'penalty-details':
+                return this.getPenaltyDetailsHTML();
             default:
                 return this.getMainMenuHTML();
         }
@@ -178,39 +180,6 @@ class ScorekeeperApp {
                                 <button class="btn btn-warning" onclick="app.showPenaltyDetails()" style="flex: 1;">Add Penalty</button>
                             </div>
                         </div>
-
-                        <div class="stat-item">
-                            <h4>Add Penalty</h4>
-                            <div class="form-group">
-                                <label>Team:</label>
-                                <select id="penalty-team">
-                                    <option value="${this.selectedGame.homeTeam}">${this.selectedGame.homeTeam}</option>
-                                    <option value="${this.selectedGame.awayTeam}">${this.selectedGame.awayTeam}</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label>Player:</label>
-                                <select id="penalty-player">
-                                    <option value="">Select Player</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label>Penalty Type:</label>
-                                <select id="penalty-type">
-                                    <option value="tripping">Tripping</option>
-                                    <option value="hooking">Hooking</option>
-                                    <option value="interference">Interference</option>
-                                    <option value="roughing">Roughing</option>
-                                    <option value="boarding">Boarding</option>
-                                    <option value="other">Other</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label>Minutes:</label>
-                                <input type="number" id="penalty-minutes" value="2" min="1" max="10">
-                            </div>
-                            <button class="btn btn-warning" onclick="app.addPenalty()">Add Penalty</button>
-                        </div>
                     </div>
                 </div>
 
@@ -303,6 +272,70 @@ class ScorekeeperApp {
         `;
     }
 
+    getPenaltyDetailsHTML() {
+        if (!this.selectedGame) {
+            return this.getMainMenuHTML();
+        }
+
+        return `
+            <div class="card">
+                <h2>Add Penalty Details</h2>
+                <p><strong>Game:</strong> ${this.selectedGame.homeTeam} vs ${this.selectedGame.awayTeam}</p>
+
+                <div class="form-group">
+                    <label>Team:</label>
+                    <select id="penalty-team">
+                        <option value="${this.selectedGame.homeTeam}">${this.selectedGame.homeTeam}</option>
+                        <option value="${this.selectedGame.awayTeam}">${this.selectedGame.awayTeam}</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Player:</label>
+                    <select id="penalty-player">
+                        <option value="">Select Player</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Penalty Type:</label>
+                    <select id="penalty-type">
+                        <option value="tripping">Tripping</option>
+                        <option value="hooking">Hooking</option>
+                        <option value="interference">Interference</option>
+                        <option value="roughing">Roughing</option>
+                        <option value="boarding">Boarding</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Minutes:</label>
+                    <input type="number" id="penalty-minutes" value="2" min="1" max="10">
+                </div>
+
+                <div class="form-group">
+                    <label>Period:</label>
+                    <select id="penalty-period">
+                        <option value="1">Period 1</option>
+                        <option value="2">Period 2</option>
+                        <option value="3">Period 3</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Time (MM:SS):</label>
+                    <input type="text" id="penalty-time" placeholder="00:00" maxlength="5" oninput="app.formatPenaltyTime(this)">
+                </div>
+
+                <div style="margin-top: 30px; display: flex; gap: 10px;">
+                    <button class="btn btn-warning" onclick="app.addPenalty()" style="flex: 1;">Add Penalty</button>
+                    <button class="btn btn-secondary" onclick="app.showScoring()" style="flex: 1;">Cancel</button>
+                </div>
+            </div>
+        `;
+    }
+
     bindEvents() {
         // Events are bound through onclick attributes in HTML
     }
@@ -362,11 +395,48 @@ class ScorekeeperApp {
     }
 
     showPenaltyDetails() {
-        // For now, just show an alert - we can implement penalty details later
-        alert('Penalty details form coming soon!');
+        this.currentView = 'penalty-details';
+        this.render();
+        this.updatePlayerDropdowns();
     }
 
     formatGoalTime(input) {
+        let value = input.value.replace(/[^0-9]/g, ''); // Remove non-numeric characters
+
+        if (value.length === 0) {
+            input.value = '';
+            return;
+        }
+
+        // Handle different input lengths
+        if (value.length === 1) {
+            // Single digit: 1 -> 00:01
+            input.value = `00:0${value}`;
+        } else if (value.length === 2) {
+            // Two digits: 11 -> 00:11
+            input.value = `00:${value}`;
+        } else if (value.length === 3) {
+            // Three digits: 120 -> 01:20
+            input.value = `0${value[0]}:${value.slice(1)}`;
+        } else if (value.length === 4) {
+            // Four digits: 1220 -> 12:20
+            input.value = `${value.slice(0, 2)}:${value.slice(2)}`;
+        } else if (value.length >= 5) {
+            // Five or more digits: take first 4 and format
+            value = value.slice(0, 4);
+            input.value = `${value.slice(0, 2)}:${value.slice(2)}`;
+        }
+
+        // Validate the time is within range (00:00 to 17:00)
+        const [minutes, seconds] = input.value.split(':').map(Number);
+        const totalSeconds = minutes * 60 + seconds;
+
+        if (totalSeconds > 1020) { // 17:00 = 1020 seconds
+            input.value = '17:00';
+        }
+    }
+
+    formatPenaltyTime(input) {
         let value = input.value.replace(/[^0-9]/g, ''); // Remove non-numeric characters
 
         if (value.length === 0) {
@@ -483,9 +553,16 @@ class ScorekeeperApp {
         const playerId = document.getElementById('penalty-player').value;
         const type = document.getElementById('penalty-type').value;
         const minutes = parseInt(document.getElementById('penalty-minutes').value);
+        const period = document.getElementById('penalty-period').value;
+        const time = document.getElementById('penalty-time').value;
 
         if (!playerId) {
             alert('Please select a player who received the penalty.');
+            return;
+        }
+
+        if (!time || !time.includes(':')) {
+            alert('Please enter a valid time in MM:SS format.');
             return;
         }
 
@@ -497,10 +574,13 @@ class ScorekeeperApp {
             player: player ? player.name : 'Unknown',
             playerId,
             type,
-            minutes
+            minutes,
+            period: parseInt(period),
+            time
         });
 
         this.clearPenaltyForm();
+        this.showScoring(); // Go back to scoring view after adding penalty
         alert(`Penalty added: ${player.name} - ${type} (${minutes} minutes)`);
     }
 
@@ -525,6 +605,8 @@ class ScorekeeperApp {
         document.getElementById('penalty-player').value = '';
         document.getElementById('penalty-type').value = 'tripping';
         document.getElementById('penalty-minutes').value = '2';
+        document.getElementById('penalty-period').value = '1';
+        document.getElementById('penalty-time').value = '';
     }
 
     endGame() {
