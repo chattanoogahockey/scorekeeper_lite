@@ -247,6 +247,44 @@ class ScorekeeperApp {
                         </div>
 
                         <div class="form-group">
+                            <label>Time:</label>
+                            <div class="time-input-container">
+                                <input type="text" id="goal-time" placeholder="00:00" readonly>
+                                <div class="time-keypad">
+                                    <button type="button" class="keypad-btn" onclick="app.addTimeDigit('1')">1</button>
+                                    <button type="button" class="keypad-btn" onclick="app.addTimeDigit('2')">2</button>
+                                    <button type="button" class="keypad-btn" onclick="app.addTimeDigit('3')">3</button>
+                                    <button type="button" class="keypad-btn" onclick="app.addTimeDigit('4')">4</button>
+                                    <button type="button" class="keypad-btn" onclick="app.addTimeDigit('5')">5</button>
+                                    <button type="button" class="keypad-btn" onclick="app.addTimeDigit('6')">6</button>
+                                    <button type="button" class="keypad-btn" onclick="app.addTimeDigit('7')">7</button>
+                                    <button type="button" class="keypad-btn" onclick="app.addTimeDigit('8')">8</button>
+                                    <button type="button" class="keypad-btn" onclick="app.addTimeDigit('9')">9</button>
+                                    <button type="button" class="keypad-btn clear-btn" onclick="app.clearTime()">Clear</button>
+                                    <button type="button" class="keypad-btn" onclick="app.addTimeDigit('0')">0</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Column -->
+                    <div class="form-column">
+                        <div class="form-group">
+                            <label>Period:</label>
+                            <div class="radio-group">
+                                <label class="radio-label">
+                                    <input type="radio" name="goal-period" value="1" checked> 1
+                                </label>
+                                <label class="radio-label">
+                                    <input type="radio" name="goal-period" value="2"> 2
+                                </label>
+                                <label class="radio-label">
+                                    <input type="radio" name="goal-period" value="3"> 3
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
                             <label>Shot Type:</label>
                             <select id="goal-shot-type">
                                 <option value="wrist" selected>Wrist</option>
@@ -271,44 +309,6 @@ class ScorekeeperApp {
                                 <option value="no" selected>No</option>
                                 <option value="yes">Yes</option>
                             </select>
-                        </div>
-                    </div>
-
-                    <!-- Right Column -->
-                    <div class="form-column">
-                        <div class="form-group">
-                            <label>Period:</label>
-                            <div class="radio-group">
-                                <label class="radio-label">
-                                    <input type="radio" name="goal-period" value="1" checked> 1
-                                </label>
-                                <label class="radio-label">
-                                    <input type="radio" name="goal-period" value="2"> 2
-                                </label>
-                                <label class="radio-label">
-                                    <input type="radio" name="goal-period" value="3"> 3
-                                </label>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Time:</label>
-                            <div class="time-input-container">
-                                <input type="text" id="goal-time" placeholder="00:00" readonly>
-                                <div class="time-keypad">
-                                    <button type="button" class="keypad-btn" onclick="app.addTimeDigit('1')">1</button>
-                                    <button type="button" class="keypad-btn" onclick="app.addTimeDigit('2')">2</button>
-                                    <button type="button" class="keypad-btn" onclick="app.addTimeDigit('3')">3</button>
-                                    <button type="button" class="keypad-btn" onclick="app.addTimeDigit('4')">4</button>
-                                    <button type="button" class="keypad-btn" onclick="app.addTimeDigit('5')">5</button>
-                                    <button type="button" class="keypad-btn" onclick="app.addTimeDigit('6')">6</button>
-                                    <button type="button" class="keypad-btn" onclick="app.addTimeDigit('7')">7</button>
-                                    <button type="button" class="keypad-btn" onclick="app.addTimeDigit('8')">8</button>
-                                    <button type="button" class="keypad-btn" onclick="app.addTimeDigit('9')">9</button>
-                                    <button type="button" class="keypad-btn clear-btn" onclick="app.clearTime()">Clear</button>
-                                    <button type="button" class="keypad-btn" onclick="app.addTimeDigit('0')">0</button>
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </div>
