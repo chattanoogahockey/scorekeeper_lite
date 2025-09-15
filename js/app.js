@@ -227,7 +227,7 @@ class ScorekeeperApp {
                         <div class="form-group">
                             <label>Team:</label>
                             <select id="goal-team">
-                                <option value="${this.selectedGame.homeTeam}">${this.selectedGame.homeTeam}</option>
+                                <option value="${this.selectedGame.homeTeam}" selected>${this.selectedGame.homeTeam}</option>
                                 <option value="${this.selectedGame.awayTeam}">${this.selectedGame.awayTeam}</option>
                             </select>
                         </div>
@@ -334,7 +334,7 @@ class ScorekeeperApp {
                 <div class="form-group">
                     <label>Team:</label>
                     <select id="penalty-team">
-                        <option value="${this.selectedGame.homeTeam}">${this.selectedGame.homeTeam}</option>
+                        <option value="${this.selectedGame.homeTeam}" selected>${this.selectedGame.homeTeam}</option>
                         <option value="${this.selectedGame.awayTeam}">${this.selectedGame.awayTeam}</option>
                     </select>
                 </div>
@@ -440,13 +440,19 @@ class ScorekeeperApp {
     showGoalDetails() {
         this.currentView = 'goal-details';
         this.render();
-        this.updatePlayerDropdowns();
+        // Use setTimeout to ensure DOM is fully rendered before updating dropdowns
+        setTimeout(() => {
+            this.updatePlayerDropdowns();
+        }, 10);
     }
 
     showPenaltyDetails() {
         this.currentView = 'penalty-details';
         this.render();
-        this.updatePlayerDropdowns();
+        // Use setTimeout to ensure DOM is fully rendered before updating dropdowns
+        setTimeout(() => {
+            this.updatePlayerDropdowns();
+        }, 10);
     }
 
     formatGoalTimeFromValue(input, value) {
@@ -573,17 +579,20 @@ class ScorekeeperApp {
             }
         };
 
-        // Add event listeners for goal team dropdown
+        // Remove existing event listeners to prevent duplicates
         if (goalTeamSelect) {
-            goalTeamSelect.addEventListener('change', () => {
+            goalTeamSelect.removeEventListener('change', goalTeamSelect._updateHandler);
+            goalTeamSelect._updateHandler = () => {
                 updatePlayers(goalTeamSelect.value, 'goal-player');
                 updatePlayers(goalTeamSelect.value, 'goal-assist');
-            });
+            };
+            goalTeamSelect.addEventListener('change', goalTeamSelect._updateHandler);
         }
 
-        // Add event listeners for penalty team dropdown
         if (penaltyTeamSelect) {
-            penaltyTeamSelect.addEventListener('change', () => updatePlayers(penaltyTeamSelect.value, 'penalty-player'));
+            penaltyTeamSelect.removeEventListener('change', penaltyTeamSelect._updateHandler);
+            penaltyTeamSelect._updateHandler = () => updatePlayers(penaltyTeamSelect.value, 'penalty-player');
+            penaltyTeamSelect.addEventListener('change', penaltyTeamSelect._updateHandler);
         }
 
         // Initialize with current values
@@ -600,7 +609,8 @@ class ScorekeeperApp {
         const assistSelect = document.getElementById('goal-assist');
 
         if (goalPlayerSelect && assistSelect && goalTeamSelect) {
-            goalPlayerSelect.addEventListener('change', () => {
+            goalPlayerSelect.removeEventListener('change', goalPlayerSelect._assistHandler);
+            goalPlayerSelect._assistHandler = () => {
                 const selectedTeam = goalTeamSelect.value;
                 if (!selectedTeam) return;
 
@@ -618,7 +628,8 @@ class ScorekeeperApp {
                 assistSelect.innerHTML = '<option value="">No Assist</option>' +
                     availablePlayers.filter(p => p.id !== goalPlayerSelect.value)
                         .map(player => `<option value="${player.id}">${player.name}</option>`).join('');
-            });
+            };
+            goalPlayerSelect.addEventListener('change', goalPlayerSelect._assistHandler);
         }
     }
 
