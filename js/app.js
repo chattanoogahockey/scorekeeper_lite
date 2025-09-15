@@ -16,7 +16,10 @@ class ScorekeeperApp {
 
     render() {
         const mainContent = document.getElementById('main-content');
+        const topNav = document.getElementById('top-navigation');
+        
         mainContent.innerHTML = this.getViewHTML();
+        topNav.innerHTML = this.getNavigationHTML();
     }
 
     getViewHTML() {
@@ -35,6 +38,24 @@ class ScorekeeperApp {
                 return this.getPenaltyDetailsHTML();
             default:
                 return this.getStartupMenuHTML();
+        }
+    }
+
+    getNavigationHTML() {
+        switch (this.currentView) {
+            case 'main-menu':
+                return ''; // No navigation needed on startup menu
+            case 'game-selection':
+                return '<button class="nav-btn" onclick="app.showStartupMenu()">← Back to Menu</button>';
+            case 'attendance':
+                return '<button class="nav-btn" onclick="app.showGameSelection()">← Back to Games</button>';
+            case 'scoring':
+                return '<button class="nav-btn" onclick="app.showAttendance()">← Back to Attendance</button>';
+            case 'goal-details':
+            case 'penalty-details':
+                return '<button class="nav-btn" onclick="app.showScoring()">← Back to Scoring</button>';
+            default:
+                return '<button class="nav-btn" onclick="app.showStartupMenu()">← Back to Menu</button>';
         }
     }
 
@@ -63,7 +84,6 @@ class ScorekeeperApp {
                 <div class="card">
                     <h2>Select a Game</h2>
                     <p>No upcoming games found. Please check the schedule data.</p>
-                    <button class="btn btn-secondary" onclick="app.showStartupMenu()">Back to Startup Menu</button>
                 </div>
             `;
         }
@@ -90,11 +110,8 @@ class ScorekeeperApp {
         return `
             <div class="card">
                 <h2>Select a Game to Score</h2>
-                <div class="game-list">
+                <div class="game-grid">
                     ${gamesHTML}
-                </div>
-                <div style="margin-top: 20px;">
-                    <button class="btn btn-secondary" onclick="app.showStartupMenu()">Back to Startup Menu</button>
                 </div>
             </div>
         `;
@@ -145,7 +162,6 @@ class ScorekeeperApp {
 
                 <div style="margin-top: 30px;">
                     <button class="btn" onclick="app.startScoring()">Start Scoring Game</button>
-                    <button class="btn btn-secondary" onclick="app.showGameSelection()">Back to Game Selection</button>
                 </div>
             </div>
         `;
@@ -187,7 +203,6 @@ class ScorekeeperApp {
 
                 <div style="margin-top: 30px;">
                     <button class="btn btn-danger" onclick="app.endGame()">End Game</button>
-                    <button class="btn btn-secondary" onclick="app.showAttendance()">Back to Attendance</button>
                 </div>
             </div>
         `;
