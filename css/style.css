@@ -420,21 +420,17 @@ header p {
     }
 }
 
-/* Goal Form 2-Column Layout */
+/* Goal Form 4x2 Grid Layout */
 .goal-form-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 20px;
+    grid-template-rows: repeat(4, auto);
+    gap: 15px;
     margin-top: 20px;
+    align-items: start;
 }
 
-.form-column {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    align-items: flex-start;
-    text-align: left;
-}
+
 
 .radio-group {
     display: flex;
@@ -511,6 +507,7 @@ header p {
 @media (max-width: 768px) {
     .goal-form-grid {
         grid-template-columns: 1fr;
+        grid-template-rows: repeat(8, auto);
         gap: 15px;
     }
     
