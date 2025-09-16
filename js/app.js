@@ -56,12 +56,12 @@ class ScorekeeperApp {
             case 'game-selection':
                 return '<button class="nav-btn" onclick="app.showStartupMenu()">← Back to Menu</button>';
             case 'attendance':
-                return '<button class="nav-btn" onclick="app.showGameSelection()">← Back to Games</button><button class="nav-btn primary" onclick="app.startScoring()">Start Scoring Game</button>';
+                return '';
             case 'scoring':
                 return '<button class="nav-btn" onclick="app.showAttendance()">← Back to Attendance</button>';
             case 'goal-details':
             case 'penalty-details':
-                return '<button class="nav-btn" onclick="app.showScoring()">← Back to Scoring</button>';
+                return '';
             default:
                 return '<button class="nav-btn" onclick="app.showStartupMenu()">← Back to Menu</button>';
         }
@@ -156,6 +156,11 @@ class ScorekeeperApp {
                 <p><strong>Game:</strong> ${this.selectedGame.homeTeam} vs ${this.selectedGame.awayTeam}</p>
                 <p><strong>Date:</strong> ${new Date(this.selectedGame.date).toLocaleDateString()}</p>
 
+                <div style="margin-top: 20px; margin-bottom: 20px; display: flex; gap: 10px; justify-content: center;">
+                    <button class="btn" onclick="app.showGameSelection()">← Back to Games</button>
+                    <button class="btn btn-success" onclick="app.startScoring()">Start Scoring Game</button>
+                </div>
+
                 <div class="attendance-grid">
                     <div class="team-column">
                         <h3>${this.selectedGame.homeTeam}</h3>
@@ -234,8 +239,8 @@ class ScorekeeperApp {
         }
 
         return `
-            <h1>Add Goal Details</h1>
             <div class="card">
+                <h2>Add Goal Details</h2>
                 <div class="goal-form-grid">
                     <!-- Left Column -->
                     <div class="form-column">
@@ -595,17 +600,21 @@ class ScorekeeperApp {
             return;
         }
 
-        // Auto-insert colon after 2 digits for better UX
-        if (value.length === 2) {
+        // Handle different input lengths for time formatting
+        if (value.length === 1) {
+            // Single digit: just show the digit
+            input.value = value;
+        } else if (value.length === 2) {
+            // Two digits: add colon for MM: format
             input.value = `${value}:`;
         } else if (value.length === 3) {
-            // Three digits: 225 -> 02:25
-            input.value = `0${value[0]}:${value.slice(1)}`;
+            // Three digits: MM S format (e.g., 144 -> 14:4)
+            input.value = `${value.slice(0, 2)}:${value.slice(2)}`;
         } else if (value.length === 4) {
-            // Four digits: 1225 -> 12:25
+            // Four digits: MM:SS format (e.g., 1445 -> 14:45)
             input.value = `${value.slice(0, 2)}:${value.slice(2)}`;
         } else if (value.length >= 5) {
-            // Five or more digits: take first 4 and format
+            // Five or more digits: take first 4 and format as MM:SS
             value = value.slice(0, 4);
             input.value = `${value.slice(0, 2)}:${value.slice(2)}`;
         }
@@ -613,7 +622,8 @@ class ScorekeeperApp {
         // Validate the time is within range (00:00 to 17:00)
         const timeParts = input.value.split(':');
         if (timeParts.length === 2) {
-            const [minutes, seconds] = timeParts.map(Number);
+            const minutes = parseInt(timeParts[0]) || 0;
+            const seconds = parseInt(timeParts[1]) || 0;
             const totalSeconds = minutes * 60 + seconds;
 
             if (totalSeconds > 1020) { // 17:00 = 1020 seconds
@@ -667,16 +677,20 @@ class ScorekeeperApp {
     addTimeDigit(digit) {
         const input = document.getElementById('goal-time');
         let currentValue = input.value.replace(/[^0-9]/g, ''); // Remove all non-numeric including colon
-        
-        if (currentValue.length < 4) {
-            currentValue = currentValue + digit;
-            this.formatGoalTimeFromValue(input, currentValue);
+
+        // Don't add more digits if we already have 4 (MM:SS format complete)
+        if (currentValue.length >= 4) {
+            return;
         }
+
+        currentValue = currentValue + digit;
+        this.formatGoalTimeFromValue(input, currentValue);
     }
 
     clearTime() {
         const input = document.getElementById('goal-time');
         input.value = '';
+        input.focus(); // Keep focus on the input for better UX
     }
 
     addColon() {
