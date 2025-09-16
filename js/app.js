@@ -54,7 +54,7 @@ class ScorekeeperApp {
             case 'main-menu':
                 return ''; // No navigation needed on startup menu
             case 'game-selection':
-                return '<button class="nav-btn" onclick="app.showStartupMenu()">← Back to Menu</button>';
+                return '';
             case 'attendance':
                 return '';
             case 'scoring':
@@ -117,6 +117,10 @@ class ScorekeeperApp {
         return `
             <h1>Select a Game to Score</h1>
             <div class="card">
+                <div style="margin-bottom: 20px; display: flex; justify-content: center;">
+                    <button class="btn" onclick="app.showStartupMenu()">← Back to Menu</button>
+                </div>
+
                 <div class="game-grid">
                     ${gamesHTML}
                 </div>
@@ -153,8 +157,10 @@ class ScorekeeperApp {
         return `
             <h1>Record Attendance</h1>
             <div class="card">
-                <p><strong>Game:</strong> ${this.selectedGame.homeTeam} vs ${this.selectedGame.awayTeam}</p>
-                <p><strong>Date:</strong> ${new Date(this.selectedGame.date).toLocaleDateString()}</p>
+                <p style="text-align: center; margin-bottom: 20px; font-size: 16px; color: var(--text-color);">
+                    Select all players that are at the game and input their jersey number. 
+                    You can edit this if needed from the in-game menu.
+                </p>
 
                 <div style="margin-top: 20px; margin-bottom: 20px; display: flex; gap: 10px; justify-content: center;">
                     <button class="btn" onclick="app.showGameSelection()">← Back to Games</button>
