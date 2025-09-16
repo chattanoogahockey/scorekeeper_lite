@@ -590,7 +590,6 @@ class ScorekeeperApp {
     }
 
     formatGoalTimeFromValue(input, value) {
-        console.log('formatGoalTimeFromValue called with value:', value);
         if (value.length === 0) {
             input.value = '';
             return;
@@ -599,20 +598,16 @@ class ScorekeeperApp {
         // Auto-insert colon after 2 digits for better UX
         if (value.length === 2) {
             input.value = `${value}:`;
-            console.log('2 digits - formatted as:', input.value);
         } else if (value.length === 3) {
             // Three digits: 225 -> 02:25
             input.value = `0${value[0]}:${value.slice(1)}`;
-            console.log('3 digits - formatted as:', input.value);
         } else if (value.length === 4) {
             // Four digits: 1225 -> 12:25
             input.value = `${value.slice(0, 2)}:${value.slice(2)}`;
-            console.log('4 digits - formatted as:', input.value);
         } else if (value.length >= 5) {
             // Five or more digits: take first 4 and format
             value = value.slice(0, 4);
             input.value = `${value.slice(0, 2)}:${value.slice(2)}`;
-            console.log('5+ digits - formatted as:', input.value);
         }
 
         // Validate the time is within range (00:00 to 17:00)
@@ -623,7 +618,6 @@ class ScorekeeperApp {
 
             if (totalSeconds > 1020) { // 17:00 = 1020 seconds
                 input.value = '17:00';
-                console.log('Time exceeded 17:00, set to 17:00');
             }
         }
     }
@@ -671,27 +665,18 @@ class ScorekeeperApp {
 
     // Time keypad methods
     addTimeDigit(digit) {
-        console.log('addTimeDigit called with:', digit);
         const input = document.getElementById('goal-time');
-        console.log('Input element:', input);
         let currentValue = input.value.replace(/[^0-9]/g, ''); // Remove all non-numeric including colon
-        console.log('Current value (numeric only):', currentValue);
         
         if (currentValue.length < 4) {
             currentValue = currentValue + digit;
-            console.log('New value after adding digit:', currentValue);
             this.formatGoalTimeFromValue(input, currentValue);
-            console.log('Final input value:', input.value);
-        } else {
-            console.log('Value already has 4 digits, ignoring input');
         }
     }
 
     clearTime() {
-        console.log('clearTime called');
         const input = document.getElementById('goal-time');
         input.value = '';
-        console.log('Time input cleared');
     }
 
     addColon() {
