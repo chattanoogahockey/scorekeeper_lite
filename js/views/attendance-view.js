@@ -18,11 +18,12 @@
           const rosterNumber = player.number != null ? String(player.number).padStart(2, '0') : '';
           const labelText = rosterNumber ? `#${rosterNumber} ${player.name}` : player.name;
           const placeholder = rosterNumber || '#';
+          const inputClass = jersey ? 'jersey-number-input' : 'jersey-number-input placeholder';
           return `
             <div class="checkbox-item" data-player-row="${player.id}">
               <input type="checkbox" data-role="attendance-checkbox" data-team="${team}" data-player-id="${player.id}" ${checked}>
               <label>${labelText}</label>
-              <input type="text" data-role="jersey-input" data-team="${team}" data-player-id="${player.id}" class="jersey-number-input" placeholder="${placeholder}" value="${jersey ?? ''}" maxlength="2" readonly>
+              <input type="text" data-role="jersey-input" data-team="${team}" data-player-id="${player.id}" class="${inputClass}" placeholder="${placeholder}" value="${jersey ?? ''}" maxlength="2" readonly>
             </div>
           `;
         })
@@ -118,3 +119,5 @@
       ?.addEventListener('click', () => app.saveJerseyNumber());
   },
 };
+
+

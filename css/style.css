@@ -1,4 +1,4 @@
-/* Modern CSS for The Scorekeeper */
+﻿/* Modern CSS for The Scorekeeper */
 :root {
     --primary-color: #2563eb;
     --secondary-color: #64748b;
@@ -538,6 +538,35 @@ header p {
     align-items: start;
 }
 
+.minutes-options {
+    display: flex;
+    gap: 10px;
+}
+
+.minutes-button {
+    flex: 1;
+    padding: 10px 0;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    background: var(--card-background);
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.minutes-button:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+
+.minutes-button.is-active {
+    background: var(--primary-color);
+    color: #fff;
+    border-color: var(--primary-color);
+}
+
+
 @media (max-width: 768px) {
     .goal-form-grid,
     .penalty-form-grid {
@@ -648,6 +677,11 @@ header p {
     background: var(--card-background);
     cursor: pointer;
     transition: border-color 0.2s;
+}
+
+.jersey-number-input.placeholder {
+    color: var(--danger-color);
+    font-weight: 600;
 }
 
 .jersey-number-input:focus {
@@ -818,3 +852,8 @@ header p {
     background: #fef3c7;
     color: #92400e;
 }
+
+
+
+
+

@@ -1,4 +1,4 @@
-import { attachTimeEntry, timeEntryMarkup } from '../components/time-entry.js';
+﻿import { attachTimeEntry, timeEntryMarkup } from '../components/time-entry.js';
 import { buildJerseyMap, formatPlayerLabel } from '../components/player-labels.js';
 
 export const penaltyDetailsView = {
@@ -67,7 +67,12 @@ export const penaltyDetailsView = {
 
           <div class="form-group">
             <label>Minutes:</label>
-            <input type="number" data-field="minutes" value="2" min="1" max="10">
+            <div class="minutes-options" data-role="minutes-group">
+              <button type="button" class="minutes-button" data-minutes="2">2 min</button>
+              <button type="button" class="minutes-button" data-minutes="4">4 min</button>
+              <button type="button" class="minutes-button" data-minutes="10">10 min</button>
+            </div>
+            <input type="hidden" data-field="minutes" value="2">
           </div>
         </div>
 
@@ -91,6 +96,29 @@ export const penaltyDetailsView = {
       attachTimeEntry(timeContainer);
     }
 
+    const minutesGroup = main.querySelector('[data-role="minutes-group"]');
+    const minutesInput = main.querySelector('[data-field="minutes"]');
+
+    const applyMinutesSelection = (value) => {
+      if (!minutesGroup || !minutesInput) return;
+      minutesInput.value = `${value}`;
+      minutesGroup.querySelectorAll('.minutes-button').forEach((button) => {
+        const isActive = Number(button.dataset.minutes) === Number(value);
+        button.classList.toggle('is-active', isActive);
+      });
+    };
+
+    minutesGroup?.addEventListener('click', (event) => {
+      const button = event.target instanceof HTMLElement ? event.target.closest('.minutes-button') : null;
+      if (!button) return;
+      const selected = button.dataset.minutes;
+      if (!selected) return;
+      applyMinutesSelection(selected);
+    });
+
+    if (minutesInput) {
+      applyMinutesSelection(minutesInput.value || 2);
+    }
     const updatePlayerOptions = (team) => {
       if (!playerSelect) return;
       const jerseyMap = buildJerseyMap(app.data.currentGame);
@@ -117,5 +145,17 @@ export const penaltyDetailsView = {
       ?.addEventListener('click', () => app.submitPenaltyForm());
   },
 };
+
+
+
+
+
+
+
+
+
+
+
+
 
 
