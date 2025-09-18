@@ -1,4 +1,4 @@
-﻿function renderGoals(goals) {
+function renderGoals(goals) {
   if (!goals.length) {
     return '<p class="muted">No goals recorded yet.</p>';
   }
@@ -6,14 +6,17 @@
   return `
     <ol class="event-list">
       ${goals
-        .map(
-          (goal) => `
+        .map((goal) => {
+          const playerName = goal.playerLabel || goal.player;
+          const assistName = goal.assistLabel || goal.assist;
+          const assistLine = assistName ? `<span class="muted">Assist: ${assistName}</span>` : '';
+          return `
             <li>
-              <strong>${goal.team}</strong> — ${goal.player} (${goal.period}P ${goal.time || '??:??'})
-              ${goal.assist ? `<span class="muted">Assist: ${goal.assist}</span>` : ''}
+              <strong>${goal.team}</strong> - ${playerName} (${goal.period}P ${goal.time || '??:??'})
+              ${assistLine}
             </li>
-          `,
-        )
+          `;
+        })
         .join('')}
     </ol>
   `;
@@ -27,14 +30,15 @@ function renderPenalties(penalties) {
   return `
     <ol class="event-list">
       ${penalties
-        .map(
-          (penalty) => `
+        .map((penalty) => {
+          const playerName = penalty.playerLabel || penalty.player;
+          return `
             <li>
-              <strong>${penalty.team}</strong> — ${penalty.player} (${penalty.minutes} min ${penalty.type})
+              <strong>${penalty.team}</strong> - ${playerName} (${penalty.minutes} min ${penalty.type})
               <span class="muted">${penalty.period}P ${penalty.time || '??:??'}</span>
             </li>
-          `,
-        )
+          `;
+        })
         .join('')}
     </ol>
   `;
@@ -67,7 +71,7 @@ export const scoringView = {
 
         <div class="score-actions">
           <button class="btn btn-primary" data-action="add-goal">Add Goal</button>
-          <button class="btn btn-secondary" data-action="add-penalty">Add Penalty</button>
+          <button class="btn btn-primary" data-action="add-penalty">Add Penalty</button>
           <button class="btn" data-action="edit-attendance">Edit Attendance</button>
           <button class="btn btn-danger" data-action="end-game">End Game</button>
         </div>
@@ -85,8 +89,8 @@ export const scoringView = {
 
         <div class="attendance-summary">
           <h3>Attendance</h3>
-          <p><strong>${game.homeTeam}</strong>: ${attendanceSummary.home.join(', ') || '—'}</p>
-          <p><strong>${game.awayTeam}</strong>: ${attendanceSummary.away.join(', ') || '—'}</p>
+          <p><strong>${game.homeTeam}</strong>: ${attendanceSummary.home.join(', ') || '-'}</p>
+          <p><strong>${game.awayTeam}</strong>: ${attendanceSummary.away.join(', ') || '-'}</p>
         </div>
       </div>
     `;

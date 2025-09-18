@@ -12,13 +12,18 @@ export const goalSchema = z.object({
   team: z.string().min(1),
   player: z.string().min(1),
   playerId: z.string().min(1),
+  playerLabel: z.string().optional(),
+  playerNumber: z.string().optional(),
   assist: z.string().optional(),
   assistId: z.string().optional(),
+  assistLabel: z.string().optional(),
+  assistNumber: z.string().optional(),
   period: z.union([z.string().regex(/^(1|2|3|OT)$/), z.number().int()]).transform((value) => `${value}`),
   time: z.string().optional(),
   shotType: z.string().optional(),
   goalType: z.string().optional(),
   breakaway: z.string().optional(),
+  clockSeconds: z.number().int().nonnegative().optional(),
   timestamp: z.string().datetime().optional(),
 });
 
@@ -27,10 +32,13 @@ export const penaltySchema = z.object({
   team: z.string().min(1),
   player: z.string().min(1),
   playerId: z.string().min(1),
+  playerLabel: z.string().optional(),
+  playerNumber: z.string().optional(),
   type: z.string().min(1),
   minutes: z.number().int().nonnegative(),
   period: z.union([z.string().regex(/^(1|2|3|OT)$/), z.number().int()]).transform((value) => `${value}`),
   time: z.string().optional(),
+  clockSeconds: z.number().int().nonnegative().optional(),
   timestamp: z.string().datetime().optional(),
 });
 

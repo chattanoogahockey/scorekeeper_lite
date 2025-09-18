@@ -1,51 +1,52 @@
-﻿{
-    "name":  "scorekeeper_lite",
-    "version":  "0.1.0",
-    "description":  "Modern GitHub Pages app for Chattanooga Roller Hockey League scorekeeping with JSON data exports.",
-    "type":  "module",
-    "scripts":  {
-                    "dev":  "wds --config web-dev-server.config.mjs",
-                    "lint":  "eslint \"**/*.js\" \"**/*.mjs\"",
-                    "format":  "prettier --write .",
-                    "test":  "vitest",
-                    "test:run":  "vitest run",
-                    "test:ui":  "node scripts/verify-ui.mjs",
-                    "validate:data":  "node scripts/validate-data.mjs",
-                    "validate":  "npm run lint \u0026\u0026 npm run test:run \u0026\u0026 npm run validate:data"
-                },
-    "keywords":  [
-                     "hockey",
-                     "scorekeeping",
-                     "github-pages",
-                     "json",
-                     "frontend"
-                 ],
-    "author":  "Chattanooga Hockey",
-    "license":  "MIT",
-    "homepage":  "https://chattanoogaHockey.github.io/scorekeeper_lite/",
-    "bugs":  {
-                 "url":  "https://github.com/chattanoogaHockey/scorekeeper_lite/issues"
-             },
-    "repository":  {
-                       "type":  "git",
-                       "url":  "git+https://github.com/chattanoogaHockey/scorekeeper_lite.git"
-                   },
-    "engines":  {
-                    "node":  "\u003e=18"
-                },
-    "devDependencies":  {
-                            "@eslint/js":  "^9.14.0",
-                            "@playwright/test":  "^1.55.0",
-                            "@web/dev-server":  "^0.4.6",
-                            "eslint":  "^9.35.0",
-                            "eslint-config-prettier":  "^10.1.8",
-                            "eslint-plugin-import":  "^2.32.0",
-                            "eslint-plugin-json":  "^4.0.1",
-                            "globals":  "^15.11.0",
-                            "prettier":  "^3.6.2",
-                            "vitest":  "^3.2.4"
-                        },
-    "dependencies":  {
-                         "zod":  "^4.1.8"
-                     }
+{
+    "name": "scorekeeper_lite",
+    "version": "0.1.0",
+    "description": "Modern GitHub Pages app for Chattanooga Roller Hockey League scorekeeping with JSON data exports.",
+    "type": "module",
+    "scripts": {
+        "dev": "wds --config web-dev-server.config.mjs",
+        "lint": "eslint \"**/*.js\" \"**/*.mjs\"",
+        "format": "prettier --write .",
+        "test": "vitest",
+        "test:run": "vitest run",
+        "test:ui": "node scripts/verify-ui.mjs",
+        "validate:data": "node scripts/validate-data.mjs",
+        "validate": "npm run lint && npm run test:run && npm run validate:data"
+    },
+    "keywords": [
+        "hockey",
+        "scorekeeping",
+        "github-pages",
+        "json",
+        "frontend"
+    ],
+    "author": "Chattanooga Hockey",
+    "license": "MIT",
+    "homepage": "https://chattanoogaHockey.github.io/scorekeeper_lite/",
+    "bugs": {
+        "url": "https://github.com/chattanoogaHockey/scorekeeper_lite/issues"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/chattanoogaHockey/scorekeeper_lite.git"
+    },
+    "engines": {
+        "node": ">=18"
+    },
+    "devDependencies": {
+        "@eslint/js": "^9.14.0",
+        "@playwright/test": "^1.55.0",
+        "@web/dev-server": "^0.4.6",
+        "eslint": "^9.35.0",
+        "eslint-config-prettier": "^10.1.8",
+        "eslint-plugin-import": "^2.32.0",
+        "eslint-plugin-json": "^4.0.1",
+        "globals": "^15.11.0",
+        "jsdom": "^27.0.0",
+        "prettier": "^3.6.2",
+        "vitest": "^3.2.4"
+    },
+    "dependencies": {
+        "zod": "^4.1.8"
+    }
 }

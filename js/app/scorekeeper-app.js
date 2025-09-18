@@ -6,6 +6,8 @@ import { historyView } from '../views/history-view.js';
 import { penaltyDetailsView } from '../views/penalty-details-view.js';
 import { scoringView } from '../views/scoring-view.js';
 import { startupView } from '../views/startup-view.js';
+import { TimeEntryLimits } from '../components/time-entry.js';
+import { buildJerseyMap, formatPlayerLabel, resolvePlayerJersey } from '../components/player-labels.js';
 
 const VIEWS = [
   startupView,
@@ -16,6 +18,24 @@ const VIEWS = [
   penaltyDetailsView,
   historyView,
 ];
+
+function parseClockTime(value) {
+  if (typeof value !== 'string' || !/^\d{2}:\d{2}$/.test(value)) {
+    return null;
+  }
+
+  const [mm, ss] = value.split(':').map((segment) => Number.parseInt(segment, 10));
+  if (Number.isNaN(mm) || Number.isNaN(ss)) {
+    return null;
+  }
+
+  const totalSeconds = mm * 60 + ss;
+  if (totalSeconds < TimeEntryLimits.MIN_SECONDS || totalSeconds > TimeEntryLimits.MAX_SECONDS) {
+    return null;
+  }
+
+  return { minutes: mm, seconds: ss, total: totalSeconds };
+}
 
 export class ScorekeeperApp {
   constructor(mainContent, topNavigation, header) {
@@ -292,21 +312,37 @@ export class ScorekeeperApp {
       return;
     }
 
-    const player = this.data.getPlayersForTeam(team).find((p) => p.id === playerId);
-    const assist = assistId
-      ? this.data.getPlayersForTeam(team).find((p) => p.id === assistId)
-      : null;
+    const parsedTime = parseClockTime(time);
+    if (!parsedTime) {
+      window.alert('Enter a valid time between 00:01 and 16:59.');
+      return;
+    }
+
+    const playersForTeam = this.data.getPlayersForTeam(team);
+    const player = playersForTeam.find((p) => p.id === playerId);
+    const assist = assistId ? playersForTeam.find((p) => p.id === assistId) : null;
+    const jerseyMap = buildJerseyMap(this.data.currentGame);
+
+    const playerLabel = player ? formatPlayerLabel(player, jerseyMap) : 'Unknown';
+    const playerNumber = player ? resolvePlayerJersey(player, jerseyMap) : '';
+    const assistLabel = assist ? formatPlayerLabel(assist, jerseyMap) : '';
+    const assistNumber = assist ? resolvePlayerJersey(assist, jerseyMap) : '';
 
     this.data.addGoal({
       team,
       player: player?.name ?? 'Unknown',
       playerId,
+      playerLabel,
+      playerNumber,
       assist: assist ? assist.name : '',
       assistId: assist ? assist.id : '',
+      assistLabel,
+      assistNumber,
       period,
       shotType,
       goalType,
       time,
+      clockSeconds: parsedTime.total,
       breakaway,
     });
 
@@ -327,16 +363,29 @@ export class ScorekeeperApp {
       return;
     }
 
-    const player = this.data.getPlayersForTeam(team).find((p) => p.id === playerId);
+    const parsedTime = parseClockTime(time);
+    if (!parsedTime) {
+      window.alert('Enter a valid time between 00:01 and 16:59.');
+      return;
+    }
+
+    const players = this.data.getPlayersForTeam(team);
+    const player = players.find((p) => p.id === playerId);
+    const jerseyMap = buildJerseyMap(this.data.currentGame);
+    const playerLabel = player ? formatPlayerLabel(player, jerseyMap) : 'Unknown';
+    const playerNumber = player ? resolvePlayerJersey(player, jerseyMap) : '';
 
     this.data.addPenalty({
       team,
       player: player?.name ?? 'Unknown',
       playerId,
+      playerLabel,
+      playerNumber,
       type,
       minutes,
       period,
       time,
+      clockSeconds: parsedTime.total,
     });
 
     this.showScoring();
