@@ -1,5 +1,5 @@
-﻿import { attachTimeEntry, timeEntryMarkup } from '../components/time-entry.js';
-import { buildJerseyMap, formatPlayerLabel } from '../components/player-labels.js';
+﻿import { buildJerseyMap, formatPlayerLabel } from '../components/player-labels.js';
+import { attachTimeEntry, timeEntryMarkup } from '../components/time-entry.js';
 
 export const penaltyDetailsView = {
   id: 'penalty-details',
@@ -25,20 +25,22 @@ export const penaltyDetailsView = {
         <div class="penalty-form-grid">
           <div class="form-group">
             <label>Period:</label>
-            <select data-field="period">
-              <option value="1">Period 1</option>
-              <option value="2">Period 2</option>
-              <option value="3">Period 3</option>
-              <option value="OT">Overtime</option>
-            </select>
+            <div class="minutes-options" data-role="period-group">
+              <button type="button" class="minutes-button" data-period="1">1</button>
+              <button type="button" class="minutes-button" data-period="2">2</button>
+              <button type="button" class="minutes-button" data-period="3">3</button>
+              <button type="button" class="minutes-button" data-period="OT">OT</button>
+            </div>
+            <input type="hidden" data-field="period" value="1">
           </div>
 
           <div class="form-group">
             <label>Team:</label>
-            <select data-field="team">
-              <option value="${game.homeTeam}" selected>${game.homeTeam}</option>
-              <option value="${game.awayTeam}">${game.awayTeam}</option>
-            </select>
+            <div class="minutes-options" data-role="team-group">
+              <button type="button" class="minutes-button" data-team="${game.homeTeam}">${game.homeTeam}</button>
+              <button type="button" class="minutes-button" data-team="${game.awayTeam}">${game.awayTeam}</button>
+            </div>
+            <input type="hidden" data-field="team" value="${game.homeTeam}">
           </div>
 
           <div class="form-group">
@@ -88,7 +90,7 @@ export const penaltyDetailsView = {
   },
   bind(app) {
     const main = app.mainContent;
-    const teamSelect = main.querySelector('[data-field="team"]');
+    const teamInput = main.querySelector('[data-field="team"]');
     const playerSelect = main.querySelector('[data-field="player"]');
     const timeContainer = main.querySelector('[data-time-input]');
 
@@ -119,6 +121,31 @@ export const penaltyDetailsView = {
     if (minutesInput) {
       applyMinutesSelection(minutesInput.value || 2);
     }
+
+    const periodGroup = main.querySelector('[data-role="period-group"]');
+    const periodInput = main.querySelector('[data-field="period"]');
+    const teamGroup = main.querySelector('[data-role="team-group"]');
+
+    const applyPeriodSelection = (value) => {
+      if (!periodGroup || !periodInput) return;
+      periodInput.value = value;
+      periodGroup.querySelectorAll('.minutes-button').forEach((button) => {
+        button.classList.toggle('is-active', button.dataset.period === value);
+      });
+    };
+
+    periodGroup?.addEventListener('click', (event) => {
+      const button = event.target instanceof HTMLElement ? event.target.closest('.minutes-button') : null;
+      if (!button) return;
+      const selected = button.dataset.period;
+      if (!selected) return;
+      applyPeriodSelection(selected);
+    });
+
+    if (periodInput) {
+      applyPeriodSelection(periodInput.value || '1');
+    }
+
     const updatePlayerOptions = (team) => {
       if (!playerSelect) return;
       const jerseyMap = buildJerseyMap(app.data.currentGame);
@@ -131,11 +158,26 @@ export const penaltyDetailsView = {
       playerSelect.dataset.team = team;
     };
 
-    teamSelect?.addEventListener('change', (event) => updatePlayerOptions(event.target.value));
+    const applyTeamSelection = (team) => {
+      if (!teamInput) return;
+      teamInput.value = team;
+      if (teamGroup) {
+        teamGroup.querySelectorAll('.minutes-button').forEach((button) => {
+          button.classList.toggle('is-active', button.dataset.team === team);
+        });
+      }
+      updatePlayerOptions(team);
+    };
 
-    if (teamSelect && teamSelect.value) {
-      updatePlayerOptions(teamSelect.value);
-    }
+    teamGroup?.addEventListener('click', (event) => {
+      const button = event.target instanceof HTMLElement ? event.target.closest('.minutes-button') : null;
+      if (!button) return;
+      const selected = button.dataset.team;
+      if (!selected) return;
+      applyTeamSelection(selected);
+    });
+
+    applyTeamSelection(teamInput?.value || app.data.currentGame?.homeTeam);
 
     main
       .querySelector('[data-action="cancel-penalty"]')

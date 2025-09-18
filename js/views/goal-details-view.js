@@ -73,12 +73,13 @@ export const goalDetailsView = {
           <!-- Column 2 -->
           <div class="form-group">
             <label>Period:</label>
-            <select data-field="period">
-              <option value="1">Period 1</option>
-              <option value="2">Period 2</option>
-              <option value="3">Period 3</option>
-              <option value="OT">Overtime</option>
-            </select>
+            <div class="minutes-options" data-role="period-group">
+              <button type="button" class="minutes-button" data-period="1">1</button>
+              <button type="button" class="minutes-button" data-period="2">2</button>
+              <button type="button" class="minutes-button" data-period="3">3</button>
+              <button type="button" class="minutes-button" data-period="OT">OT</button>
+            </div>
+            <input type="hidden" data-field="period" value="1">
           </div>
 
           <div class="form-group form-group--time">
@@ -111,9 +112,31 @@ export const goalDetailsView = {
     const scorerSelect = main.querySelector('[data-field="player"]');
     const assistSelect = main.querySelector('[data-field="assist"]');
     const timeContainer = main.querySelector('[data-time-input]');
+    const periodGroup = main.querySelector('[data-role="period-group"]');
+    const periodInput = main.querySelector('[data-field="period"]');
 
     if (timeContainer) {
       attachTimeEntry(timeContainer);
+    }
+
+    const applyPeriodSelection = (value) => {
+      if (!periodGroup || !periodInput) return;
+      periodInput.value = value;
+      periodGroup.querySelectorAll('.minutes-button').forEach((button) => {
+        button.classList.toggle('is-active', button.dataset.period === value);
+      });
+    };
+
+    periodGroup?.addEventListener('click', (event) => {
+      const button = event.target instanceof HTMLElement ? event.target.closest('.minutes-button') : null;
+      if (!button) return;
+      const selected = button.dataset.period;
+      if (!selected) return;
+      applyPeriodSelection(selected);
+    });
+
+    if (periodInput) {
+      applyPeriodSelection(periodInput.value || '1');
     }
 
     const getPlayers = (team) => app.data.getPlayersForTeam(team);
