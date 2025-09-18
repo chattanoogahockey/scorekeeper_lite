@@ -1,4 +1,4 @@
-﻿import { ScorekeeperApp } from './app/scorekeeper-app.js';
+import { ScorekeeperApp } from './app/scorekeeper-app.js';
 import { SyncBanner } from './components/sync-banner.js';
 import { getAppConfig } from './core/config.js';
 import { SyncService } from './core/sync-service.js';
@@ -38,4 +38,10 @@ function bootstrap() {
     });
 }
 
-document.addEventListener('DOMContentLoaded', bootstrap);
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', bootstrap);
+} else {
+  bootstrap();
+}
+
+
