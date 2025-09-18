@@ -1,0 +1,65 @@
+diff --git a/js/core/data-manager.js b/js/core/data-manager.js
+--- a/js/core/data-manager.js
++++ b/js/core/data-manager.js
+@@
+-  createGame(gameInfo) {
+-    return {
+-      id: `${Date.now()}`,
+-      ...gameInfo,
+-      attendance: gameInfo.attendance || [],
+-      goals: [],
+-      penalties: [],
+-      homeScore: 0,
+-      awayScore: 0,
+-      status: 'in_progress',
+-      created: new Date().toISOString(),
+-    };
+-  }
++  createGame(gameInfo) {
++    const baseGame = {
++      id: `${Date.now()}`,
++      ...gameInfo,
++      attendance: gameInfo.attendance || [],
++      goals: [],
++      penalties: [],
++      homeScore: 0,
++      awayScore: 0,
++      status: 'in_progress',
++      created: new Date().toISOString(),
++    };
++
++    if (!baseGame.division) {
++      baseGame.division = this.resolveDivisionForGame(baseGame);
++    }
++
++    return baseGame;
++  }
++
++  resolveDivisionForGame(game) {
++    const collectDivision = (teamName) => {
++      if (!teamName) return null;
++      const players = this.getPlayersForTeam(teamName);
++      const divisions = new Set();
++
++      players.forEach((player) => {
++        if (player && player.division) {
++          divisions.add(player.division);
++        }
++      });
++
++      if (!divisions.size) {
++        return null;
++      }
++
++      return divisions.values().next().value;
++    };
++
++    const homeDivision = collectDivision(game.homeTeam);
++    const awayDivision = collectDivision(game.awayTeam);
++
++    if (homeDivision && awayDivision && homeDivision === awayDivision) {
++      return homeDivision;
++    }
++
++    return homeDivision || awayDivision || '';
++  }

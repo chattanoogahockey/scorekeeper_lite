@@ -17,7 +17,7 @@
           const jersey = app.getPlayerJersey(team, player.id);
           const rosterNumber = player.number != null ? String(player.number).padStart(2, '0') : '';
           const labelText = rosterNumber ? `#${rosterNumber} ${player.name}` : player.name;
-          const placeholder = rosterNumber || '#';
+          const placeholder = '##';
           const inputClass = jersey ? 'jersey-number-input' : 'jersey-number-input placeholder';
           return `
             <div class="checkbox-item" data-player-row="${player.id}">
@@ -62,10 +62,10 @@
         <div class="modal-content">
           <h3 id="dialog-title">Enter Jersey Number</h3>
           <p id="dialog-player-name">Player</p>
-          <input type="text" id="number-input" maxlength="2" placeholder="00" data-role="number-input">
+          <input type="text" id="number-input" maxlength="2" placeholder="##" data-role="number-input">
           <div style="margin-top: 20px; display: flex; gap: 10px;">
-            <button class="btn btn-secondary" data-action="close-number-dialog">Cancel</button>
             <button class="btn btn-primary" data-action="save-jersey-number">Save</button>
+            <button class="btn btn-secondary" data-action="close-number-dialog">Cancel</button>
           </div>
         </div>
       </div>

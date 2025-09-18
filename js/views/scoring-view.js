@@ -72,8 +72,8 @@ export const scoringView = {
         <div class="score-actions">
           <button class="btn btn-primary" data-action="add-goal">Add Goal</button>
           <button class="btn btn-primary" data-action="add-penalty">Add Penalty</button>
-          <button class="btn" data-action="edit-attendance">Edit Attendance</button>
           <button class="btn btn-danger" data-action="submit-game">Submit Game</button>
+          <button class="btn" data-action="edit-attendance">Edit Attendance</button>
         </div>
 
         <div class="event-columns">

@@ -1,5 +1,5 @@
 ﻿const GAME_DIRECTORY = 'data/games';
-const INDEX_FILE = ${GAME_DIRECTORY}/index.json;
+const INDEX_FILE = `${GAME_DIRECTORY}/index.json`;
 
 export default {
   async fetch(request, env) {
@@ -42,13 +42,14 @@ export default {
     const { owner, repo } = parseRepo(env.GITHUB_REPO);
     const branch = env.GITHUB_BRANCH || 'main';
 
-    const filePath = ${GAME_DIRECTORY}/.json;
-    const content = ${JSON.stringify(sanitized, null, 2)}\n;
+    const fileName = buildGameFileName(sanitized);
+    const filePath = `${GAME_DIRECTORY}/${fileName}`;
+    const content = `${JSON.stringify(sanitized, null, 2)}\n`;
 
-    await upsertFile(env, owner, repo, branch, filePath, content, Add game );
-    await updateIndex(env, owner, repo, branch, sanitized);
+    await upsertFile(env, owner, repo, branch, filePath, content, `Add game ${sanitized.id}`);
+    await updateIndex(env, owner, repo, branch, sanitized, filePath);
 
-    return jsonResponse(env, { status: 'ok', id: sanitized.id });
+    return jsonResponse(env, { status: 'ok', id: sanitized.id, file: filePath });
   },
 };
 
@@ -108,6 +109,7 @@ function sanitizeGame(game) {
     time: requiredString(game.time),
     homeTeam: requiredString(game.homeTeam),
     awayTeam: requiredString(game.awayTeam),
+    division: requiredString(game.division),
     location: requiredString(game.location),
     season: requiredString(game.season),
     week: requiredString(game.week),
@@ -122,6 +124,74 @@ function sanitizeGame(game) {
   };
 }
 
+function buildGameFileName(game) {
+  const dateSegment = formatDateSegment(game.date || game.created);
+  const divisionSegment = slugSegment(game.division, 'unknown-division');
+  const homeSegment = slugSegment(game.homeTeam, 'home');
+  const awaySegment = slugSegment(game.awayTeam, 'away');
+  const timeSegment = formatTimeSegment(game.time || game.ended);
+
+  const matchupSegment = `${homeSegment}_vs_${awaySegment}`;
+  return `${[dateSegment, divisionSegment, matchupSegment, timeSegment].join('_')}.json`;
+}
+
+function formatDateSegment(rawValue) {
+  if (typeof rawValue === 'string' && rawValue.trim()) {
+    const match = rawValue.trim().match(/^(\d{4}-\d{2}-\d{2})/);
+    if (match) {
+      return match[1];
+    }
+  }
+
+  const date = rawValue ? new Date(rawValue) : null;
+  if (date && !Number.isNaN(date.getTime())) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+  return 'unknown-date';
+}
+
+function formatTimeSegment(rawValue) {
+  if (typeof rawValue === 'string' && rawValue.trim()) {
+    const normalized = rawValue.trim();
+    const match = normalized.match(/^(\d{2}):(\d{2})(?::\d{2})?/);
+    if (match) {
+      return `${match[1]}-${match[2]}`;
+    }
+  }
+
+  const date = rawValue ? new Date(rawValue) : null;
+  if (date && !Number.isNaN(date.getTime())) {
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    return `${hours}-${minutes}`;
+  }
+
+  return 'unknown-time';
+}
+
+function slugSegment(value, fallback = 'unknown') {
+  if (typeof value !== 'string' || !value.trim()) {
+    return fallback;
+  }
+
+  const normalized = value
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/&/g, ' and ')
+    .replace(/['\u2019]/g, '');
+
+  const slug = normalized
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+
+  return slug || fallback;
+}
+
 function parseRepo(repoString) {
   const [owner, repo] = repoString.split('/');
   if (!owner || !repo) {
@@ -130,7 +200,7 @@ function parseRepo(repoString) {
   return { owner, repo };
 }
 
-async function updateIndex(env, owner, repo, branch, game) {
+async function updateIndex(env, owner, repo, branch, game, filePath) {
   const existingIndex = await fetchFile(env, owner, repo, branch, INDEX_FILE);
   let entries = [];
 
@@ -147,7 +217,11 @@ async function updateIndex(env, owner, repo, branch, game) {
 
   const entry = {
     id: game.id,
-    file: ${GAME_DIRECTORY}/.json,
+    file: filePath,
+    fileName: filePath.split('/').pop() || filePath,
+    date: game.date,
+    time: game.time,
+    division: game.division,
     created: game.created,
     homeTeam: game.homeTeam,
     awayTeam: game.awayTeam,
@@ -160,7 +234,7 @@ async function updateIndex(env, owner, repo, branch, game) {
   filtered.push(entry);
   filtered.sort((a, b) => new Date(b.created) - new Date(a.created));
 
-  const content = ${JSON.stringify(filtered, null, 2)}\n;
+  const content = `${JSON.stringify(filtered, null, 2)}\n`;
 
   await upsertFile(
     env,
@@ -169,7 +243,7 @@ async function updateIndex(env, owner, repo, branch, game) {
     branch,
     INDEX_FILE,
     content,
-    Update index after game ,
+    `Update index after game ${game.id}`,
     existingIndex?.sha,
   );
 }
@@ -192,26 +266,26 @@ async function upsertFile(env, owner, repo, branch, path, content, message, exis
     body.sha = sha;
   }
 
-  const response = await githubRequest(env, owner, repo, contents/C:\Users\marce\OneDrive\Documents\CHAHKY\scorekeeper_lite\worker\worker.js, {
+  const response = await githubRequest(env, owner, repo, `contents/${path}`, {
     method: 'PUT',
     body: JSON.stringify(body),
   });
 
   if (!response.ok) {
     const text = await response.text();
-    throw new Error(GitHub upsert failed:  );
+    throw new Error(`GitHub upsert failed: ${response.status} ${text}`);
   }
 }
 
 async function fetchFile(env, owner, repo, branch, path) {
-  const response = await githubRequest(env, owner, repo, contents/C:\Users\marce\OneDrive\Documents\CHAHKY\scorekeeper_lite\worker\worker.js?ref=);
+  const response = await githubRequest(env, owner, repo, `contents/${path}?ref=${branch}`);
   if (response.status === 404) {
     return null;
   }
 
   if (!response.ok) {
     const text = await response.text();
-    throw new Error(GitHub fetch failed:  );
+    throw new Error(`GitHub fetch failed: ${response.status} ${text}`);
   }
 
   return response.json();
@@ -222,9 +296,9 @@ function encodeBase64(content) {
 }
 
 function githubRequest(env, owner, repo, path, init = {}) {
-  const url = https://api.github.com/repos///C:\Users\marce\OneDrive\Documents\CHAHKY\scorekeeper_lite\worker\worker.js;
+  const url = `https://api.github.com/repos/${owner}/${repo}/${path}`;
   const headers = {
-    Authorization: Bearer ,
+    Authorization: `Bearer ${env.GITHUB_TOKEN}`,
     'Content-Type': 'application/json',
     'User-Agent': 'scorekeeper-lite-worker',
     Accept: 'application/vnd.github+json',

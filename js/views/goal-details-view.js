@@ -37,21 +37,6 @@ export const goalDetailsView = {
           </div>
 
           <div class="form-group">
-            <label>Period:</label>
-            <select data-field="period">
-              <option value="1">Period 1</option>
-              <option value="2">Period 2</option>
-              <option value="3">Period 3</option>
-              <option value="OT">Overtime</option>
-            </select>
-          </div>
-
-          <div class="form-group form-group--time">
-            <label>Time (MM:SS):</label>
-            ${timeEntryMarkup()}
-          </div>
-
-          <div class="form-group">
             <label>Scorer:</label>
             <select data-field="player" data-team="${game.homeTeam}">
               ${renderPlayerOptions(playersByTeam[game.homeTeam])}
@@ -75,6 +60,21 @@ export const goalDetailsView = {
           </div>
 
           <div class="form-group">
+            <label>Period:</label>
+            <select data-field="period">
+              <option value="1">Period 1</option>
+              <option value="2">Period 2</option>
+              <option value="3">Period 3</option>
+              <option value="OT">Overtime</option>
+            </select>
+          </div>
+
+          <div class="form-group form-group--time">
+            <label>Time (MM:SS):</label>
+            ${timeEntryMarkup()}
+          </div>
+
+          <div class="form-group">
             <label>Shot Type:</label>
             <select data-field="shotType">
               <option value="wrist" selected>Wrist</option>
@@ -94,8 +94,8 @@ export const goalDetailsView = {
         </div>
 
         <div class="form-actions">
-          <button class="btn btn-secondary" data-action="cancel-goal">Cancel</button>
           <button class="btn btn-success" data-action="save-goal">Add Goal</button>
+          <button class="btn btn-secondary" data-action="cancel-goal">Cancel</button>
         </div>
       </div>
     `;

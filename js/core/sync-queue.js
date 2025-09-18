@@ -57,6 +57,21 @@ export class SyncQueue {
     this.persist();
   }
 
+  clear() {
+    this.items = [];
+
+    if (this.storage && typeof this.storage.removeItem === 'function') {
+      try {
+        this.storage.removeItem(this.storageKey);
+        return;
+      } catch (error) {
+        console.error('Failed to clear sync queue', error);
+      }
+    }
+
+    this.persist();
+  }
+
   getPending() {
     return [...this.items];
   }

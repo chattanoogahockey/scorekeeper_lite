@@ -20,7 +20,7 @@ function normalizeJersey(value) {
   if (!trimmed) {
     return '';
   }
-  return trimmed.padStart(2, '0');
+  return trimmed;
 }
 
 export function resolvePlayerJersey(player, jerseyMap) {

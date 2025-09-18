@@ -3,6 +3,65 @@ import { SyncQueue } from './sync-queue.js';
 
 const STORAGE_KEY = 'chahky_games';
 const IN_PROGRESS_STORAGE_KEY = 'chahky_current_game';
+const DATA_VERSION_KEY = 'chahky_data_version';
+
+function buildSeedSignature(schedule, rosters) {
+  const schedulePart = Array.isArray(schedule)
+    ? schedule
+        .map((game) => {
+          const parts = [
+            game && game.id ? game.id : '',
+            game && game.date ? game.date : '',
+            game && game.time ? game.time : '',
+            game && game.homeTeam ? game.homeTeam : '',
+            game && game.awayTeam ? game.awayTeam : '',
+            game && game.season ? game.season : '',
+          ];
+          return parts.join('|');
+        })
+        .join(';')
+    : 'none';
+
+  const rosterEntries = [];
+  if (rosters && typeof rosters === 'object') {
+    const teams = Object.keys(rosters).sort((teamA, teamB) => teamA.localeCompare(teamB));
+    teams.forEach((team) => {
+      const players = rosters[team];
+      if (Array.isArray(players)) {
+        const playerSignature = players
+          .map((player) => {
+            if (player && typeof player === 'object') {
+              if (typeof player.id === 'string' && player.id) {
+                return player.id;
+              }
+              if (typeof player.name === 'string' && player.name) {
+                return player.name;
+              }
+            }
+            return '';
+          })
+          .join(',');
+        rosterEntries.push(`${team}:${playerSignature}`);
+      } else {
+        rosterEntries.push(`${team}:`);
+      }
+    });
+  }
+
+  const rosterPart = rosterEntries.length ? rosterEntries.join(';') : 'none';
+
+  return `schedule:${schedulePart}|rosters:${rosterPart}`;
+}
+
+function simpleHash(value) {
+  let hash = 0;
+  for (let index = 0; index < value.length; index += 1) {
+    const charCode = value.charCodeAt(index);
+    hash = (hash << 5) - hash + charCode;
+    hash |= 0;
+  }
+  return String(hash);
+}
 
 export class DataManager {
   constructor({
@@ -30,6 +89,7 @@ export class DataManager {
   async init() {
     if (this.isLoaded) return;
     await this.loadSeeds();
+    this.ensureSeedVersion();
     this.loadCachedGames();
     this.restoreCurrentGame();
     this.isLoaded = true;
@@ -143,8 +203,65 @@ export class DataManager {
     }
   }
 
+  discardCurrentGame() {
+    this.currentGame = null;
+    this.clearCurrentGameState();
+  }
+
+  ensureSeedVersion() {
+    if (typeof window === 'undefined') return;
+
+    try {
+      const version = this.computeSeedVersion();
+      const stored = window.localStorage.getItem(DATA_VERSION_KEY);
+
+      if (stored === version) {
+        return;
+      }
+
+      if (stored === null) {
+        window.localStorage.setItem(DATA_VERSION_KEY, version);
+        return;
+      }
+
+      this.handleSeedChange();
+      window.localStorage.setItem(DATA_VERSION_KEY, version);
+    } catch (error) {
+      console.error('Failed to ensure seed version', error);
+    }
+  }
+
+  computeSeedVersion() {
+    const signature = buildSeedSignature(this.schedule, this.rosters);
+    return simpleHash(signature);
+  }
+
+  handleSeedChange() {
+    if (typeof window !== 'undefined') {
+      try {
+        window.localStorage.removeItem(STORAGE_KEY);
+      } catch (error) {
+        console.error('Failed to clear cached games', error);
+      }
+    }
+
+    this.clearCurrentGameState();
+    this.currentGame = null;
+
+    if (!Array.isArray(this.gamesData)) {
+      this.gamesData = [];
+    }
+
+    if (this.syncQueue && typeof this.syncQueue.clear === 'function') {
+      this.syncQueue.clear();
+    }
+
+    const pending = this.syncQueue && typeof this.syncQueue.size === 'number' ? this.syncQueue.size : 0;
+    this.notifySync({ type: 'queue:pending', pending });
+  }
+
   createGame(gameInfo) {
-    return {
+    const baseGame = {
       id: `${Date.now()}`,
       ...gameInfo,
       attendance: gameInfo.attendance || [],
@@ -155,6 +272,41 @@ export class DataManager {
       status: 'in_progress',
       created: new Date().toISOString(),
     };
+
+    if (!baseGame.division) {
+      baseGame.division = this.resolveDivisionForGame(baseGame);
+    }
+
+    return baseGame;
+  }
+
+  resolveDivisionForGame(game) {
+    const collectDivision = (teamName) => {
+      if (!teamName) return null;
+      const players = this.getPlayersForTeam(teamName);
+      const divisions = new Set();
+
+      players.forEach((player) => {
+        if (player && player.division) {
+          divisions.add(player.division);
+        }
+      });
+
+      if (!divisions.size) {
+        return null;
+      }
+
+      return divisions.values().next().value;
+    };
+
+    const homeDivision = collectDivision(game.homeTeam);
+    const awayDivision = collectDivision(game.awayTeam);
+
+    if (homeDivision && awayDivision && homeDivision === awayDivision) {
+      return homeDivision;
+    }
+
+    return homeDivision || awayDivision || '';
   }
 
   beginGame(gameInfo) {

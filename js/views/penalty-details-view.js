@@ -77,8 +77,8 @@ export const penaltyDetailsView = {
         </div>
 
         <div class="form-actions">
-          <button class="btn btn-secondary" data-action="cancel-penalty">Cancel</button>
           <button class="btn btn-success" data-action="save-penalty">Add Penalty</button>
+          <button class="btn btn-secondary" data-action="cancel-penalty">Cancel</button>
         </div>
       </div>
     `;

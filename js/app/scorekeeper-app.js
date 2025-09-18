@@ -57,8 +57,9 @@ export class ScorekeeperApp {
     await this.data.init();
 
     if (this.data.currentGame) {
-      this.hydrateFromCurrentGame();
-      this.currentView = 'scoring';
+      // Keep the app on the main menu so the user can choose whether to resume.
+      this.attendanceState.clear();
+      this.selectedGame = null;
     }
 
     this.render();
@@ -98,6 +99,33 @@ export class ScorekeeperApp {
   selectGame(gameId) {
     const game = this.data.getGameById(gameId);
     if (!game) return;
+
+    const inProgressGame = this.data.currentGame;
+
+    if (inProgressGame) {
+      if (inProgressGame.id === game.id) {
+        const resume = window.confirm('Resume your in-progress game for this matchup?');
+        if (resume) {
+          this.hydrateFromCurrentGame();
+          this.showScoring();
+          return;
+        }
+
+        this.data.discardCurrentGame();
+      } else {
+        const proceed = window.confirm('Starting this game will discard the in-progress game. Continue?');
+        if (!proceed) {
+          return;
+        }
+
+        this.data.discardCurrentGame();
+      }
+
+      this.attendanceState.clear();
+      this.dialogContext = null;
+      this.boundNumberKeyHandler = null;
+      this.selectedGame = null;
+    }
 
     this.selectedGame = game;
     this.bootstrapAttendanceState();
