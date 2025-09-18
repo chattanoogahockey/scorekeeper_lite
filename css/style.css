@@ -430,6 +430,16 @@ header p {
     align-items: start;
 }
 
+/* Explicit grid positioning for goal form */
+.goal-form-grid .form-group:nth-child(1) { grid-column: 1; grid-row: 1; } /* Team */
+.goal-form-grid .form-group:nth-child(2) { grid-column: 1; grid-row: 2; } /* Scorer */
+.goal-form-grid .form-group:nth-child(3) { grid-column: 1; grid-row: 3; } /* Assist */
+.goal-form-grid .form-group:nth-child(4) { grid-column: 1; grid-row: 4; } /* Goal Type */
+.goal-form-grid .form-group:nth-child(5) { grid-column: 1; grid-row: 5; } /* Shot Type */
+.goal-form-grid .form-group:nth-child(6) { grid-column: 2; grid-row: 1; } /* Period */
+.goal-form-grid .form-group:nth-child(7) { grid-column: 2; grid-row: 2/4; } /* Time (spans 2 rows) */
+.goal-form-grid .form-group:nth-child(8) { grid-column: 2; grid-row: 5; } /* Breakaway */
+
 
 
 .radio-group {
@@ -520,7 +530,6 @@ header p {
     display: flex;
     flex-direction: column;
     gap: 12px;
-    grid-row: span 2;
 }
 
 .form-actions {
