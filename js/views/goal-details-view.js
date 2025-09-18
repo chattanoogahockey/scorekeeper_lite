@@ -28,6 +28,7 @@ export const goalDetailsView = {
         <p><strong>Game:</strong> ${game.homeTeam} vs ${game.awayTeam}</p>
 
         <div class="goal-form-grid">
+          <!-- Column 1 -->
           <div class="form-group">
             <label>Team:</label>
             <select data-field="team">
@@ -60,6 +61,17 @@ export const goalDetailsView = {
           </div>
 
           <div class="form-group">
+            <label>Shot Type:</label>
+            <select data-field="shotType">
+              <option value="wrist" selected>Wrist</option>
+              <option value="slap">Slap</option>
+              <option value="backhand">Backhand</option>
+              <option value="snapshot">Snapshot</option>
+            </select>
+          </div>
+
+          <!-- Column 2 -->
+          <div class="form-group">
             <label>Period:</label>
             <select data-field="period">
               <option value="1">Period 1</option>
@@ -72,16 +84,6 @@ export const goalDetailsView = {
           <div class="form-group form-group--time">
             <label>Time (MM:SS):</label>
             ${timeEntryMarkup()}
-          </div>
-
-          <div class="form-group">
-            <label>Shot Type:</label>
-            <select data-field="shotType">
-              <option value="wrist" selected>Wrist</option>
-              <option value="slap">Slap</option>
-              <option value="backhand">Backhand</option>
-              <option value="snapshot">Snapshot</option>
-            </select>
           </div>
 
           <div class="form-group">

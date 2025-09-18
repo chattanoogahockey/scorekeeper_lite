@@ -420,11 +420,11 @@ header p {
     }
 }
 
-/* Goal Form 4x2 Grid Layout */
+/* Goal Form 5x2 Grid Layout */
 .goal-form-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    grid-template-rows: repeat(4, auto);
+    grid-template-rows: repeat(5, auto);
     gap: 15px;
     margin-top: 20px;
     align-items: start;
@@ -520,6 +520,7 @@ header p {
     display: flex;
     flex-direction: column;
     gap: 12px;
+    grid-row: span 2;
 }
 
 .form-actions {
