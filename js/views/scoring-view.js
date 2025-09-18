@@ -1,0 +1,117 @@
+﻿function renderGoals(goals) {
+  if (!goals.length) {
+    return '<p class="muted">No goals recorded yet.</p>';
+  }
+
+  return `
+    <ol class="event-list">
+      ${goals
+        .map(
+          (goal) => `
+            <li>
+              <strong>${goal.team}</strong> — ${goal.player} (${goal.period}P ${goal.time || '??:??'})
+              ${goal.assist ? `<span class="muted">Assist: ${goal.assist}</span>` : ''}
+            </li>
+          `,
+        )
+        .join('')}
+    </ol>
+  `;
+}
+
+function renderPenalties(penalties) {
+  if (!penalties.length) {
+    return '<p class="muted">No penalties recorded yet.</p>';
+  }
+
+  return `
+    <ol class="event-list">
+      ${penalties
+        .map(
+          (penalty) => `
+            <li>
+              <strong>${penalty.team}</strong> — ${penalty.player} (${penalty.minutes} min ${penalty.type})
+              <span class="muted">${penalty.period}P ${penalty.time || '??:??'}</span>
+            </li>
+          `,
+        )
+        .join('')}
+    </ol>
+  `;
+}
+
+export const scoringView = {
+  id: 'scoring',
+  hideHeader: true,
+  template(app) {
+    const game = app.data.currentGame;
+    if (!game) {
+      return `<div class="card"><p>No active game. Return to the menu to start one.</p></div>`;
+    }
+
+    const attendanceSummary = app.getAttendanceSummary();
+
+    return `
+      <div class="card">
+        <div class="scoreboard">
+          <div class="team">
+            <h2>${game.homeTeam}</h2>
+            <div id="home-score" class="score">${game.homeScore}</div>
+          </div>
+          <div class="score-divider">vs</div>
+          <div class="team">
+            <h2>${game.awayTeam}</h2>
+            <div id="away-score" class="score">${game.awayScore}</div>
+          </div>
+        </div>
+
+        <div class="score-actions">
+          <button class="btn btn-primary" data-action="add-goal">Add Goal</button>
+          <button class="btn btn-secondary" data-action="add-penalty">Add Penalty</button>
+          <button class="btn" data-action="edit-attendance">Edit Attendance</button>
+          <button class="btn btn-danger" data-action="end-game">End Game</button>
+        </div>
+
+        <div class="event-columns">
+          <div class="event-column">
+            <h3>Goals (${game.goals.length})</h3>
+            ${renderGoals(game.goals)}
+          </div>
+          <div class="event-column">
+            <h3>Penalties (${game.penalties.length})</h3>
+            ${renderPenalties(game.penalties)}
+          </div>
+        </div>
+
+        <div class="attendance-summary">
+          <h3>Attendance</h3>
+          <p><strong>${game.homeTeam}</strong>: ${attendanceSummary.home.join(', ') || '—'}</p>
+          <p><strong>${game.awayTeam}</strong>: ${attendanceSummary.away.join(', ') || '—'}</p>
+        </div>
+      </div>
+    `;
+  },
+  navigation() {
+    return '<button class="nav-btn" data-action="back-to-attendance">Back to Attendance</button>';
+  },
+  bind(app) {
+    const nav = app.topNavigation;
+    nav
+      .querySelector('[data-action="back-to-attendance"]')
+      ?.addEventListener('click', () => app.showAttendance());
+
+    const main = app.mainContent;
+    main
+      .querySelector('[data-action="add-goal"]')
+      ?.addEventListener('click', () => app.showGoalDetails());
+    main
+      .querySelector('[data-action="add-penalty"]')
+      ?.addEventListener('click', () => app.showPenaltyDetails());
+    main
+      .querySelector('[data-action="edit-attendance"]')
+      ?.addEventListener('click', () => app.showAttendance());
+    main
+      .querySelector('[data-action="end-game"]')
+      ?.addEventListener('click', () => app.endGame());
+  },
+};

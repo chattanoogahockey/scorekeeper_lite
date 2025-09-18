@@ -1,49 +1,45 @@
-@echo off
-echo The Scorekeeper - GitHub Deployment Script
-echo ==============================================
+﻿@echo off
+setlocal
 
-set /p GITHUB_USERNAME="Enter your GitHub username: "
-set /p REPO_NAME="Enter repository name (default: scorekeeper_lite): "
+echo ========================================
+echo Create GitHub Repo With gh
+========================================
+
+gh --version >nul 2>&1
+if errorlevel 1 goto gh_missing
+
+echo Running validation before publishing...
+npm run validate
+if errorlevel 1 goto validate_error
+
+echo.
+set /p REPO_NAME="Repository name (default: scorekeeper_lite): "
 if "%REPO_NAME%"=="" set REPO_NAME=scorekeeper_lite
 
-echo.
-echo Creating GitHub repository: %GITHUB_USERNAME%/%REPO_NAME%
-echo.
-
-REM Check if GitHub CLI is available
-gh --version >nul 2>&1
-if %errorlevel% neq 0 (
-    echo GitHub CLI not found. Please install it from: https://cli.github.com/
-    echo Or create the repository manually at: https://github.com/new
-    echo.
-    echo After creating the repository, run these commands:
-    echo git remote add origin https://github.com/%GITHUB_USERNAME%/%REPO_NAME%.git
-    echo git branch -M main
-    echo git push -u origin main
-    pause
-    exit /b 1
-)
-
-REM Create GitHub repository
-echo Creating repository on GitHub...
+echo Creating %REPO_NAME% on GitHub and pushing current branch...
 gh repo create %REPO_NAME% --public --source=. --remote=origin --push
+if errorlevel 1 goto gh_error
 
-if %errorlevel% equ 0 (
-    echo.
-    echo ✅ Repository created successfully!
-    echo.
-    echo Your app will be available at: https://%GITHUB_USERNAME%.github.io/%REPO_NAME%/
-    echo.
-    echo To enable GitHub Pages:
-    echo 1. Go to: https://github.com/%GITHUB_USERNAME%/%REPO_NAME%/settings/pages
-    echo 2. Select "Deploy from a branch"
-    echo 3. Choose "main" branch and "/ (root)" folder
-    echo 4. Click "Save"
-    echo.
-) else (
-    echo.
-    echo ❌ Failed to create repository. Please try manually.
-    echo.
-)
+echo.
+echo Repository ready! Enable GitHub Pages from Settings > Pages (branch: main, folder: /(root)).
+echo Update SCOREKEEPER_CONFIG.syncEndpoint with your Worker URL to enable syncing.
 
+goto end
+
+:gh_missing
+echo GitHub CLI not found. Install from https://cli.github.com/ or use DEPLOY.bat.
+goto end
+
+:validate_error
+echo Validation failed. Fix issues before creating the repo.
+goto end
+
+:gh_error
+echo gh repo create failed. Check the CLI output above.
+
+goto end
+
+:end
+echo.
 pause
+endlocal

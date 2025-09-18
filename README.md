@@ -1,70 +1,143 @@
-# The Scorekeeper
+﻿# The Scorekeeper (Lite)
 
-A modern web application for tracking scores, goals, penalties, and attendance for Chattanooga Roller Hockey League games.
+A GitHub Pages application for tracking Chattanooga Roller Hockey League games. The frontend captures attendance, goals, and penalties, then syncs completed games as JSON files that you can process later in Python.
 
-## Features
+## Project Goals
 
-- **Game Selection**: Choose from upcoming games in the schedule
-- **Attendance Tracking**: Mark which players are present for each game
-- **Live Scoring**: Track goals and penalties in real-time
-- **Data Export**: Download game data as JSON for analysis
-- **Responsive Design**: Works on desktop and mobile devices
+- 100% static frontend hosted on GitHub Pages
+- Capture full game state from any modern browser (desktop/tablet phones)
+- Persist completed games as structured JSON without managing a database
+- Keep source data (rosters, schedule, history) under version control for later analytics
 
-## How to Use
+## High-Level Architecture
 
-1. **Start a Game**: Click "Score a New Game" from the startup menu
-2. **Select Game**: Choose the game you want to score from the schedule
-3. **Mark Attendance**: Check off which players from each team are present
-4. **Score the Game**:
-   - Add goals by selecting the team, player, and optional assist
-   - Add penalties by selecting the team, player, type, and duration
-   - View live score updates
-5. **End Game**: Click "End Game" to save the data and download as JSON
+| Layer | Purpose |
+| --- | --- |
+| Frontend (`index.html`, `css/`, `js/`) | Runs entirely in the browser. Uses ES modules, modular views, and a shared data manager to drive UI state. |
+| Static data (`data/`) | Seed JSON files generated from league spreadsheets (`rosters.json`, `schedule.json`). |
+| Sync queue (`localStorage`) | Browser-local queue that stores unsynced games so nothing is lost offline. |
+| Cloudflare Worker (`worker/`) | Minimal serverless endpoint that validates game payloads and commits them into `data/games/` plus an index manifest. |
+| Automation scripts (`scripts/`) | Node utilities that validate JSON, enforce schema, and help with deployment/maintenance. |
 
-## Data Structure
+## Repository Layout
 
-The app captures the following data for each game:
-
-- **Game Info**: Date, time, teams, location
-- **Attendance**: List of present players from both teams
-- **Goals**: Player, team, assists, timestamps
-- **Penalties**: Player, team, type, duration, timestamps
-- **Scores**: Running totals for both teams
-
-## Technical Details
-
-- **Frontend**: Vanilla HTML/CSS/JavaScript
-- **Data Storage**: JSON files with consistent schema
-- **Deployment**: GitHub Pages ready
-- **Responsive**: Mobile-friendly design
-
-## File Structure
-
-```
-scorekeeper_lite/
-├── index.html          # Main application
-├── css/
-│   └── style.css       # Modern styling
-├── js/
-│   ├── app.js          # Main application logic
-│   └── data.js         # Data management
-└── data/
-    ├── rosters.json    # Player rosters by team
-    ├── schedule.json   # Game schedule
-    └── games.json      # Completed game data
+```text
+.
+├─ css/                # Styling for the app
+├─ data/
+│  ├─ games.json       # Legacy placeholder (history view uses it until /games/ manifest lands)
+│  ├─ games/           # Individual game files + index manifest (created by Worker)
+│  ├─ rosters.json     # Rosters generated from Excel sheets
+│  └─ schedule.json    # Game schedule generated from Excel sheets
+├─ js/
+│  ├─ app/             # ScorekeeperApp orchestrator
+│  ├─ components/      # UI helpers (sync banner, etc.)
+│  ├─ core/            # Data manager, config, schema, sync queue/service
+│  ├─ utils/           # Formatting helpers
+│  └─ views/           # View renderers for menu, attendance, scoring, history
+├─ scripts/            # Node scripts (validate data, future tooling)
+├─ worker/             # Cloudflare Worker source + Wrangler config
+├─ index.html          # GitHub Pages entry point
+├─ package.json        # Tooling configuration (ESLint, Prettier, Vitest, dev server)
+└─ README.md
 ```
 
-## Data Updates
+## Local Development
 
-To update rosters or schedules:
-1. Edit the Excel files (fall_2025_rosters.xlsx, fall_2025_schedule.xlsx)
-2. Run the conversion script: `python convert_excel.py`
-3. The JSON files in the `data/` folder will be updated automatically
+1. **Install prerequisites**
+   - Node.js ≥ 18
+   - npm ≥ 9
 
-## Browser Compatibility
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
 
-Works in all modern browsers that support:
-- ES6 JavaScript
-- CSS Grid and Flexbox
-- localStorage API
-- Blob API for downloads
+3. **Start the dev server**
+   ```bash
+   npm run dev
+   ```
+   This launches `@web/dev-server` with hot reload for modules and static assets. The app remains 100% static, so deployment is simply pushing to `main`.
+
+4. **Run tests & validators**
+   ```bash
+   npm run test        # Interactive Vitest watcher (tests arrive soon)
+   npm run lint        # ESLint (JavaScript + JSON schema-aware rules)
+   npm run validate    # Combined lint + unit tests + data schema validation
+   ```
+
+## Configuring Sync
+
+The browser exposes a global `window.SCOREKEEPER_CONFIG` object (see `index.html`). Update it with your Cloudflare Worker endpoint once deployed:
+
+```html
+<script>
+window.SCOREKEEPER_CONFIG = {
+  syncEndpoint: 'https://your-worker.example.workers.dev',
+  syncApiKey: '' // optional, if you secure the worker with a token
+};
+</script>
+```
+
+Until an endpoint is configured, completed games remain in `localStorage` and the sync banner will remind you that data is stored locally.
+
+## Data Pipeline
+
+League spreadsheets live outside the repo under `C:\Users\marce\OneDrive\Documents\CHAHKY\data`. Use `convert_excel.py` to regenerate JSON seeds:
+
+```bash
+python convert_excel.py
+```
+
+This script reads the latest roster/schedule workbooks and writes to `data/rosters.json` and `data/schedule.json`. Add more conversion helpers inside `scripts/` if needed.
+
+## Game Persistence Workflow
+
+1. During a game the browser keeps state in memory and mirrors progress in `localStorage`.
+2. When you end a game the data manager enqueues the final payload and attempts to sync.
+3. The sync client POSTs to the Cloudflare Worker endpoint whenever the device is online and the endpoint is configured.
+4. The Worker validates the payload, writes a new file (or updates an existing one) in `data/games/`, and rebuilds `data/games/index.json`.
+5. A GitHub Action can run nightly to re-validate the dataset (`npm run validate`) and deploy the newest static site.
+
+If the network call fails or you are offline, the queue keeps the payload; the next successful sync flushes all pending games. You can see the status in the banner under the navigation bar.
+
+## Cloudflare Worker
+
+The Worker source lives in `worker/worker.js`. It expects these secrets:
+
+- `GITHUB_TOKEN`
+- `GITHUB_REPO` (e.g. `chattanoogaHockey/scorekeeper_lite`)
+- `GITHUB_BRANCH` (defaults to `main`)
+- `GITHUB_COMMIT_NAME` / `GITHUB_COMMIT_EMAIL`
+
+Deploy with Wrangler:
+
+```bash
+cd worker
+wrangler login
+wrangler secret put GITHUB_TOKEN
+wrangler secret put GITHUB_REPO
+wrangler deploy
+```
+
+Once deployed, drop the Worker URL into `window.SCOREKEEPER_CONFIG.syncEndpoint`.
+
+## Deployment to GitHub Pages
+
+1. Push changes to `main` (or merge a PR).
+2. GitHub Pages is configured to serve from the repository root. After GitHub finishes the build, your latest UI is live at:
+   ```
+   https://chattanoogaHockey.github.io/scorekeeper_lite/
+   ```
+3. The Cloudflare Worker runs independently using API tokens stored as secrets. See `worker/README.md` for details.
+
+## Next Steps
+
+- [ ] Flesh out goal/penalty statistics screens fed by the persisted JSON
+- [ ] Add Vitest coverage for data manager, queue, and sync banner logic
+- [ ] Wire CI to run `npm run validate` on every push
+- [ ] Automate Worker deployments via GitHub Actions
+
+---
+
+Questions or ideas? Open an issue or drop a note in the Chattanooga Hockey dev channel.
