@@ -1,4 +1,4 @@
-﻿import { z } from 'zod';
+import { z } from './zod-loader.js';
 
 export const attendanceEntrySchema = z.object({
   id: z.string().min(1),
