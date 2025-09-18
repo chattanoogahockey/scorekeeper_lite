@@ -1,5 +1,5 @@
-import { attachTimeEntry, timeEntryMarkup } from '../components/time-entry.js';
 import { buildJerseyMap, formatPlayerLabel } from '../components/player-labels.js';
+import { attachTimeEntry, timeEntryMarkup } from '../components/time-entry.js';
 
 export const goalDetailsView = {
   id: 'goal-details',

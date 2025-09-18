@@ -1,4 +1,4 @@
-﻿/* Modern CSS for The Scorekeeper */
+/* Modern CSS for The Scorekeeper */
 :root {
     --primary-color: #2563eb;
     --secondary-color: #64748b;
@@ -578,19 +578,28 @@ header p {
 
 
 @media (max-width: 768px) {
-    .goal-form-grid,
-    .penalty-form-grid {
-        grid-template-columns: 1fr;
-    }
+      .goal-form-grid,
+      .penalty-form-grid {
+          grid-template-columns: 1fr;
+      }
 
-    .radio-group {
-        gap: 10px;
-    }
+      .goal-form-grid .form-group {
+          grid-column: 1 !important;
+          grid-row: auto !important;
+      }
 
-    .time-entry-keypad {
-        grid-template-columns: repeat(3, minmax(80px, 1fr));
-    }
-}
+      .goal-form-grid .form-group.form-group--time {
+          grid-row: auto !important;
+      }
+
+      .radio-group {
+          gap: 10px;
+      }
+
+      .time-entry-keypad {
+          grid-template-columns: repeat(3, minmax(80px, 1fr));
+      }
+  }
 
 /* Attendance Page 2-Column Layout */
 .attendance-grid {
