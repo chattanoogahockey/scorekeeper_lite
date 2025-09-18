@@ -1,5 +1,6 @@
 /* @vitest-environment jsdom */
 import { describe, expect, it, beforeEach } from 'vitest';
+
 import { deriveTimeFromDigits, TimeEntry, timeEntryMarkup } from '../js/components/time-entry.js';
 
 describe('deriveTimeFromDigits', () => {
@@ -15,12 +16,12 @@ describe('deriveTimeFromDigits', () => {
 
   it('rejects values above 16:59', () => {
     const result = deriveTimeFromDigits(['1', '7', '0', '0']);
-    expect(result).toBeNull();
+    expect(result).toEqual({ status: 'invalid' });
   });
 
   it('rejects invalid seconds', () => {
     const result = deriveTimeFromDigits(['1', '2', '6', '5']);
-    expect(result).toBeNull();
+    expect(result).toEqual({ status: 'invalid' });
   });
 });
 

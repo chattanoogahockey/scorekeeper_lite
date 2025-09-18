@@ -9,7 +9,7 @@ export function formatTime(minutes, seconds) {
 
 export function deriveTimeFromDigits(digits) {
   if (!Array.isArray(digits)) {
-    return null;
+    return { status: 'invalid' };
   }
 
   const trimmed = digits
@@ -17,7 +17,7 @@ export function deriveTimeFromDigits(digits) {
     .filter((digit) => /^[0-9]$/.test(digit));
 
   if (!trimmed.length) {
-    return { value: '', seconds: 0, display: '00:00' };
+    return { status: 'empty', value: '', display: '00:00', seconds: 0 };
   }
 
   const recent = trimmed.slice(-4);
@@ -30,31 +30,29 @@ export function deriveTimeFromDigits(digits) {
   const seconds = Number.parseInt(secondsDigits, 10);
 
   if (Number.isNaN(minutes) || Number.isNaN(seconds)) {
-    return null;
-  }
-
-  if (minutesDigits.startsWith('0') && secondsDigits.startsWith('0')) {
-    return null;
-  }
-
-  if (seconds > 59) {
-    return null;
+    return { status: 'invalid' };
   }
 
   const totalSeconds = minutes * 60 + seconds;
-  if (totalSeconds > MAX_SECONDS || minutes > 16) {
-    return null;
+
+  if (trimmed.length < 4 && (seconds > 59 || minutes > 16)) {
+    return { status: 'partial', seconds: totalSeconds };
+  }
+
+  if (seconds > 59 || minutes > 16 || totalSeconds > MAX_SECONDS) {
+    return { status: 'invalid' };
   }
 
   if (totalSeconds === 0) {
-    return { value: '', seconds: 0, display: '00:00' };
+    return { status: 'zero', value: '', display: '00:00', seconds: 0 };
   }
 
-  return {
-    value: formatTime(minutes, seconds),
-    display: formatTime(minutes, seconds),
-    seconds: totalSeconds,
-  };
+  if (totalSeconds < MIN_SECONDS) {
+    return { status: 'invalid' };
+  }
+
+  const formatted = formatTime(minutes, seconds);
+  return { status: 'valid', value: formatted, display: formatted, seconds: totalSeconds };
 }
 
 export class TimeEntry {
@@ -139,20 +137,22 @@ export class TimeEntry {
 
     const result = deriveTimeFromDigits(nextDigits);
 
-    if (!result || !result.value) {
-      if (result && result.seconds === 0) {
+    switch (result.status) {
+      case 'partial':
+        this.digits = nextDigits;
+        break;
+      case 'zero':
+      case 'empty':
         this.digits = nextDigits;
         this.syncState({ value: '', display: '00:00' });
-      }
-      return;
+        break;
+      case 'valid':
+        this.digits = nextDigits;
+        this.syncState(result);
+        break;
+      default:
+        break;
     }
-
-    if (result.seconds < MIN_SECONDS || result.seconds > MAX_SECONDS) {
-      return;
-    }
-
-    this.digits = nextDigits;
-    this.syncState(result);
   }
 
   applyInitialValue(value) {
