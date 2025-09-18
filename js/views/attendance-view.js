@@ -15,15 +15,15 @@
         .map((player) => {
           const checked = app.isPlayerChecked(team, player.id) ? 'checked' : '';
           const jersey = app.getPlayerJersey(team, player.id);
-          const rosterNumber = player.number != null ? String(player.number).padStart(2, '0') : '';
-          const labelText = rosterNumber ? `#${rosterNumber} ${player.name}` : player.name;
           const placeholder = '##';
-          const inputClass = jersey ? 'jersey-number-input' : 'jersey-number-input placeholder';
+          const hasNumber = jersey && jersey !== '##';
+          const inputClass = hasNumber ? 'jersey-number-input' : 'jersey-number-input placeholder';
+          const inputValue = hasNumber ? jersey : '';
           return `
             <div class="checkbox-item" data-player-row="${player.id}">
               <input type="checkbox" data-role="attendance-checkbox" data-team="${team}" data-player-id="${player.id}" ${checked}>
-              <label>${labelText}</label>
-              <input type="text" data-role="jersey-input" data-team="${team}" data-player-id="${player.id}" class="${inputClass}" placeholder="${placeholder}" value="${jersey ?? ''}" maxlength="2" readonly>
+              <label>${player.name}</label>
+              <input type="text" data-role="jersey-input" data-team="${team}" data-player-id="${player.id}" class="${inputClass}" placeholder="${placeholder}" value="${inputValue}" maxlength="2" readonly role="button" aria-label="Tap to enter jersey number">
             </div>
           `;
         })
@@ -33,7 +33,7 @@
       <h1>Record Attendance</h1>
       <div class="card">
         <p style="text-align: center; margin-bottom: 20px; font-size: 16px; color: var(--text-color);">
-          Select all players at the game and record jersey numbers. You can edit later from the in-game menu.
+          Select all players at the game and record jersey numbers. Tap the jersey placeholder (##) to enter numbers; the keypad will open on mobile. You can edit later from the in-game menu.
         </p>
 
         <div style="margin-top: 20px; margin-bottom: 20px; display: flex; gap: 10px; justify-content: center;">
@@ -62,7 +62,7 @@
         <div class="modal-content">
           <h3 id="dialog-title">Enter Jersey Number</h3>
           <p id="dialog-player-name">Player</p>
-          <input type="text" id="number-input" maxlength="2" placeholder="##" data-role="number-input">
+          <input type="tel" id="number-input" maxlength="2" placeholder="##" data-role="number-input" inputmode="numeric" pattern="[0-9]*" autocomplete="off">
           <div style="margin-top: 20px; display: flex; gap: 10px;">
             <button class="btn btn-primary" data-action="save-jersey-number">Save</button>
             <button class="btn btn-secondary" data-action="close-number-dialog">Cancel</button>
