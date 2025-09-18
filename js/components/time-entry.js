@@ -21,11 +21,19 @@ export function deriveTimeFromDigits(digits) {
   }
 
   const recent = trimmed.slice(-4);
-  const raw = recent.join('').padStart(4, '0');
-  const minutes = Number.parseInt(raw.slice(0, 2), 10);
-  const seconds = Number.parseInt(raw.slice(2), 10);
+  const raw = recent.join('');
+  const padded = raw.padStart(4, '0');
+  const minutesDigits = padded.slice(0, 2);
+  const secondsDigits = padded.slice(2);
+
+  const minutes = Number.parseInt(minutesDigits, 10);
+  const seconds = Number.parseInt(secondsDigits, 10);
 
   if (Number.isNaN(minutes) || Number.isNaN(seconds)) {
+    return null;
+  }
+
+  if (minutesDigits.startsWith('0') && secondsDigits.startsWith('0')) {
     return null;
   }
 
