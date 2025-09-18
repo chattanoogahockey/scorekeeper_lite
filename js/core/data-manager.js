@@ -2,6 +2,7 @@
 import { SyncQueue } from './sync-queue.js';
 
 const STORAGE_KEY = 'chahky_games';
+const IN_PROGRESS_STORAGE_KEY = 'chahky_current_game';
 
 export class DataManager {
   constructor({
@@ -30,6 +31,7 @@ export class DataManager {
     if (this.isLoaded) return;
     await this.loadSeeds();
     this.loadCachedGames();
+    this.restoreCurrentGame();
     this.isLoaded = true;
     if (this.syncQueue.size > 0) {
       this.notifySync({ type: 'queue:pending', pending: this.syncQueue.size });
@@ -103,6 +105,44 @@ export class DataManager {
     }
   }
 
+  saveCurrentGameState() {
+    if (typeof window === 'undefined') return;
+    try {
+      if (!this.currentGame) {
+        window.localStorage.removeItem(IN_PROGRESS_STORAGE_KEY);
+        return;
+      }
+      window.localStorage.setItem(IN_PROGRESS_STORAGE_KEY, JSON.stringify(this.currentGame));
+    } catch (error) {
+      console.error('Failed to persist in-progress game', error);
+    }
+  }
+
+  restoreCurrentGame() {
+    if (typeof window === 'undefined') return null;
+    try {
+      const raw = window.localStorage.getItem(IN_PROGRESS_STORAGE_KEY);
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === 'object') {
+        this.currentGame = parsed;
+        return this.currentGame;
+      }
+    } catch (error) {
+      console.error('Failed to restore in-progress game', error);
+    }
+    return null;
+  }
+
+  clearCurrentGameState() {
+    if (typeof window === 'undefined') return;
+    try {
+      window.localStorage.removeItem(IN_PROGRESS_STORAGE_KEY);
+    } catch (error) {
+      console.error('Failed to clear in-progress game', error);
+    }
+  }
+
   createGame(gameInfo) {
     return {
       id: `${Date.now()}`,
@@ -119,12 +159,14 @@ export class DataManager {
 
   beginGame(gameInfo) {
     this.currentGame = this.createGame(gameInfo);
+    this.saveCurrentGameState();
     return this.currentGame;
   }
 
   addAttendance(attendanceList) {
     if (!this.currentGame) return;
     this.currentGame.attendance = attendanceList;
+    this.saveCurrentGameState();
   }
 
   addGoal(goalData) {
@@ -137,6 +179,7 @@ export class DataManager {
     };
 
     this.currentGame.goals.push(goalRecord);
+    this.saveCurrentGameState();
 
     if (goalData.team === this.currentGame.homeTeam) {
       this.currentGame.homeScore += 1;
@@ -155,6 +198,7 @@ export class DataManager {
     };
 
     this.currentGame.penalties.push(penaltyRecord);
+    this.saveCurrentGameState();
   }
 
   endCurrentGame() {
@@ -175,6 +219,7 @@ export class DataManager {
     this.syncQueue.enqueue(completedGame);
     this.notifySync({ type: 'queue:pending', pending: this.syncQueue.size });
 
+    this.clearCurrentGameState();
     this.currentGame = null;
     void this.triggerSync();
 

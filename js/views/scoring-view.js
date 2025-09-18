@@ -73,7 +73,7 @@ export const scoringView = {
           <button class="btn btn-primary" data-action="add-goal">Add Goal</button>
           <button class="btn btn-primary" data-action="add-penalty">Add Penalty</button>
           <button class="btn" data-action="edit-attendance">Edit Attendance</button>
-          <button class="btn btn-danger" data-action="end-game">End Game</button>
+          <button class="btn btn-danger" data-action="submit-game">Submit Game</button>
         </div>
 
         <div class="event-columns">
@@ -115,7 +115,7 @@ export const scoringView = {
       .querySelector('[data-action="edit-attendance"]')
       ?.addEventListener('click', () => app.showAttendance());
     main
-      .querySelector('[data-action="end-game"]')
-      ?.addEventListener('click', () => app.endGame());
+      .querySelector('[data-action="submit-game"]')
+      ?.addEventListener('click', () => app.submitGame());
   },
 };

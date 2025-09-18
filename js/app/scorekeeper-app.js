@@ -55,6 +55,12 @@ export class ScorekeeperApp {
 
   async init() {
     await this.data.init();
+
+    if (this.data.currentGame) {
+      this.hydrateFromCurrentGame();
+      this.currentView = 'scoring';
+    }
+
     this.render();
   }
 
@@ -266,7 +272,64 @@ export class ScorekeeperApp {
 
   syncAttendanceToGame() {
     if (!this.data.currentGame) return;
-    this.data.currentGame.attendance = this.buildAttendanceRecords();
+    this.data.addAttendance(this.buildAttendanceRecords());
+  }
+
+  hydrateFromCurrentGame() {
+    const currentGame = this.data.currentGame;
+    if (!currentGame) return;
+
+    this.selectedGame = {
+      id: currentGame.id,
+      homeTeam: currentGame.homeTeam,
+      awayTeam: currentGame.awayTeam,
+      location: currentGame.location ?? '',
+      date: currentGame.date ?? '',
+      time: currentGame.time ?? '',
+      season: currentGame.season ?? '',
+      week: currentGame.week ?? '',
+    };
+
+    this.attendanceState.clear();
+
+    const attendanceById = new Map();
+    (currentGame.attendance ?? []).forEach((record) => {
+      if (!record?.id) return;
+      attendanceById.set(record.id, record);
+    });
+
+    const seedTeamState = (teamName) => {
+      const players = this.data.getPlayersForTeam(teamName);
+      const teamState = new Map();
+
+      players.forEach((player) => {
+        const attendanceRecord = attendanceById.get(player.id);
+        teamState.set(player.id, {
+          playerId: player.id,
+          team: teamName,
+          name: player.name,
+          present: Boolean(attendanceRecord),
+          jersey: attendanceRecord?.jersey ?? '',
+        });
+      });
+
+      (currentGame.attendance ?? [])
+        .filter((record) => record.team === teamName && !teamState.has(record.id))
+        .forEach((record) => {
+          teamState.set(record.id, {
+            playerId: record.id,
+            team: teamName,
+            name: record.name,
+            present: true,
+            jersey: record.jersey ?? '',
+          });
+        });
+
+      this.attendanceState.set(teamName, teamState);
+    };
+
+    seedTeamState(currentGame.homeTeam);
+    seedTeamState(currentGame.awayTeam);
   }
 
   getAttendanceSummary() {
@@ -391,15 +454,17 @@ export class ScorekeeperApp {
     this.showScoring();
   }
 
-  endGame() {
+  submitGame() {
     if (!this.data.currentGame) return;
 
-    const confirmEnd = window.confirm('End this game and save the final data?');
-    if (!confirmEnd) return;
+    const confirmSubmit = window.confirm('Submit this game and save the results?');
+    if (!confirmSubmit) return;
 
     const completedGame = this.data.endCurrentGame();
-    console.log('Game completed', completedGame);
-    window.alert('Game saved!');
+    console.log('Game submitted', completedGame);
+    window.alert('Game submitted!');
     this.showStartupMenu();
   }
 }
+
+
