@@ -8,8 +8,8 @@
   "season": "Fall 2025",
   "week": "1",
   "status": "completed",
-  "created": "2025-09-18T15:35:36.006Z",
-  "ended": "2025-09-18T15:38:45.556Z",
+  "created": "2025-09-18T16:31:24.162Z",
+  "ended": "2025-09-18T16:32:01.218Z",
   "attendance": [
     {
       "id": "dumb_pucks_dustin_backus_38",
@@ -21,7 +21,7 @@
       "id": "dumb_pucks_garrett_liles_61",
       "name": "Garrett Liles",
       "team": "Dumb Pucks",
-      "jersey": "55"
+      "jersey": ""
     },
     {
       "id": "dumb_pucks_kevin_neely_95",
@@ -134,41 +134,26 @@
   ],
   "goals": [
     {
-      "id": "1758209815086",
-      "team": "Skate Invaders",
-      "player": "Bishop Moniz",
-      "playerId": "skate_invaders_bishop_moniz_11",
-      "playerLabel": "#12 Bishop Moniz",
-      "playerNumber": "12",
-      "assist": "",
-      "assistId": "",
-      "assistLabel": "",
-      "assistNumber": "",
-      "period": "1",
-      "time": "02:05",
-      "shotType": "wrist",
-      "goalType": "regular",
-      "breakaway": "no",
-      "clockSeconds": 125,
-      "timestamp": "2025-09-18T15:36:55.086Z"
-    }
-  ],
-  "penalties": [
-    {
-      "id": "1758209892791",
+      "id": "1758213101922",
       "team": "Dumb Pucks",
       "player": "Matthew Brewer",
       "playerId": "dumb_pucks_matthew_brewer_99",
       "playerLabel": "#100 Matthew Brewer",
       "playerNumber": "100",
-      "type": "tripping",
-      "minutes": 2,
+      "assist": "",
+      "assistId": "",
+      "assistLabel": "",
+      "assistNumber": "",
       "period": "1",
-      "time": "02:47",
-      "clockSeconds": 167,
-      "timestamp": "2025-09-18T15:38:12.791Z"
+      "time": "00:24",
+      "shotType": "wrist",
+      "goalType": "regular",
+      "breakaway": "no",
+      "clockSeconds": 24,
+      "timestamp": "2025-09-18T16:31:41.922Z"
     }
   ],
-  "homeScore": 0,
-  "awayScore": 1
+  "penalties": [],
+  "homeScore": 1,
+  "awayScore": 0
 }
