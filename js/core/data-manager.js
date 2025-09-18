@@ -124,8 +124,29 @@ export class DataManager {
 
   async loadRosters() {
     const response = await this.safeFetch('data/rosters.json');
-    if (response) {
-      this.rosters = response;
+    if (response && typeof response === 'object') {
+      this.rosters = Object.fromEntries(
+        Object.entries(response).map(([teamName, players]) => {
+          if (!Array.isArray(players)) {
+            return [teamName, []];
+          }
+
+          const sanitized = players.map((player) => {
+            if (!player || typeof player !== 'object') {
+              return { id: '', name: '', team: teamName, division: '' };
+            }
+
+            const { number: _ignoredNumber, ...rest } = player;
+            // eslint-disable-next-line no-unused-vars
+            const _ = _ignoredNumber; // Keep number destructuring but acknowledge we're ignoring it
+            return { ...rest, team: player.team ?? teamName };
+          });
+
+          return [teamName, sanitized];
+        }),
+      );
+    } else {
+      this.rosters = {};
     }
   }
 

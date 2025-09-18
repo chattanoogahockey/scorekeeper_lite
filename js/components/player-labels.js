@@ -6,7 +6,8 @@ export function buildJerseyMap(game) {
 
   game.attendance.forEach((record) => {
     if (!record?.id) return;
-    map.set(record.id, (record.jersey ?? '').trim());
+    const normalized = (record.jersey ?? '').trim();
+    map.set(record.id, normalized || '##');
   });
 
   return map;
@@ -24,22 +25,18 @@ function normalizeJersey(value) {
 }
 
 export function resolvePlayerJersey(player, jerseyMap) {
-  const attendanceNumber = jerseyMap.get(player.id);
-  if (attendanceNumber) {
-    return normalizeJersey(attendanceNumber);
+  if (jerseyMap.has(player.id)) {
+    const attendanceNumber = jerseyMap.get(player.id) ?? '';
+    return normalizeJersey(attendanceNumber) || '##';
   }
 
-  if (player.number != null) {
-    return normalizeJersey(player.number);
-  }
-
-  return '';
+  return '##';
 }
 
 export function formatPlayerLabel(player, jerseyMap) {
   const jersey = resolvePlayerJersey(player, jerseyMap);
-  if (!jersey) {
-    return player.name;
+  if (!jersey || jersey === '##') {
+    return `## ${player.name}`;
   }
   return `#${jersey} ${player.name}`;
 }
