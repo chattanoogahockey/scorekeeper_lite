@@ -31,10 +31,11 @@ export const goalDetailsView = {
           <!-- Column 1 -->
           <div class="form-group">
             <label>Team:</label>
-            <select data-field="team">
-              <option value="${game.homeTeam}" selected>${game.homeTeam}</option>
-              <option value="${game.awayTeam}">${game.awayTeam}</option>
-            </select>
+            <div class="minutes-options" data-role="team-group">
+              <button type="button" class="minutes-button" data-team="${game.homeTeam}">${game.homeTeam}</button>
+              <button type="button" class="minutes-button" data-team="${game.awayTeam}">${game.awayTeam}</button>
+            </div>
+            <input type="hidden" data-field="team" value="${game.homeTeam}">
           </div>
 
           <div class="form-group">
@@ -108,7 +109,8 @@ export const goalDetailsView = {
   },
   bind(app) {
     const main = app.mainContent;
-    const teamSelect = main.querySelector('[data-field="team"]');
+    const teamInput = main.querySelector('[data-field="team"]');
+    const teamGroup = main.querySelector('[data-role="team-group"]');
     const scorerSelect = main.querySelector('[data-field="player"]');
     const assistSelect = main.querySelector('[data-field="assist"]');
     const timeContainer = main.querySelector('[data-time-input]');
@@ -162,13 +164,26 @@ export const goalDetailsView = {
       assistSelect.dataset.team = team;
     };
 
-    teamSelect?.addEventListener('change', (event) => {
-      populateOptions(event.target.value);
+    const applyTeamSelection = (team) => {
+      if (!teamInput) return;
+      teamInput.value = team;
+      if (teamGroup) {
+        teamGroup.querySelectorAll('.minutes-button').forEach((button) => {
+          button.classList.toggle('is-active', button.dataset.team === team);
+        });
+      }
+      populateOptions(team);
+    };
+
+    teamGroup?.addEventListener('click', (event) => {
+      const button = event.target instanceof HTMLElement ? event.target.closest('.minutes-button') : null;
+      if (!button) return;
+      const selected = button.dataset.team;
+      if (!selected) return;
+      applyTeamSelection(selected);
     });
 
-    if (teamSelect && teamSelect.value) {
-      populateOptions(teamSelect.value);
-    }
+    applyTeamSelection(teamInput?.value || app.data.currentGame?.homeTeam);
 
     main
       .querySelector('[data-action="cancel-goal"]')

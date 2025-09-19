@@ -791,11 +791,15 @@ header p {
 }
 
 .score-actions {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(150px, 1fr));
     gap: 10px;
-    justify-content: center;
+    justify-items: stretch;
     margin-bottom: 20px;
+}
+
+.score-actions .btn {
+    width: 100%;
 }
 
 .event-columns {
@@ -876,3 +880,9 @@ header p {
 
 
 
+
+@media (max-width: 768px) {
+    .score-actions {
+        grid-template-columns: 1fr;
+    }
+}
