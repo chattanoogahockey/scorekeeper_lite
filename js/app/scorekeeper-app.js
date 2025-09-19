@@ -280,13 +280,13 @@ export class ScorekeeperApp {
     const records = [];
     this.attendanceState.forEach((teamState) => {
       teamState.forEach((record) => {
-        if (!record.present) return;
         const normalizedJersey = (record.jersey ?? '').trim();
         records.push({
           id: record.playerId,
           name: record.name,
           team: record.team,
           jersey: normalizedJersey || '##',
+          present: Boolean(record.present),
         });
       });
     });
@@ -493,5 +493,6 @@ export class ScorekeeperApp {
     this.showStartupMenu();
   }
 }
+
 
 
