@@ -1,0 +1,135 @@
+{
+  "id": "game_18",
+  "date": "2025-09-18 00:00:00",
+  "time": "19:00:00",
+  "homeTeam": "UTC",
+  "awayTeam": "Purpetrators",
+  "location": "Purpetrators at UTC",
+  "season": "Fall 2025",
+  "week": "2",
+  "status": "completed",
+  "created": "2025-09-19T10:52:10.633Z",
+  "ended": "2025-09-19T10:52:20.368Z",
+  "attendance": [
+    {
+      "id": "utc_brennan_wilson_41",
+      "name": "Brennan Wilson",
+      "team": "UTC",
+      "jersey": "##"
+    },
+    {
+      "id": "utc_brock_murphy_46",
+      "name": "Brock Murphy",
+      "team": "UTC",
+      "jersey": "##"
+    },
+    {
+      "id": "utc_carter_naylor_67",
+      "name": "Carter Naylor",
+      "team": "UTC",
+      "jersey": "##"
+    },
+    {
+      "id": "utc_jack_davis_113",
+      "name": "Jack Davis",
+      "team": "UTC",
+      "jersey": "##"
+    },
+    {
+      "id": "utc_liam_jaggers_151",
+      "name": "Liam Jaggers",
+      "team": "UTC",
+      "jersey": "##"
+    },
+    {
+      "id": "utc_logan_verpoort_152",
+      "name": "Logan Verpoort",
+      "team": "UTC",
+      "jersey": "##"
+    },
+    {
+      "id": "utc_sub_206",
+      "name": "Sub",
+      "team": "UTC",
+      "jersey": "##"
+    },
+    {
+      "id": "purpetrators_caleb_mohns_51",
+      "name": "Caleb Mohns",
+      "team": "Purpetrators",
+      "jersey": "##"
+    },
+    {
+      "id": "purpetrators_purpetrators_marshall_88",
+      "name": "Purpetrators Marshall",
+      "team": "Purpetrators",
+      "jersey": "##"
+    },
+    {
+      "id": "purpetrators_david_delmotte_100",
+      "name": "David Delmotte",
+      "team": "Purpetrators",
+      "jersey": "##"
+    },
+    {
+      "id": "purpetrators_evan_skiles_104",
+      "name": "Evan Skiles",
+      "team": "Purpetrators",
+      "jersey": "##"
+    },
+    {
+      "id": "purpetrators_slappy_gilmores_williams_106",
+      "name": "Slappy Gilmores Williams",
+      "team": "Purpetrators",
+      "jersey": "##"
+    },
+    {
+      "id": "purpetrators_jared_leader_121",
+      "name": "Jared Leader",
+      "team": "Purpetrators",
+      "jersey": "##"
+    },
+    {
+      "id": "purpetrators_nick_king_173",
+      "name": "Nick King",
+      "team": "Purpetrators",
+      "jersey": "##"
+    },
+    {
+      "id": "purpetrators_raphael_santos_182",
+      "name": "Raphael Santos",
+      "team": "Purpetrators",
+      "jersey": "##"
+    },
+    {
+      "id": "purpetrators_sub_203",
+      "name": "Sub",
+      "team": "Purpetrators",
+      "jersey": "##"
+    }
+  ],
+  "goals": [
+    {
+      "id": "1758279138183",
+      "team": "UTC",
+      "player": "Brock Murphy",
+      "playerId": "utc_brock_murphy_46",
+      "playerLabel": "## Brock Murphy",
+      "playerNumber": "##",
+      "assist": "Brock Murphy",
+      "assistId": "utc_brock_murphy_46",
+      "assistLabel": "## Brock Murphy",
+      "assistNumber": "##",
+      "period": "1",
+      "time": "02:06",
+      "shotType": "wrist",
+      "goalType": "regular",
+      "breakaway": "no",
+      "clockSeconds": 126,
+      "timestamp": "2025-09-19T10:52:18.183Z"
+    }
+  ],
+  "penalties": [],
+  "homeScore": 1,
+  "awayScore": 0
+}
