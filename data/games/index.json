@@ -1,5 +1,19 @@
 [
   {
+    "id": "game_27",
+    "file": "data/games/2025-09-24_nets-sticks-and-chill_vs_mracnaphobia_21-00_game-27.json",
+    "fileName": "2025-09-24_nets-sticks-and-chill_vs_mracnaphobia_21-00_game-27.json",
+    "date": "2025-09-24 00:00:00",
+    "time": "21:00:00",
+    "division": "",
+    "created": "2025-09-19T21:15:42.874Z",
+    "homeTeam": "Nets, Sticks, and Chill",
+    "awayTeam": "Mracnaphobia",
+    "homeScore": 1,
+    "awayScore": 1,
+    "lastUpdated": "2025-09-19T21:15:57.783Z"
+  },
+  {
     "id": "game_24",
     "file": "data/games/game_24.json",
     "created": "2025-09-19T21:06:05.721Z",
