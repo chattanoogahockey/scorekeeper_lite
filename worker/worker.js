@@ -126,13 +126,29 @@ function sanitizeGame(game) {
 
 function buildGameFileName(game) {
   const dateSegment = formatDateSegment(game.date || game.created);
-  const divisionSegment = slugSegment(game.division, 'unknown-division');
+  const divisionSegment = slugSegment(game.division, '');
   const homeSegment = slugSegment(game.homeTeam, 'home');
   const awaySegment = slugSegment(game.awayTeam, 'away');
   const timeSegment = formatTimeSegment(game.time || game.ended);
+  const idSegment = slugSegment(game.id, '');
 
+  const normalizedDate = dateSegment !== 'unknown-date' ? dateSegment : '';
+  const normalizedTime = timeSegment !== 'unknown-time' ? timeSegment : '';
   const matchupSegment = `${homeSegment}_vs_${awaySegment}`;
-  return `${[dateSegment, divisionSegment, matchupSegment, timeSegment].join('_')}.json`;
+
+  const segments = [
+    normalizedDate,
+    divisionSegment,
+    matchupSegment,
+    normalizedTime,
+    idSegment,
+  ].filter((segment) => segment && segment.trim());
+
+  if (!segments.length) {
+    segments.push('game');
+  }
+
+  return `${segments.join('_')}.json`;
 }
 
 function formatDateSegment(rawValue) {
