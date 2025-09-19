@@ -1,0 +1,198 @@
+{
+  "id": "game_5",
+  "date": "2025-09-10 00:00:00",
+  "time": "19:00:00",
+  "homeTeam": "Crease Grease",
+  "awayTeam": "Board Busters",
+  "location": "Board Busters at Crease Grease",
+  "season": "Fall 2025",
+  "week": "1",
+  "status": "completed",
+  "created": "2025-09-19T13:23:07.086Z",
+  "ended": "2025-09-19T13:24:52.048Z",
+  "attendance": [
+    {
+      "id": "crease_grease_benjamin_prentice_21",
+      "name": "Benjamin Prentice",
+      "team": "Crease Grease",
+      "jersey": "##"
+    },
+    {
+      "id": "crease_grease_brandon_chord_29",
+      "name": "Brandon Chord",
+      "team": "Crease Grease",
+      "jersey": "##"
+    },
+    {
+      "id": "crease_grease_brock_wooten_42",
+      "name": "Brock Wooten",
+      "team": "Crease Grease",
+      "jersey": "##"
+    },
+    {
+      "id": "crease_grease_dalton_burkhalter_50",
+      "name": "Dalton Burkhalter",
+      "team": "Crease Grease",
+      "jersey": "##"
+    },
+    {
+      "id": "crease_grease_joey_safford_92",
+      "name": "Joey Safford",
+      "team": "Crease Grease",
+      "jersey": "##"
+    },
+    {
+      "id": "crease_grease_john_peddicord_102",
+      "name": "John Peddicord",
+      "team": "Crease Grease",
+      "jersey": "##"
+    },
+    {
+      "id": "crease_grease_justin_hosie_112",
+      "name": "Justin Hosie",
+      "team": "Crease Grease",
+      "jersey": "##"
+    },
+    {
+      "id": "crease_grease_kevin_brennan_120",
+      "name": "Kevin Brennan",
+      "team": "Crease Grease",
+      "jersey": "##"
+    },
+    {
+      "id": "crease_grease_kristopher_nowakowski_123",
+      "name": "Kristopher Nowakowski",
+      "team": "Crease Grease",
+      "jersey": "##"
+    },
+    {
+      "id": "crease_grease_tyler_prentice_175",
+      "name": "Tyler Prentice",
+      "team": "Crease Grease",
+      "jersey": "##"
+    },
+    {
+      "id": "crease_grease_wesley_statler_181",
+      "name": "Wesley Statler",
+      "team": "Crease Grease",
+      "jersey": "##"
+    },
+    {
+      "id": "crease_grease_sub_208",
+      "name": "Sub",
+      "team": "Crease Grease",
+      "jersey": "##"
+    },
+    {
+      "id": "board_busters_aaron_nottis_1",
+      "name": "Aaron Nottis",
+      "team": "Board Busters",
+      "jersey": "##"
+    },
+    {
+      "id": "board_busters_hudson_ellis_56",
+      "name": "Hudson Ellis",
+      "team": "Board Busters",
+      "jersey": "##"
+    },
+    {
+      "id": "board_busters_jack_calvert_57",
+      "name": "Jack Calvert",
+      "team": "Board Busters",
+      "jersey": "##"
+    },
+    {
+      "id": "board_busters_jamie_standridge_63",
+      "name": "Jamie Standridge",
+      "team": "Board Busters",
+      "jersey": "##"
+    },
+    {
+      "id": "board_busters_jeron_summerville_73",
+      "name": "Jeron Summerville",
+      "team": "Board Busters",
+      "jersey": "##"
+    },
+    {
+      "id": "board_busters_keith_liles_114",
+      "name": "Keith Liles",
+      "team": "Board Busters",
+      "jersey": "##"
+    },
+    {
+      "id": "board_busters_kyle_mackillop_130",
+      "name": "Kyle MacKillop",
+      "team": "Board Busters",
+      "jersey": "##"
+    },
+    {
+      "id": "board_busters_mike_mahoney_149",
+      "name": "Mike Mahoney",
+      "team": "Board Busters",
+      "jersey": "##"
+    },
+    {
+      "id": "board_busters_nick_oberg_155",
+      "name": "Nick Oberg",
+      "team": "Board Busters",
+      "jersey": "##"
+    },
+    {
+      "id": "board_busters_tony_gioia_172",
+      "name": "Tony Gioia",
+      "team": "Board Busters",
+      "jersey": "##"
+    },
+    {
+      "id": "board_busters_yoeri_artemieff_189",
+      "name": "Yoeri Artemieff",
+      "team": "Board Busters",
+      "jersey": "##"
+    },
+    {
+      "id": "board_busters_sub_207",
+      "name": "Sub",
+      "team": "Board Busters",
+      "jersey": "##"
+    }
+  ],
+  "goals": [
+    {
+      "id": "1758288218781",
+      "team": "Crease Grease",
+      "player": "Benjamin Prentice",
+      "playerId": "crease_grease_benjamin_prentice_21",
+      "playerLabel": "## Benjamin Prentice",
+      "playerNumber": "##",
+      "assist": "Brandon Chord",
+      "assistId": "crease_grease_brandon_chord_29",
+      "assistLabel": "## Brandon Chord",
+      "assistNumber": "##",
+      "period": "1",
+      "time": "16:54",
+      "shotType": "wrist",
+      "goalType": "powerplay",
+      "breakaway": "no",
+      "clockSeconds": 1014,
+      "timestamp": "2025-09-19T13:23:38.781Z"
+    }
+  ],
+  "penalties": [
+    {
+      "id": "1758288282644",
+      "team": "Board Busters",
+      "player": "Jeron Summerville",
+      "playerId": "board_busters_jeron_summerville_73",
+      "playerLabel": "## Jeron Summerville",
+      "playerNumber": "##",
+      "type": "other",
+      "minutes": 2,
+      "period": "1",
+      "time": "16:55",
+      "clockSeconds": 1015,
+      "timestamp": "2025-09-19T13:24:42.644Z"
+    }
+  ],
+  "homeScore": 1,
+  "awayScore": 0
+}
