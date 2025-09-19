@@ -1,0 +1,186 @@
+{
+  "id": "game_4",
+  "date": "2025-09-08 00:00:00",
+  "time": "21:30:00",
+  "homeTeam": "Silent Knights",
+  "awayTeam": "Trailer Puck Boys",
+  "location": "Trailer Puck Boys at Silent Knights",
+  "season": "Fall 2025",
+  "week": "1",
+  "status": "completed",
+  "created": "2025-09-19T10:31:19.146Z",
+  "ended": "2025-09-19T10:31:54.771Z",
+  "attendance": [
+    {
+      "id": "silent_knights_arend_folkens_6",
+      "name": "Arend Folkens",
+      "team": "Silent Knights",
+      "jersey": ""
+    },
+    {
+      "id": "silent_knights_boston_mcclarty_12",
+      "name": "Boston McClarty",
+      "team": "Silent Knights",
+      "jersey": ""
+    },
+    {
+      "id": "silent_knights_dalton_williams_34",
+      "name": "Dalton Williams",
+      "team": "Silent Knights",
+      "jersey": ""
+    },
+    {
+      "id": "silent_knights_elyssa_coulson_44",
+      "name": "Elyssa Coulson",
+      "team": "Silent Knights",
+      "jersey": ""
+    },
+    {
+      "id": "silent_knights_eric_dunkel_54",
+      "name": "Eric Dunkel",
+      "team": "Silent Knights",
+      "jersey": ""
+    },
+    {
+      "id": "silent_knights_elyssa_coulson_55",
+      "name": "Elyssa Coulson",
+      "team": "Silent Knights",
+      "jersey": ""
+    },
+    {
+      "id": "silent_knights_jack_mcclarty_64",
+      "name": "Jack McClarty",
+      "team": "Silent Knights",
+      "jersey": ""
+    },
+    {
+      "id": "silent_knights_kristopher_williams_96",
+      "name": "Kristopher Williams",
+      "team": "Silent Knights",
+      "jersey": ""
+    },
+    {
+      "id": "silent_knights_shaun_heldzinger_165",
+      "name": "Shaun Heldzinger",
+      "team": "Silent Knights",
+      "jersey": ""
+    },
+    {
+      "id": "silent_knights_xander_zimmerman_191",
+      "name": "Xander Zimmerman",
+      "team": "Silent Knights",
+      "jersey": ""
+    },
+    {
+      "id": "silent_knights_yegor_zyryanov_192",
+      "name": "Yegor Zyryanov",
+      "team": "Silent Knights",
+      "jersey": ""
+    },
+    {
+      "id": "trailer_puck_boys_brooks_bonifacius_22",
+      "name": "Brooks Bonifacius",
+      "team": "Trailer Puck Boys",
+      "jersey": ""
+    },
+    {
+      "id": "trailer_puck_boys_carl_pinson_23",
+      "name": "Carl Pinson",
+      "team": "Trailer Puck Boys",
+      "jersey": ""
+    },
+    {
+      "id": "trailer_puck_boys_edward_bonifacius_39",
+      "name": "Edward Bonifacius",
+      "team": "Trailer Puck Boys",
+      "jersey": ""
+    },
+    {
+      "id": "trailer_puck_boys_elliot_atwood_43",
+      "name": "Elliot Atwood",
+      "team": "Trailer Puck Boys",
+      "jersey": ""
+    },
+    {
+      "id": "trailer_puck_boys_gavin_bonifacius_62",
+      "name": "Gavin Bonifacius",
+      "team": "Trailer Puck Boys",
+      "jersey": ""
+    },
+    {
+      "id": "trailer_puck_boys_jeff_poteralski_76",
+      "name": "Jeff Poteralski",
+      "team": "Trailer Puck Boys",
+      "jersey": ""
+    },
+    {
+      "id": "trailer_puck_boys_jonathan_cobb_84",
+      "name": "Jonathan Cobb",
+      "team": "Trailer Puck Boys",
+      "jersey": ""
+    },
+    {
+      "id": "trailer_puck_boys_jordan_mracna_90",
+      "name": "Jordan Mracna",
+      "team": "Trailer Puck Boys",
+      "jersey": ""
+    },
+    {
+      "id": "trailer_puck_boys_mike_dradi_111",
+      "name": "Mike Dradi",
+      "team": "Trailer Puck Boys",
+      "jersey": ""
+    },
+    {
+      "id": "trailer_puck_boys_niki_schmidtke_132",
+      "name": "Niki Schmidtke",
+      "team": "Trailer Puck Boys",
+      "jersey": ""
+    },
+    {
+      "id": "trailer_puck_boys_russell_packard_163",
+      "name": "Russell Packard",
+      "team": "Trailer Puck Boys",
+      "jersey": ""
+    }
+  ],
+  "goals": [
+    {
+      "id": "1758277894595",
+      "team": "Silent Knights",
+      "player": "Eric Dunkel",
+      "playerId": "silent_knights_eric_dunkel_54",
+      "playerLabel": "## Eric Dunkel",
+      "playerNumber": "##",
+      "assist": "Eric Dunkel",
+      "assistId": "silent_knights_eric_dunkel_54",
+      "assistLabel": "## Eric Dunkel",
+      "assistNumber": "##",
+      "period": "OT",
+      "time": "05:09",
+      "shotType": "wrist",
+      "goalType": "powerplay",
+      "breakaway": "yes",
+      "clockSeconds": 309,
+      "timestamp": "2025-09-19T10:31:34.595Z"
+    }
+  ],
+  "penalties": [
+    {
+      "id": "1758277907751",
+      "team": "Trailer Puck Boys",
+      "player": "Elliot Atwood",
+      "playerId": "trailer_puck_boys_elliot_atwood_43",
+      "playerLabel": "## Elliot Atwood",
+      "playerNumber": "##",
+      "type": "interference",
+      "minutes": 10,
+      "period": "3",
+      "time": "04:05",
+      "clockSeconds": 245,
+      "timestamp": "2025-09-19T10:31:47.751Z"
+    }
+  ],
+  "homeScore": 1,
+  "awayScore": 0
+}
