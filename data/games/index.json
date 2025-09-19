@@ -1,5 +1,15 @@
 [
   {
+    "id": "game_4",
+    "file": "data/games/game_4.json",
+    "created": "2025-09-19T10:31:19.146Z",
+    "homeTeam": "Silent Knights",
+    "awayTeam": "Trailer Puck Boys",
+    "homeScore": 1,
+    "awayScore": 0,
+    "lastUpdated": "2025-09-19T10:31:55.853Z"
+  },
+  {
     "id": "game_1",
     "file": "data/games/game_1.json",
     "created": "2025-09-18T16:31:24.162Z",
