@@ -1,3 +1,5 @@
+import { buildJerseyMap, formatPlayerLabel, resolvePlayerJersey } from '../components/player-labels.js';
+import { TimeEntryLimits } from '../components/time-entry.js';
 import { dataManager } from '../core/data-manager.js';
 import { attendanceView } from '../views/attendance-view.js';
 import { gameSelectionView } from '../views/game-selection-view.js';
@@ -6,8 +8,6 @@ import { historyView } from '../views/history-view.js';
 import { penaltyDetailsView } from '../views/penalty-details-view.js';
 import { scoringView } from '../views/scoring-view.js';
 import { startupView } from '../views/startup-view.js';
-import { TimeEntryLimits } from '../components/time-entry.js';
-import { buildJerseyMap, formatPlayerLabel, resolvePlayerJersey } from '../components/player-labels.js';
 
 const VIEWS = [
   startupView,
@@ -101,26 +101,19 @@ export class ScorekeeperApp {
     if (!game) return;
 
     const inProgressGame = this.data.currentGame;
+    const isSameMatch = inProgressGame && inProgressGame.id === game.id;
+
+    if (isSameMatch) {
+      const resume = window.confirm('Resume your in-progress game for this matchup?');
+      if (resume) {
+        this.hydrateFromCurrentGame();
+        this.showScoring();
+        return;
+      }
+    }
 
     if (inProgressGame) {
-      if (inProgressGame.id === game.id) {
-        const resume = window.confirm('Resume your in-progress game for this matchup?');
-        if (resume) {
-          this.hydrateFromCurrentGame();
-          this.showScoring();
-          return;
-        }
-
-        this.data.discardCurrentGame();
-      } else {
-        const proceed = window.confirm('Starting this game will discard the in-progress game. Continue?');
-        if (!proceed) {
-          return;
-        }
-
-        this.data.discardCurrentGame();
-      }
-
+      this.data.discardCurrentGame();
       this.attendanceState.clear();
       this.dialogContext = null;
       this.boundNumberKeyHandler = null;
@@ -215,7 +208,7 @@ export class ScorekeeperApp {
 
     this.dialogContext = { team, playerId };
     const currentValue = this.getPlayerJersey(team, playerId) ?? '';
-    input.value = currentValue;
+    input.value = currentValue === '##' ? '' : currentValue;
     if (playerNameLabel) {
       playerNameLabel.textContent = playerName;
     }
@@ -258,13 +251,14 @@ export class ScorekeeperApp {
 
     if (!input) return;
     const sanitized = input.value.replace(/[^0-9]/g, '').slice(0, 2);
+    const jerseyValue = sanitized || '##';
 
     const teamState = this.attendanceState.get(team);
     if (!teamState) return;
 
     const record = teamState.get(playerId);
     if (record) {
-      record.jersey = sanitized;
+      record.jersey = jerseyValue;
     }
 
     this.syncAttendanceToGame();
@@ -287,11 +281,12 @@ export class ScorekeeperApp {
     this.attendanceState.forEach((teamState) => {
       teamState.forEach((record) => {
         if (!record.present) return;
+        const normalizedJersey = (record.jersey ?? '').trim();
         records.push({
           id: record.playerId,
           name: record.name,
           team: record.team,
-          jersey: record.jersey,
+          jersey: normalizedJersey || '##',
         });
       });
     });
@@ -371,7 +366,9 @@ export class ScorekeeperApp {
     if (homeState) {
       homeState.forEach((record) => {
         if (record.present) {
-          summary.home.push(`${record.name}${record.jersey ? ` (#${record.jersey})` : ''}`);
+          const jersey = (record.jersey ?? '').trim() || '##';
+          const display = jersey === '##' ? '##' : `#${jersey}`;
+          summary.home.push(`${record.name} (${display})`);
         }
       });
     }
@@ -379,7 +376,9 @@ export class ScorekeeperApp {
     if (awayState) {
       awayState.forEach((record) => {
         if (record.present) {
-          summary.away.push(`${record.name}${record.jersey ? ` (#${record.jersey})` : ''}`);
+          const jersey = (record.jersey ?? '').trim() || '##';
+          const display = jersey === '##' ? '##' : `#${jersey}`;
+          summary.away.push(`${record.name} (${display})`);
         }
       });
     }
