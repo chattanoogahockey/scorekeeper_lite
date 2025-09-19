@@ -22,9 +22,19 @@
   },
   bind(app) {
     const main = app.mainContent;
-    main
-      .querySelector('[data-action="score-new"]')
-      .addEventListener('click', () => app.showGameSelection());
+    const scoreNewButton = main.querySelector('[data-action="score-new"]');
+    scoreNewButton?.addEventListener('click', () => {
+      const PASSCODE = 'chahky2025';
+      const input = window.prompt('Enter passcode to score a new game:');
+      if (input === null) {
+        return;
+      }
+      if (input === PASSCODE) {
+        app.showGameSelection();
+      } else {
+        window.alert('Incorrect passcode.');
+      }
+    });
     main
       .querySelector('[data-action="view-history"]')
       .addEventListener('click', () => app.showGameHistory());
