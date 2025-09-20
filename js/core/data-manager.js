@@ -509,7 +509,30 @@ export class DataManager {
 
   addAttendance(attendanceList) {
     if (!this.currentGame) return;
-    this.currentGame.attendance = attendanceList;
+
+    const validTeams = new Set([this.currentGame.homeTeam, this.currentGame.awayTeam].filter(Boolean));
+    const unique = new Map();
+
+    if (Array.isArray(attendanceList)) {
+      attendanceList.forEach((record) => {
+        if (!record || !validTeams.has(record.team)) {
+          return;
+        }
+
+        const normalizedJersey = (record.jersey ?? '').trim();
+        const entry = {
+          id: record.id ?? record.playerId ?? `${record.team}-${unique.size}`,
+          name: record.name ?? '',
+          team: record.team,
+          jersey: normalizedJersey || '##',
+          present: Boolean(record.present),
+        };
+
+        unique.set(entry.id, entry);
+      });
+    }
+
+    this.currentGame.attendance = Array.from(unique.values());
     this.saveCurrentGameState();
   }
 

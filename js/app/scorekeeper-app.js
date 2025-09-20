@@ -128,6 +128,8 @@ export class ScorekeeperApp {
   bootstrapAttendanceState() {
     if (!this.selectedGame) return;
 
+    this.attendanceState.clear();
+
     const seedTeamState = (teamName) => {
       const players = this.data.getPlayersForTeam(teamName);
       const teamState = new Map();
@@ -185,7 +187,7 @@ export class ScorekeeperApp {
   startScoring() {
     if (!this.selectedGame) return;
 
-    const attendance = this.buildAttendanceRecords();
+    const attendance = this.buildAttendanceRecords(this.selectedGame);
     const game = this.data.beginGame({
       ...this.selectedGame,
       attendance,
@@ -284,26 +286,43 @@ export class ScorekeeperApp {
     return teamState?.get(playerId)?.jersey ?? '';
   }
 
-  buildAttendanceRecords() {
+  buildAttendanceRecords(contextGame = null) {
     const records = [];
-    this.attendanceState.forEach((teamState) => {
+    const game = contextGame ?? this.selectedGame ?? this.data.currentGame;
+    const teams = new Set();
+
+    if (game) {
+      if (game.homeTeam) teams.add(game.homeTeam);
+      if (game.awayTeam) teams.add(game.awayTeam);
+    } else {
+      this.attendanceState.forEach((_, teamName) => {
+        if (teamName) teams.add(teamName);
+      });
+    }
+
+    teams.forEach((teamName) => {
+      const teamState = this.attendanceState.get(teamName);
+      if (!teamState) return;
+
       teamState.forEach((record) => {
         const normalizedJersey = (record.jersey ?? '').trim();
         records.push({
           id: record.playerId,
           name: record.name,
-          team: record.team,
+          team: teamName,
           jersey: normalizedJersey || '##',
           present: Boolean(record.present),
         });
       });
     });
+
     return records;
   }
 
   syncAttendanceToGame() {
-    if (!this.data.currentGame) return;
-    this.data.addAttendance(this.buildAttendanceRecords());
+    const currentGame = this.data.currentGame;
+    if (!currentGame) return;
+    this.data.addAttendance(this.buildAttendanceRecords(currentGame));
   }
 
   hydrateFromCurrentGame() {

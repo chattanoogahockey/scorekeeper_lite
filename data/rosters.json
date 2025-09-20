@@ -181,7 +181,7 @@
   ],
   "Nets, Sticks, and Chill": [
     {
-      "id": "nets,_sticks,_and_chill_adam_blair_2",
+      "id": "nets__sticks__and_chill_adam_blair_2",
       "name": "Adam Blair",
       "number": 3,
       "position": "Player",
@@ -189,7 +189,7 @@
       "team": "Nets, Sticks, and Chill"
     },
     {
-      "id": "nets,_sticks,_and_chill_anthony_backus_15",
+      "id": "nets__sticks__and_chill_anthony_backus_15",
       "name": "Anthony Backus",
       "number": 16,
       "position": "Player",
@@ -197,7 +197,7 @@
       "team": "Nets, Sticks, and Chill"
     },
     {
-      "id": "nets,_sticks,_and_chill_chris_wiegand_47",
+      "id": "nets__sticks__and_chill_chris_wiegand_47",
       "name": "Chris Wiegand",
       "number": 48,
       "position": "Goalie",
@@ -205,7 +205,7 @@
       "team": "Nets, Sticks, and Chill"
     },
     {
-      "id": "nets,_sticks,_and_chill_dustin_backus_52",
+      "id": "nets__sticks__and_chill_dustin_backus_52",
       "name": "Dustin Backus",
       "number": 53,
       "position": "Player",
@@ -213,7 +213,7 @@
       "team": "Nets, Sticks, and Chill"
     },
     {
-      "id": "nets,_sticks,_and_chill_james_such_60",
+      "id": "nets__sticks__and_chill_james_such_60",
       "name": "James Such",
       "number": 61,
       "position": "Player",
@@ -221,7 +221,7 @@
       "team": "Nets, Sticks, and Chill"
     },
     {
-      "id": "nets,_sticks,_and_chill_jeff_mcspadden_69",
+      "id": "nets__sticks__and_chill_jeff_mcspadden_69",
       "name": "Jeff McSpadden",
       "number": 70,
       "position": "Player",
@@ -229,7 +229,7 @@
       "team": "Nets, Sticks, and Chill"
     },
     {
-      "id": "nets,_sticks,_and_chill_joe_cutner_80",
+      "id": "nets__sticks__and_chill_joe_cutner_80",
       "name": "Joe Cutner",
       "number": 81,
       "position": "Player",
@@ -237,7 +237,7 @@
       "team": "Nets, Sticks, and Chill"
     },
     {
-      "id": "nets,_sticks,_and_chill_martin_bartow_136",
+      "id": "nets__sticks__and_chill_martin_bartow_136",
       "name": "Martin Bartow",
       "number": 137,
       "position": "Player",
@@ -245,7 +245,7 @@
       "team": "Nets, Sticks, and Chill"
     },
     {
-      "id": "nets,_sticks,_and_chill_matt_forbes_137",
+      "id": "nets__sticks__and_chill_matt_forbes_137",
       "name": "Matt Forbes",
       "number": 138,
       "position": "Player",
@@ -253,7 +253,7 @@
       "team": "Nets, Sticks, and Chill"
     },
     {
-      "id": "nets,_sticks,_and_chill_matthew_gunzburger_144",
+      "id": "nets__sticks__and_chill_matthew_gunzburger_144",
       "name": "Matthew Gunzburger",
       "number": 145,
       "position": "Player",
@@ -261,7 +261,7 @@
       "team": "Nets, Sticks, and Chill"
     },
     {
-      "id": "nets,_sticks,_and_chill_sohaib_amjad_162",
+      "id": "nets__sticks__and_chill_sohaib_amjad_162",
       "name": "Sohaib Amjad",
       "number": 163,
       "position": "Player",
@@ -269,7 +269,7 @@
       "team": "Nets, Sticks, and Chill"
     },
     {
-      "id": "nets,_sticks,_and_chill_sub_211",
+      "id": "nets__sticks__and_chill_sub_211",
       "name": "Sub",
       "number": 212,
       "position": "Player",
@@ -643,6 +643,80 @@
       "position": "Player",
       "division": "Silver",
       "team": "Silent Knights"
+    }
+  ],
+  "Slappy Gilmore's": [
+    {
+      "id": "slappy_gilmore_s_alexey_voronin_7",
+      "name": "Alexey Voronin",
+      "number": 8,
+      "position": "Player",
+      "division": "Gold",
+      "team": "Slappy Gilmore's"
+    },
+    {
+      "id": "slappy_gilmore_s_brad_truel_26",
+      "name": "Brad Truel",
+      "number": 27,
+      "position": "Player",
+      "division": "Gold",
+      "team": "Slappy Gilmore's"
+    },
+    {
+      "id": "slappy_gilmore_s_slappy_gilmoresory_marshall_110",
+      "name": "Slappy Gilmoresory Marshall",
+      "number": 111,
+      "position": "Goalie",
+      "division": "Gold",
+      "team": "Slappy Gilmore's"
+    },
+    {
+      "id": "slappy_gilmore_s_jeron_summerville_127",
+      "name": "Jeron Summerville",
+      "number": 128,
+      "position": "Player",
+      "division": "Gold",
+      "team": "Slappy Gilmore's"
+    },
+    {
+      "id": "slappy_gilmore_s_kyle_ludwig_150",
+      "name": "Kyle Ludwig",
+      "number": 151,
+      "position": "Player",
+      "division": "Gold",
+      "team": "Slappy Gilmore's"
+    },
+    {
+      "id": "slappy_gilmore_s_marc_redinger_154",
+      "name": "Marc Redinger",
+      "number": 155,
+      "position": "Player",
+      "division": "Gold",
+      "team": "Slappy Gilmore's"
+    },
+    {
+      "id": "slappy_gilmore_s_sam_bambrick_184",
+      "name": "Sam Bambrick",
+      "number": 185,
+      "position": "Player",
+      "division": "Gold",
+      "team": "Slappy Gilmore's"
+    },
+    {
+      "id": "slappy_gilmore_s_shaun_olsen_190",
+      "name": "Shaun Olsen",
+      "number": 191,
+      "position": "Player",
+      "division": "Gold",
+      "team": "Slappy Gilmore's"
+    },
+    {
+      "id": "slappy_gilmore_s_sub_205",
+      "name": "Sub",
+      "number": 206,
+      "position": "Player",
+      "division": "Gold",
+      "team": "Slappy Gilmore's"
     }
   ],
   "Danglin Under The Influence": [
@@ -1079,7 +1153,7 @@
       "team": "Stitches"
     },
     {
-      "id": "stitches_noah's_arknemesis_miller_133",
+      "id": "stitches_noah_s_arknemesis_miller_133",
       "name": "Noah's Arknemesis Miller",
       "number": 134,
       "position": "Player",
@@ -1515,7 +1589,7 @@
   ],
   "Noah's Arknemesis": [
     {
-      "id": "noah's_arknemesis_caden_gersky_48",
+      "id": "noah_s_arknemesis_caden_gersky_48",
       "name": "Caden Gersky",
       "number": 49,
       "position": "Player",
@@ -1523,7 +1597,7 @@
       "team": "Noah's Arknemesis"
     },
     {
-      "id": "noah's_arknemesis_conner_barry_82",
+      "id": "noah_s_arknemesis_conner_barry_82",
       "name": "Conner Barry",
       "number": 83,
       "position": "Player",
@@ -1531,7 +1605,7 @@
       "team": "Noah's Arknemesis"
     },
     {
-      "id": "noah's_arknemesis_jay_buchanan_126",
+      "id": "noah_s_arknemesis_jay_buchanan_126",
       "name": "Jay Buchanan",
       "number": 127,
       "position": "Player",
@@ -1539,7 +1613,7 @@
       "team": "Noah's Arknemesis"
     },
     {
-      "id": "noah's_arknemesis_josh_zweizig_139",
+      "id": "noah_s_arknemesis_josh_zweizig_139",
       "name": "Josh Zweizig",
       "number": 140,
       "position": "Player",
@@ -1547,7 +1621,7 @@
       "team": "Noah's Arknemesis"
     },
     {
-      "id": "noah's_arknemesis_kenzie_goins_145",
+      "id": "noah_s_arknemesis_kenzie_goins_145",
       "name": "Kenzie Goins",
       "number": 146,
       "position": "Goalie",
@@ -1555,7 +1629,7 @@
       "team": "Noah's Arknemesis"
     },
     {
-      "id": "noah's_arknemesis_nathan_brown_170",
+      "id": "noah_s_arknemesis_nathan_brown_170",
       "name": "Nathan Brown",
       "number": 171,
       "position": "Player",
@@ -1563,7 +1637,7 @@
       "team": "Noah's Arknemesis"
     },
     {
-      "id": "noah's_arknemesis_noah's_arknemesis_dillingham_179",
+      "id": "noah_s_arknemesis_noah_s_arknemesis_dillingham_179",
       "name": "Noah's Arknemesis Dillingham",
       "number": 180,
       "position": "Player",
@@ -1571,7 +1645,7 @@
       "team": "Noah's Arknemesis"
     },
     {
-      "id": "noah's_arknemesis_scott_friend_185",
+      "id": "noah_s_arknemesis_scott_friend_185",
       "name": "Scott Friend",
       "number": 186,
       "position": "Player",
@@ -1579,7 +1653,7 @@
       "team": "Noah's Arknemesis"
     },
     {
-      "id": "noah's_arknemesis_sub_202",
+      "id": "noah_s_arknemesis_sub_202",
       "name": "Sub",
       "number": 203,
       "position": "Player",
@@ -1659,80 +1733,6 @@
       "position": "Player",
       "division": "Gold",
       "team": "Purpetrators"
-    }
-  ],
-  "Slappy Gilmore's": [
-    {
-      "id": "slappy_gilmores_alexey_voronin_7",
-      "name": "Alexey Voronin",
-      "number": 8,
-      "position": "Player",
-      "division": "Gold",
-      "team": "Slappy Gilmore's"
-    },
-    {
-      "id": "slappy_gilmores_brad_truel_26",
-      "name": "Brad Truel",
-      "number": 27,
-      "position": "Player",
-      "division": "Gold",
-      "team": "Slappy Gilmore's"
-    },
-    {
-      "id": "slappy_gilmores_slappy_gilmoresory_marshall_110",
-      "name": "Slappy Gilmoresory Marshall",
-      "number": 111,
-      "position": "Goalie",
-      "division": "Gold",
-      "team": "Slappy Gilmore's"
-    },
-    {
-      "id": "slappy_gilmores_jeron_summerville_127",
-      "name": "Jeron Summerville",
-      "number": 128,
-      "position": "Player",
-      "division": "Gold",
-      "team": "Slappy Gilmore's"
-    },
-    {
-      "id": "slappy_gilmores_kyle_ludwig_150",
-      "name": "Kyle Ludwig",
-      "number": 151,
-      "position": "Player",
-      "division": "Gold",
-      "team": "Slappy Gilmore's"
-    },
-    {
-      "id": "slappy_gilmores_marc_redinger_154",
-      "name": "Marc Redinger",
-      "number": 155,
-      "position": "Player",
-      "division": "Gold",
-      "team": "Slappy Gilmore's"
-    },
-    {
-      "id": "slappy_gilmores_sam_bambrick_184",
-      "name": "Sam Bambrick",
-      "number": 185,
-      "position": "Player",
-      "division": "Gold",
-      "team": "Slappy Gilmore's"
-    },
-    {
-      "id": "slappy_gilmores_shaun_olsen_190",
-      "name": "Shaun Olsen",
-      "number": 191,
-      "position": "Player",
-      "division": "Gold",
-      "team": "Slappy Gilmore's"
-    },
-    {
-      "id": "slappy_gilmores_sub_205",
-      "name": "Sub",
-      "number": 206,
-      "position": "Player",
-      "division": "Gold",
-      "team": "Slappy Gilmore's"
     }
   ]
 }
