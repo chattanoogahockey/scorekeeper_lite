@@ -55,10 +55,13 @@ export const penaltyDetailsView = {
             <select data-field="type">
               <option value="tripping">Tripping</option>
               <option value="hooking">Hooking</option>
+              <option value="slashing">Slashing</option>
+              <option value="high-sticking">High Sticking</option>
               <option value="interference">Interference</option>
+              <option value="holding">Holding</option>
               <option value="roughing">Roughing</option>
-              <option value="boarding">Boarding</option>
               <option value="other">Other</option>
+
             </select>
           </div>
 

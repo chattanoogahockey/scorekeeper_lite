@@ -185,6 +185,31 @@ function isClutchGoal(period, clockSeconds, teamScore, opponentScore) {
   return teamScore === opponentScore || teamScore > opponentScore;
 }
 
+const PERIOD_DURATION_SECONDS = 17 * 60;
+
+function periodToIndex(period) {
+  const value = `${period ?? ''}`.toUpperCase();
+  if (value === '2') {
+    return 1;
+  }
+  if (value === '3') {
+    return 2;
+  }
+  if (value === 'OT' || value === '4') {
+    return 3;
+  }
+  const parsed = Number.parseInt(value, 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed - 1 : 0;
+}
+
+function computeAbsoluteSeconds(period, clockSeconds) {
+  const index = periodToIndex(period);
+  const duration = PERIOD_DURATION_SECONDS;
+  const clamped = Number.isFinite(clockSeconds) ? Math.min(Math.max(clockSeconds, 0), duration) : duration;
+  const elapsedInPeriod = duration - clamped;
+  return index * duration + elapsedInPeriod;
+}
+
 export class DataManager {
   constructor({
     fetchImpl = window.fetch.bind(window),
@@ -573,9 +598,84 @@ export class DataManager {
   addPenalty(penaltyData) {
     if (!this.currentGame) return;
 
+    const normalizedTeamScore = toScoreValue(penaltyData?.teamScore);
+    const normalizedOpponentScore = toScoreValue(penaltyData?.opponentScore);
+    const payload = { ...penaltyData };
+
+    if (normalizedTeamScore !== null) {
+      payload.teamScore = normalizedTeamScore;
+    } else {
+      delete payload.teamScore;
+    }
+
+    if (normalizedOpponentScore !== null) {
+      payload.opponentScore = normalizedOpponentScore;
+    } else {
+      delete payload.opponentScore;
+    }
+
+    const currentPenalties = Array.isArray(this.currentGame.penalties) ? this.currentGame.penalties : [];
+
+    const previousPenaltiesForPlayer = currentPenalties.filter((penalty) => penalty.playerId === penaltyData.playerId).length;
+    const fallbackPlayerTotal = previousPenaltiesForPlayer + 1;
+    const providedPlayerTotal = toScoreValue(payload.penaltiesThisGame);
+    const penaltiesThisGameValue = Number.isInteger(providedPlayerTotal) && providedPlayerTotal > 0 ? providedPlayerTotal : fallbackPlayerTotal;
+    payload.penaltiesThisGame = penaltiesThisGameValue;
+
+    const teamPenaltyCountFallback = currentPenalties.filter((penalty) => penalty.team === penaltyData.team).length + 1;
+    const providedTeamPenaltyCount = toScoreValue(payload.teamPenaltyCount);
+    const teamPenaltyCountValue = Number.isInteger(providedTeamPenaltyCount) && providedTeamPenaltyCount > 0 ? providedTeamPenaltyCount : teamPenaltyCountFallback;
+    payload.teamPenaltyCount = teamPenaltyCountValue;
+
+    const periodValue = `${payload.period ?? ''}`;
+    const rawClockSeconds = Number.isFinite(payload.clockSeconds) ? payload.clockSeconds : toScoreValue(payload.clockSeconds);
+    const clockSecondsValue = Number.isFinite(rawClockSeconds) ? rawClockSeconds : null;
+    if (clockSecondsValue !== null) {
+      payload.clockSeconds = clockSecondsValue;
+    } else {
+      delete payload.clockSeconds;
+    }
+
+    const teamScoreValue = normalizedTeamScore !== null ? normalizedTeamScore : null;
+    const opponentScoreValue = normalizedOpponentScore !== null ? normalizedOpponentScore : null;
+
+    const latePenaltyComputed = isLateGameGoal(periodValue, clockSecondsValue);
+    const earlyPenaltyComputed = isEarlyGameGoal(periodValue, clockSecondsValue);
+    const comebackThreatComputed =
+      periodValue === '3' && Number.isFinite(teamScoreValue) && Number.isFinite(opponentScoreValue) && teamScoreValue > opponentScoreValue && teamScoreValue - opponentScoreValue <= 1;
+    const clutchPenaltyComputed = isClutchGoal(periodValue, clockSecondsValue, teamScoreValue, opponentScoreValue);
+
+    payload.latePenalty = normalizeYesNo(payload.latePenalty, toYesNo(latePenaltyComputed));
+    payload.earlyPenalty = normalizeYesNo(payload.earlyPenalty, toYesNo(earlyPenaltyComputed));
+    payload.comebackThreat = normalizeYesNo(payload.comebackThreat, toYesNo(comebackThreatComputed));
+    payload.clutchPenalty = normalizeYesNo(payload.clutchPenalty, toYesNo(clutchPenaltyComputed));
+
+    const lastGoal = this.currentGame.goals?.length ? this.currentGame.goals[this.currentGame.goals.length - 1] : null;
+    const momentumComputed = lastGoal ? lastGoal.team === penaltyData.team : false;
+    payload.momentumSwing = normalizeYesNo(payload.momentumSwing, toYesNo(momentumComputed));
+
+    if (!payload.penaltyImpact) {
+      if (Number.isFinite(teamScoreValue) && Number.isFinite(opponentScoreValue)) {
+        const scoreDiff = teamScoreValue - opponentScoreValue;
+        if (scoreDiff < 0) {
+          payload.penaltyImpact = 'trailing penalty';
+        } else if (scoreDiff === 0) {
+          payload.penaltyImpact = 'tied penalty';
+        } else if (scoreDiff >= 2) {
+          payload.penaltyImpact = 'costly penalty';
+        } else {
+          payload.penaltyImpact = 'leading penalty';
+        }
+      } else {
+        payload.penaltyImpact = '';
+      }
+    }
+
+    payload.powerPlayConverted = payload.powerPlayConverted ?? '';
+
     const penaltyRecord = {
       id: `${Date.now()}`,
-      ...penaltyData,
+      ...payload,
       timestamp: new Date().toISOString(),
     };
 
@@ -583,11 +683,72 @@ export class DataManager {
     this.saveCurrentGameState();
   }
 
+  annotatePenaltyPowerPlays(game) {
+    if (!game || !Array.isArray(game.penalties) || !game.penalties.length) {
+      return;
+    }
+
+    const penalties = game.penalties;
+    const goals = Array.isArray(game.goals) ? game.goals : [];
+    const goalTimeline = goals
+      .map((goal) => {
+        const periodValue = `${goal.period ?? ''}`;
+        const rawClock = Number.isFinite(goal.clockSeconds) ? goal.clockSeconds : toScoreValue(goal.clockSeconds);
+        const clockValue = Number.isFinite(rawClock) ? rawClock : null;
+        const absoluteTime = computeAbsoluteSeconds(periodValue, clockValue);
+        return { team: goal.team, absoluteTime };
+      })
+      .sort((a, b) => a.absoluteTime - b.absoluteTime);
+
+    penalties.forEach((penalty) => {
+      if (!penalty || typeof penalty !== 'object') {
+        return;
+      }
+
+      const minutes = Number.parseInt(penalty.minutes, 10) || 0;
+      const periodValue = `${penalty.period ?? ''}`;
+      const rawClock = Number.isFinite(penalty.clockSeconds) ? penalty.clockSeconds : toScoreValue(penalty.clockSeconds);
+      const clockValue = Number.isFinite(rawClock) ? rawClock : null;
+      const startTime = computeAbsoluteSeconds(periodValue, clockValue);
+
+      if (!Number.isFinite(startTime)) {
+        if (!penalty.powerPlayConverted) {
+          penalty.powerPlayConverted = '';
+        }
+        return;
+      }
+
+      if (minutes < 2) {
+        if (!penalty.powerPlayConverted) {
+          penalty.powerPlayConverted = '';
+        }
+        return;
+      }
+
+      if (minutes >= 10) {
+        if (!penalty.powerPlayConverted) {
+          penalty.powerPlayConverted = 'not_applicable';
+        }
+        return;
+      }
+
+      const durationSeconds = minutes * 60;
+      const endTime = startTime + durationSeconds;
+      const opponentTeam = penalty.team === game.homeTeam ? game.awayTeam : game.homeTeam;
+
+      const goalDuring = goalTimeline.find((goal) => goal.team === opponentTeam && goal.absoluteTime > startTime && goal.absoluteTime <= endTime);
+
+      penalty.powerPlayConverted = goalDuring ? 'yes' : 'no';
+    });
+  }
+
   endCurrentGame() {
     if (!this.currentGame) return null;
 
     this.currentGame.status = 'completed';
     this.currentGame.ended = new Date().toISOString();
+
+    this.annotatePenaltyPowerPlays(this.currentGame);
 
     const validation = safeValidateGame(this.currentGame);
     const completedGame = validation.success ? validation.data : { ...this.currentGame };

@@ -526,11 +526,58 @@ export class ScorekeeperApp {
     const players = this.data.getPlayersForTeam(team);
     const player = players.find((p) => p.id === playerId);
     const jerseyMap = buildJerseyMap(this.data.currentGame);
+    const currentGame = this.data.currentGame;
+    const homeScore = Number((currentGame && currentGame.homeScore) || 0);
+    const awayScore = Number((currentGame && currentGame.awayScore) || 0);
+
+    let teamScore = team === currentGame?.homeTeam ? homeScore : awayScore;
+    let opponentScore = team === currentGame?.homeTeam ? awayScore : homeScore;
+
+    let penaltyImpact = '';
+    const scoreDiff = teamScore - opponentScore;
+    if (scoreDiff < 0) {
+      penaltyImpact = 'trailing penalty';
+    } else if (scoreDiff === 0) {
+      penaltyImpact = 'tied penalty';
+    } else if (scoreDiff >= 2) {
+      penaltyImpact = 'costly penalty';
+    } else {
+      penaltyImpact = 'leading penalty';
+    }
+
+    const clockSeconds = parsedTime.total;
+    const isThirdPeriod = period === '3';
+    const isFirstPeriod = period === '1';
+
+    const latePenalty = isThirdPeriod && clockSeconds >= 1 && clockSeconds <= 120 ? 'yes' : 'no';
+    const earlyPenalty = isFirstPeriod && clockSeconds >= 15 * 60 && clockSeconds <= 16 * 60 + 59 ? 'yes' : 'no';
+    const clutchPenalty =
+      isThirdPeriod && clockSeconds <= 300 && (teamScore === opponentScore || teamScore > opponentScore) ? 'yes' : 'no';
+    const comebackThreat = isThirdPeriod && teamScore > opponentScore && scoreDiff <= 1 ? 'yes' : 'no';
+
+    const existingPenalties = Array.isArray(currentGame?.penalties) ? currentGame.penalties : [];
+    const previousPenaltiesForPlayer = existingPenalties.filter((penalty) => penalty.playerId === playerId).length;
+    const penaltiesThisGame = previousPenaltiesForPlayer + 1;
+    const teamPenaltyCount = existingPenalties.filter((penalty) => penalty.team === team).length + 1;
+
+    const lastGoal = currentGame?.goals?.length ? currentGame.goals[currentGame.goals.length - 1] : null;
+    const momentumSwing = lastGoal && lastGoal.team === team ? 'yes' : 'no';
+
     const playerLabel = player ? formatPlayerLabel(player, jerseyMap) : 'Unknown';
     const playerNumber = player ? resolvePlayerJersey(player, jerseyMap) : '';
 
     this.data.addPenalty({
       team,
+      teamScore,
+      opponentScore,
+      penaltyImpact,
+      penaltiesThisGame,
+      teamPenaltyCount,
+      momentumSwing,
+      latePenalty,
+      earlyPenalty,
+      clutchPenalty,
+      comebackThreat,
       player: player?.name ?? 'Unknown',
       playerId,
       playerLabel,
@@ -539,7 +586,7 @@ export class ScorekeeperApp {
       minutes,
       period,
       time,
-      clockSeconds: parsedTime.total,
+      clockSeconds,
     });
 
     this.showScoring();
