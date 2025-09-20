@@ -1,16 +1,1 @@
-[
-  {
-    "id": "game_1",
-    "file": "data/games/2025-09-08_bronze_dumb-pucks_vs_skate-invaders_18-30_game-1.json",
-    "fileName": "2025-09-08_bronze_dumb-pucks_vs_skate-invaders_18-30_game-1.json",
-    "date": "2025-09-08 00:00:00",
-    "time": "18:30:00",
-    "division": "Bronze",
-    "created": "2025-09-20T03:29:33.870Z",
-    "homeTeam": "Dumb Pucks",
-    "awayTeam": "Skate Invaders",
-    "homeScore": 1,
-    "awayScore": 0,
-    "lastUpdated": "2025-09-20T04:06:30.677Z"
-  }
-]
+[]
