@@ -70,8 +70,8 @@ export const scoringView = {
         </div>
 
         <div class="shot-actions">
-          <button class="btn btn-secondary" data-action="add-shot" data-team="${game.homeTeam}">Shots on Goal: ${game.homeTeam} (${game.homeShots ?? 0})</button>
-          <button class="btn btn-secondary" data-action="add-shot" data-team="${game.awayTeam}">Shots on Goal: ${game.awayTeam} (${game.awayShots ?? 0})</button>
+          <button type="button" class="shot-button" data-action="add-shot" data-team="${game.homeTeam}">Shots on Goal: ${game.homeTeam} (${game.homeShots ?? 0})</button>
+          <button type="button" class="shot-button" data-action="add-shot" data-team="${game.awayTeam}">Shots on Goal: ${game.awayTeam} (${game.awayShots ?? 0})</button>
         </div>
 
         <div class="score-actions">
@@ -133,3 +133,4 @@ export const scoringView = {
       ?.addEventListener('click', () => app.submitGame());
   },
 };
+

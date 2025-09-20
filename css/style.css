@@ -792,13 +792,28 @@ header p {
 
 .shot-actions {
     display: grid;
-    grid-template-columns: repeat(2, minmax(150px, 1fr));
-    gap: 10px;
-    margin-bottom: 16px;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 8px;
+    margin-bottom: 14px;
 }
 
-.shot-actions .btn {
-    width: 100%;
+.shot-button {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    background: #e2e8f0;
+    color: var(--primary-color);
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.shot-button:hover {
+    background: #dbeafe;
+    transform: translateY(-1px);
 }
 
 

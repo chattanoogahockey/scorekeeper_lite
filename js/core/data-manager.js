@@ -1,4 +1,4 @@
-﻿import { safeValidateGame } from './schema.js';
+import { safeValidateGame } from './schema.js';
 import { SyncQueue } from './sync-queue.js';
 
 const STORAGE_KEY = 'chahky_games';
@@ -61,6 +61,24 @@ function simpleHash(value) {
     hash |= 0;
   }
   return String(hash);
+}
+
+function toShotCount(value) {
+  if (typeof value === 'number') {
+    return Number.isFinite(value) && value >= 0 ? Math.trunc(value) : 0;
+  }
+
+  if (typeof value === 'string') {
+    const trimmed = value.trim();
+    if (trimmed) {
+      const parsed = Number.parseInt(trimmed, 10);
+      if (Number.isFinite(parsed) && parsed >= 0) {
+        return parsed;
+      }
+    }
+  }
+
+  return 0;
 }
 
 export class DataManager {
@@ -160,7 +178,12 @@ export class DataManager {
   async loadGamesData() {
     const response = await this.safeFetch('data/games.json');
     if (Array.isArray(response)) {
-      this.gamesData = response;
+      this.gamesData = response.map((game) => {
+        if (game && typeof game === 'object') {
+          this.ensureShotCounters(game);
+        }
+        return game;
+      });
     }
   }
 
@@ -170,7 +193,12 @@ export class DataManager {
       if (cached) {
         const parsed = JSON.parse(cached);
         if (Array.isArray(parsed)) {
-          this.gamesData = parsed;
+          this.gamesData = parsed.map((game) => {
+            if (game && typeof game === 'object') {
+              this.ensureShotCounters(game);
+            }
+            return game;
+          });
         }
       }
     } catch (error) {
@@ -199,6 +227,15 @@ export class DataManager {
     }
   }
 
+  ensureShotCounters(game) {
+    if (!game || typeof game !== 'object') {
+      return;
+    }
+
+    game.homeShots = toShotCount(game.homeShots);
+    game.awayShots = toShotCount(game.awayShots);
+  }
+
   restoreCurrentGame() {
     if (typeof window === 'undefined') return null;
     try {
@@ -207,6 +244,7 @@ export class DataManager {
       const parsed = JSON.parse(raw);
       if (parsed && typeof parsed === 'object') {
         this.currentGame = parsed;
+        this.ensureShotCounters(this.currentGame);
         return this.currentGame;
       }
     } catch (error) {
@@ -290,6 +328,8 @@ export class DataManager {
       penalties: [],
       homeScore: 0,
       awayScore: 0,
+      homeShots: toShotCount(gameInfo?.homeShots),
+      awayShots: toShotCount(gameInfo?.awayShots),
       status: 'in_progress',
       created: new Date().toISOString(),
     };
@@ -297,6 +337,8 @@ export class DataManager {
     if (!baseGame.division) {
       baseGame.division = this.resolveDivisionForGame(baseGame);
     }
+
+    this.ensureShotCounters(baseGame);
 
     return baseGame;
   }
@@ -339,6 +381,22 @@ export class DataManager {
   addAttendance(attendanceList) {
     if (!this.currentGame) return;
     this.currentGame.attendance = attendanceList;
+    this.saveCurrentGameState();
+  }
+
+  addShotOnGoal(team) {
+    if (!this.currentGame || !team) return;
+
+    this.ensureShotCounters(this.currentGame);
+
+    if (team === this.currentGame.homeTeam) {
+      this.currentGame.homeShots += 1;
+    } else if (team === this.currentGame.awayTeam) {
+      this.currentGame.awayShots += 1;
+    } else {
+      return;
+    }
+
     this.saveCurrentGameState();
   }
 
