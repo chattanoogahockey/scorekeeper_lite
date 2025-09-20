@@ -56,7 +56,19 @@ export const goalSchema = z.object({
 
   opponentScore: z.number().int().nonnegative().optional(),
 
+  totalGameGoals: z.number().int().nonnegative().optional(),
+
   scoreImpact: z.string().optional(),
+
+  hatTrickIndicator: z.string().optional(),
+
+  lateGameGoal: z.string().optional(),
+
+  earlyGameGoal: z.string().optional(),
+
+  comebackGoal: z.string().optional(),
+
+  clutchGoal: z.string().optional(),
 
   timestamp: z.string().datetime().optional(),
 

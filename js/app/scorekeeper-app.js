@@ -447,6 +447,27 @@ export class ScorekeeperApp {
       }
     }
 
+    const existingGoals = Array.isArray(currentGame?.goals) ? currentGame.goals : [];
+    const previousGoalsForPlayer = existingGoals.filter((goal) => goal.playerId === playerId).length;
+    const totalGameGoals = previousGoalsForPlayer + 1;
+    const hatTrickIndicator = totalGameGoals >= 3 ? 'yes' : 'no';
+
+    const clockSeconds = parsedTime.total;
+    const isThirdPeriod = period === '3';
+    const isFirstPeriod = period === '1';
+
+    const lateGameGoal = isThirdPeriod && clockSeconds >= 1 && clockSeconds <= 120 ? 'yes' : 'no';
+    const earlyGameGoal = isFirstPeriod && clockSeconds >= 15 * 60 && clockSeconds <= 16 * 60 + 59 ? 'yes' : 'no';
+
+    const previousTeamScore = teamScore - 1;
+    const previousOpponentScore = opponentScore;
+    const wasTrailingByTwoOrMore = previousOpponentScore - previousTeamScore >= 2;
+    const nowDeficit = opponentScore - teamScore;
+    const comebackGoal = wasTrailingByTwoOrMore && nowDeficit <= 1 ? 'yes' : 'no';
+
+    const clutchGoal =
+      isThirdPeriod && clockSeconds <= 300 && (teamScore === opponentScore || teamScore > opponentScore) ? 'yes' : 'no';
+
     const playerLabel = player ? formatPlayerLabel(player, jerseyMap) : 'Unknown';
     const playerNumber = player ? resolvePlayerJersey(player, jerseyMap) : '';
     const assistLabel = assist ? formatPlayerLabel(assist, jerseyMap) : '';
@@ -457,6 +478,12 @@ export class ScorekeeperApp {
       teamScore,
       opponentScore,
       scoreImpact,
+      totalGameGoals,
+      hatTrickIndicator,
+      lateGameGoal,
+      earlyGameGoal,
+      comebackGoal,
+      clutchGoal,
       player: player?.name ?? 'Unknown',
       playerId,
       playerLabel,
@@ -469,7 +496,7 @@ export class ScorekeeperApp {
       shotType,
       goalType,
       time,
-      clockSeconds: parsedTime.total,
+      clockSeconds,
       breakaway,
     });
 
@@ -530,3 +557,4 @@ export class ScorekeeperApp {
     this.showStartupMenu();
   }
 }
+

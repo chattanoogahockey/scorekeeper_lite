@@ -123,6 +123,68 @@ function deriveScoreImpact(teamScore, opponentScore) {
   return '';
 }
 
+function toYesNo(condition) {
+  return condition ? 'yes' : 'no';
+}
+
+function normalizeYesNo(value, fallback) {
+  if (typeof value === 'string') {
+    const normalized = value.trim().toLowerCase();
+    if (normalized === 'yes' || normalized === 'no') {
+      return normalized;
+    }
+  }
+  return fallback;
+}
+
+function isLateGameGoal(period, clockSeconds) {
+  if (period !== '3') {
+    return false;
+  }
+  if (!Number.isFinite(clockSeconds)) {
+    return false;
+  }
+  return clockSeconds >= 1 && clockSeconds <= 120;
+}
+
+function isEarlyGameGoal(period, clockSeconds) {
+  if (period !== '1') {
+    return false;
+  }
+  if (!Number.isFinite(clockSeconds)) {
+    return false;
+  }
+  return clockSeconds >= 15 * 60 && clockSeconds <= 16 * 60 + 59;
+}
+
+function isComebackGoal(teamScore, opponentScore) {
+  if (!Number.isFinite(teamScore) || !Number.isFinite(opponentScore)) {
+    return false;
+  }
+
+  const previousTeamScore = teamScore - 1;
+  if (previousTeamScore < 0) {
+    return false;
+  }
+
+  const wasTrailingByTwoOrMore = opponentScore - previousTeamScore >= 2;
+  const nowDeficit = opponentScore - teamScore;
+  return wasTrailingByTwoOrMore && nowDeficit <= 1;
+}
+
+function isClutchGoal(period, clockSeconds, teamScore, opponentScore) {
+  if (period !== '3') {
+    return false;
+  }
+  if (!Number.isFinite(clockSeconds) || !Number.isFinite(teamScore) || !Number.isFinite(opponentScore)) {
+    return false;
+  }
+  if (clockSeconds > 300) {
+    return false;
+  }
+  return teamScore === opponentScore || teamScore > opponentScore;
+}
+
 export class DataManager {
   constructor({
     fetchImpl = window.fetch.bind(window),
@@ -468,6 +530,30 @@ export class DataManager {
       }
     }
 
+    const existingGoals = Array.isArray(this.currentGame.goals) ? this.currentGame.goals : [];
+    const previousGoalsForPlayer = existingGoals.filter((goal) => goal.playerId === goalData.playerId).length;
+    const fallbackTotal = previousGoalsForPlayer + 1;
+    const providedTotal = toScoreValue(payload.totalGameGoals);
+    const totalGameGoalsValue = Number.isInteger(providedTotal) && providedTotal > 0 ? providedTotal : fallbackTotal;
+    payload.totalGameGoals = totalGameGoalsValue;
+
+    payload.hatTrickIndicator = normalizeYesNo(payload.hatTrickIndicator, toYesNo(totalGameGoalsValue >= 3));
+
+    const periodValue = `${payload.period ?? ''}`;
+    const clockSecondsValue = Number.isFinite(payload.clockSeconds) ? payload.clockSeconds : toScoreValue(payload.clockSeconds);
+    const teamScoreValue = normalizedTeamScore !== null ? normalizedTeamScore : null;
+    const opponentScoreValue = normalizedOpponentScore !== null ? normalizedOpponentScore : null;
+
+    const lateGoalComputed = isLateGameGoal(periodValue, clockSecondsValue);
+    const earlyGoalComputed = isEarlyGameGoal(periodValue, clockSecondsValue);
+    const comebackComputed = isComebackGoal(teamScoreValue, opponentScoreValue);
+    const clutchComputed = isClutchGoal(periodValue, clockSecondsValue, teamScoreValue, opponentScoreValue);
+
+    payload.lateGameGoal = normalizeYesNo(payload.lateGameGoal, toYesNo(lateGoalComputed));
+    payload.earlyGameGoal = normalizeYesNo(payload.earlyGameGoal, toYesNo(earlyGoalComputed));
+    payload.comebackGoal = normalizeYesNo(payload.comebackGoal, toYesNo(comebackComputed));
+    payload.clutchGoal = normalizeYesNo(payload.clutchGoal, toYesNo(clutchComputed));
+
     const goalRecord = {
       id: `${Date.now()}`,
       ...payload,
@@ -589,3 +675,4 @@ export class DataManager {
 }
 
 export const dataManager = new DataManager();
+
