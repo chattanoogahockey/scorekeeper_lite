@@ -158,6 +158,14 @@ export class ScorekeeperApp {
     this.showView('scoring');
   }
 
+  addShotOnGoal(team) {
+    if (!team) return;
+    this.data.addShotOnGoal(team);
+    if (this.currentView === 'scoring') {
+      this.render();
+    }
+  }
+
   showGoalDetails() {
     this.showView('goal-details');
   }

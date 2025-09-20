@@ -790,6 +790,18 @@ header p {
     margin-top: 10px;
 }
 
+.shot-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(150px, 1fr));
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+.shot-actions .btn {
+    width: 100%;
+}
+
+
 .score-actions {
     display: grid;
     grid-template-columns: repeat(2, minmax(150px, 1fr));

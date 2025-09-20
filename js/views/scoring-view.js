@@ -69,6 +69,11 @@ export const scoringView = {
           </div>
         </div>
 
+        <div class="shot-actions">
+          <button class="btn btn-secondary" data-action="add-shot" data-team="${game.homeTeam}">Shots on Goal: ${game.homeTeam} (${game.homeShots ?? 0})</button>
+          <button class="btn btn-secondary" data-action="add-shot" data-team="${game.awayTeam}">Shots on Goal: ${game.awayTeam} (${game.awayShots ?? 0})</button>
+        </div>
+
         <div class="score-actions">
           <button class="btn btn-primary" data-action="add-goal">Add Goal</button>
           <button class="btn btn-primary" data-action="add-penalty">Add Penalty</button>
@@ -114,6 +119,15 @@ export const scoringView = {
     main
       .querySelector('[data-action="edit-attendance"]')
       ?.addEventListener('click', () => app.showAttendance());
+    main
+      .querySelectorAll('[data-action="add-shot"]')
+      .forEach((button) => {
+        const team = button.dataset.team;
+        if (!team) return;
+        button.addEventListener('click', () => {
+          app.addShotOnGoal(team);
+        });
+      });
     main
       .querySelector('[data-action="submit-game"]')
       ?.addEventListener('click', () => app.submitGame());
