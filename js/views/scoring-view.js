@@ -101,14 +101,9 @@ export const scoringView = {
     `;
   },
   navigation() {
-    return '<button class="nav-btn" data-action="back-to-attendance">Back to Attendance</button>';
+    return '';
   },
   bind(app) {
-    const nav = app.topNavigation;
-    nav
-      .querySelector('[data-action="back-to-attendance"]')
-      ?.addEventListener('click', () => app.showAttendance());
-
     const main = app.mainContent;
     main
       .querySelector('[data-action="add-goal"]')

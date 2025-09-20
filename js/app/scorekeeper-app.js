@@ -420,6 +420,32 @@ export class ScorekeeperApp {
     const player = playersForTeam.find((p) => p.id === playerId);
     const assist = assistId ? playersForTeam.find((p) => p.id === assistId) : null;
     const jerseyMap = buildJerseyMap(this.data.currentGame);
+    const currentGame = this.data.currentGame;
+    const homeScore = Number((currentGame && currentGame.homeScore) || 0);
+    const awayScore = Number((currentGame && currentGame.awayScore) || 0);
+
+    let teamScore = homeScore;
+    let opponentScore = awayScore;
+    if (currentGame && team === currentGame.homeTeam) {
+      teamScore = homeScore + 1;
+      opponentScore = awayScore;
+    } else if (currentGame && team === currentGame.awayTeam) {
+      teamScore = awayScore + 1;
+      opponentScore = homeScore;
+    }
+
+    let scoreImpact = '';
+    if (currentGame) {
+      if (teamScore === 1 && opponentScore === 0) {
+        scoreImpact = 'first goal of the game';
+      } else if (teamScore === opponentScore) {
+        scoreImpact = 'game tying goal';
+      } else if (teamScore >= opponentScore + 2) {
+        scoreImpact = 'insurance goal';
+      } else if (teamScore > opponentScore) {
+        scoreImpact = 'go ahead goal';
+      }
+    }
 
     const playerLabel = player ? formatPlayerLabel(player, jerseyMap) : 'Unknown';
     const playerNumber = player ? resolvePlayerJersey(player, jerseyMap) : '';
@@ -428,6 +454,9 @@ export class ScorekeeperApp {
 
     this.data.addGoal({
       team,
+      teamScore,
+      opponentScore,
+      scoreImpact,
       player: player?.name ?? 'Unknown',
       playerId,
       playerLabel,
@@ -501,6 +530,3 @@ export class ScorekeeperApp {
     this.showStartupMenu();
   }
 }
-
-
-

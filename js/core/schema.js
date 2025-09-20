@@ -52,6 +52,12 @@ export const goalSchema = z.object({
 
   clockSeconds: z.number().int().nonnegative().optional(),
 
+  teamScore: z.number().int().nonnegative().optional(),
+
+  opponentScore: z.number().int().nonnegative().optional(),
+
+  scoreImpact: z.string().optional(),
+
   timestamp: z.string().datetime().optional(),
 
 });
@@ -145,4 +151,3 @@ export function safeValidateGame(game) {
   return gameSchema.safeParse(game);
 
 }
-

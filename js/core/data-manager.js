@@ -81,6 +81,48 @@ function toShotCount(value) {
   return 0;
 }
 
+function toScoreValue(value) {
+  if (typeof value === 'number') {
+    return Number.isFinite(value) && value >= 0 ? Math.trunc(value) : null;
+  }
+
+  if (typeof value === 'string') {
+    const trimmed = value.trim();
+    if (trimmed) {
+      const parsed = Number.parseInt(trimmed, 10);
+      if (Number.isFinite(parsed) && parsed >= 0) {
+        return parsed;
+      }
+    }
+  }
+
+  return null;
+}
+
+function deriveScoreImpact(teamScore, opponentScore) {
+  if (!Number.isFinite(teamScore) || !Number.isFinite(opponentScore)) {
+    return '';
+  }
+
+  if (teamScore === 1 && opponentScore === 0) {
+    return 'first goal of the game';
+  }
+
+  if (teamScore === opponentScore) {
+    return 'game tying goal';
+  }
+
+  if (teamScore >= opponentScore + 2) {
+    return 'insurance goal';
+  }
+
+  if (teamScore > opponentScore) {
+    return 'go ahead goal';
+  }
+
+  return '';
+}
+
 export class DataManager {
   constructor({
     fetchImpl = window.fetch.bind(window),
@@ -403,18 +445,41 @@ export class DataManager {
   addGoal(goalData) {
     if (!this.currentGame) return;
 
+    const normalizedTeamScore = toScoreValue(goalData?.teamScore);
+    const normalizedOpponentScore = toScoreValue(goalData?.opponentScore);
+    const payload = { ...goalData };
+
+    if (normalizedTeamScore !== null) {
+      payload.teamScore = normalizedTeamScore;
+    } else {
+      delete payload.teamScore;
+    }
+
+    if (normalizedOpponentScore !== null) {
+      payload.opponentScore = normalizedOpponentScore;
+    } else {
+      delete payload.opponentScore;
+    }
+
+    if (!payload.scoreImpact) {
+      const impact = deriveScoreImpact(normalizedTeamScore, normalizedOpponentScore);
+      if (impact) {
+        payload.scoreImpact = impact;
+      }
+    }
+
     const goalRecord = {
       id: `${Date.now()}`,
-      ...goalData,
+      ...payload,
       timestamp: new Date().toISOString(),
     };
 
     this.currentGame.goals.push(goalRecord);
     this.saveCurrentGameState();
 
-    if (goalData.team === this.currentGame.homeTeam) {
+    if (goalRecord.team === this.currentGame.homeTeam) {
       this.currentGame.homeScore += 1;
-    } else if (goalData.team === this.currentGame.awayTeam) {
+    } else if (goalRecord.team === this.currentGame.awayTeam) {
       this.currentGame.awayScore += 1;
     }
   }
