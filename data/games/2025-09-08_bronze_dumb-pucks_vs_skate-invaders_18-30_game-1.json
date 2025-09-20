@@ -1,0 +1,604 @@
+{
+  "id": "game_1",
+  "date": "2025-09-08 00:00:00",
+  "time": "18:30:00",
+  "homeTeam": "Dumb Pucks",
+  "awayTeam": "Skate Invaders",
+  "division": "Bronze",
+  "location": "Skate Invaders at Dumb Pucks",
+  "season": "Fall 2025",
+  "week": "1",
+  "status": "completed",
+  "created": "2025-09-20T12:15:23.030Z",
+  "ended": "2025-09-20T12:16:05.366Z",
+  "attendance": [
+    {
+      "id": "danglin_under_the_influence_alex_guppy_9",
+      "name": "Alex Guppy",
+      "team": "Danglin Under The Influence",
+      "jersey": "##",
+      "present": true
+    },
+    {
+      "id": "danglin_under_the_influence_benjamin_michael_16",
+      "name": "Benjamin Michael",
+      "team": "Danglin Under The Influence",
+      "jersey": "##",
+      "present": true
+    },
+    {
+      "id": "danglin_under_the_influence_bennett_martensen_24",
+      "name": "Bennett Martensen",
+      "team": "Danglin Under The Influence",
+      "jersey": "##",
+      "present": true
+    },
+    {
+      "id": "danglin_under_the_influence_brad_truel_28",
+      "name": "Brad Truel",
+      "team": "Danglin Under The Influence",
+      "jersey": "##",
+      "present": true
+    },
+    {
+      "id": "danglin_under_the_influence_brandon_santan_32",
+      "name": "Brandon Santan",
+      "team": "Danglin Under The Influence",
+      "jersey": "##",
+      "present": true
+    },
+    {
+      "id": "danglin_under_the_influence_joel_davis_89",
+      "name": "Joel Davis",
+      "team": "Danglin Under The Influence",
+      "jersey": "##",
+      "present": true
+    },
+    {
+      "id": "danglin_under_the_influence_kurtis_anderson_125",
+      "name": "Kurtis Anderson",
+      "team": "Danglin Under The Influence",
+      "jersey": "##",
+      "present": true
+    },
+    {
+      "id": "danglin_under_the_influence_matt_wright_143",
+      "name": "Matt Wright",
+      "team": "Danglin Under The Influence",
+      "jersey": "##",
+      "present": true
+    },
+    {
+      "id": "danglin_under_the_influence_raphael_santos_156",
+      "name": "Raphael Santos",
+      "team": "Danglin Under The Influence",
+      "jersey": "##",
+      "present": true
+    },
+    {
+      "id": "danglin_under_the_influence_spencer_peck_168",
+      "name": "Spencer Peck",
+      "team": "Danglin Under The Influence",
+      "jersey": "##",
+      "present": true
+    },
+    {
+      "id": "danglin_under_the_influence_taylor_redden_169",
+      "name": "Taylor Redden",
+      "team": "Danglin Under The Influence",
+      "jersey": "##",
+      "present": true
+    },
+    {
+      "id": "danglin_under_the_influence_sub_209",
+      "name": "Sub",
+      "team": "Danglin Under The Influence",
+      "jersey": "##",
+      "present": false
+    },
+    {
+      "id": "mracnaphobia_aidan_mcdonald_5",
+      "name": "Aidan McDonald",
+      "team": "Mracnaphobia",
+      "jersey": "##",
+      "present": true
+    },
+    {
+      "id": "mracnaphobia_brian_fisher_37",
+      "name": "Brian Fisher",
+      "team": "Mracnaphobia",
+      "jersey": "##",
+      "present": true
+    },
+    {
+      "id": "mracnaphobia_caleb_chastain_45",
+      "name": "Caleb Chastain",
+      "team": "Mracnaphobia",
+      "jersey": "##",
+      "present": true
+    },
+    {
+      "id": "mracnaphobia_joe_rawlston_85",
+      "name": "Joe Rawlston",
+      "team": "Mracnaphobia",
+      "jersey": "##",
+      "present": true
+    },
+    {
+      "id": "mracnaphobia_john_bradley_97",
+      "name": "John Bradley",
+      "team": "Mracnaphobia",
+      "jersey": "##",
+      "present": true
+    },
+    {
+      "id": "mracnaphobia_jordan_isip_105",
+      "name": "Jordan Isip",
+      "team": "Mracnaphobia",
+      "jersey": "##",
+      "present": true
+    },
+    {
+      "id": "mracnaphobia_jordan_mracna_109",
+      "name": "Jordan Mracna",
+      "team": "Mracnaphobia",
+      "jersey": "##",
+      "present": true
+    },
+    {
+      "id": "mracnaphobia_kenneth_redington_118",
+      "name": "Kenneth Redington",
+      "team": "Mracnaphobia",
+      "jersey": "##",
+      "present": true
+    },
+    {
+      "id": "mracnaphobia_rob_berna_157",
+      "name": "Rob Berna",
+      "team": "Mracnaphobia",
+      "jersey": "##",
+      "present": true
+    },
+    {
+      "id": "mracnaphobia_scott_quatro_160",
+      "name": "Scott Quatro",
+      "team": "Mracnaphobia",
+      "jersey": "##",
+      "present": true
+    },
+    {
+      "id": "mracnaphobia_wyatt_martin_188",
+      "name": "Wyatt Martin",
+      "team": "Mracnaphobia",
+      "jersey": "##",
+      "present": true
+    },
+    {
+      "id": "mracnaphobia_sub_210",
+      "name": "Sub",
+      "team": "Mracnaphobia",
+      "jersey": "##",
+      "present": false
+    },
+    {
+      "id": "crease_crusaders_andrew_richards_4",
+      "name": "Andrew Richards",
+      "team": "Crease Crusaders",
+      "jersey": "##",
+      "present": true
+    },
+    {
+      "id": "crease_crusaders_asher_licht_8",
+      "name": "Asher Licht",
+      "team": "Crease Crusaders",
+      "jersey": "##",
+      "present": true
+    },
+    {
+      "id": "crease_crusaders_branden_kim_14",
+      "name": "Branden Kim",
+      "team": "Crease Crusaders",
+      "jersey": "##",
+      "present": true
+    },
+    {
+      "id": "crease_crusaders_james_hering_70",
+      "name": "James Hering",
+      "team": "Crease Crusaders",
+      "jersey": "##",
+      "present": true
+    },
+    {
+      "id": "crease_crusaders_jimmy_icard_77",
+      "name": "Jimmy Icard",
+      "team": "Crease Crusaders",
+      "jersey": "##",
+      "present": true
+    },
+    {
+      "id": "crease_crusaders_nate_perry_116",
+      "name": "Nate Perry",
+      "team": "Crease Crusaders",
+      "jersey": "##",
+      "present": true
+    },
+    {
+      "id": "crease_crusaders_parker_wettstaedt_134",
+      "name": "Parker Wettstaedt",
+      "team": "Crease Crusaders",
+      "jersey": "##",
+      "present": true
+    },
+    {
+      "id": "crease_crusaders_thomas_dixon_177",
+      "name": "Thomas Dixon",
+      "team": "Crease Crusaders",
+      "jersey": "##",
+      "present": true
+    },
+    {
+      "id": "crease_crusaders_tysen_kim_186",
+      "name": "Tysen Kim",
+      "team": "Crease Crusaders",
+      "jersey": "##",
+      "present": true
+    },
+    {
+      "id": "crease_crusaders_will_dixon_187",
+      "name": "Will Dixon",
+      "team": "Crease Crusaders",
+      "jersey": "##",
+      "present": true
+    },
+    {
+      "id": "crease_crusaders_sub_194",
+      "name": "Sub",
+      "team": "Crease Crusaders",
+      "jersey": "##",
+      "present": false
+    },
+    {
+      "id": "stitches_bryant_purnell_20",
+      "name": "Bryant Purnell",
+      "team": "Stitches",
+      "jersey": "##",
+      "present": true
+    },
+    {
+      "id": "stitches_chris_barton_30",
+      "name": "Chris Barton",
+      "team": "Stitches",
+      "jersey": "##",
+      "present": true
+    },
+    {
+      "id": "stitches_chris_gaskin_31",
+      "name": "Chris Gaskin",
+      "team": "Stitches",
+      "jersey": "##",
+      "present": true
+    },
+    {
+      "id": "stitches_frank_lindeman_59",
+      "name": "Frank Lindeman",
+      "team": "Stitches",
+      "jersey": "##",
+      "present": true
+    },
+    {
+      "id": "stitches_john_bradley_78",
+      "name": "John Bradley",
+      "team": "Stitches",
+      "jersey": "##",
+      "present": true
+    },
+    {
+      "id": "stitches_joseph_bass_91",
+      "name": "Joseph Bass",
+      "team": "Stitches",
+      "jersey": "##",
+      "present": true
+    },
+    {
+      "id": "stitches_justin_hosie_94",
+      "name": "Justin Hosie",
+      "team": "Stitches",
+      "jersey": "##",
+      "present": true
+    },
+    {
+      "id": "stitches_micah_blakney_107",
+      "name": "Micah Blakney",
+      "team": "Stitches",
+      "jersey": "##",
+      "present": true
+    },
+    {
+      "id": "stitches_michael_quinlan_108",
+      "name": "Michael Quinlan",
+      "team": "Stitches",
+      "jersey": "##",
+      "present": true
+    },
+    {
+      "id": "stitches_noah's_arknemesis_miller_133",
+      "name": "Noah's Arknemesis Miller",
+      "team": "Stitches",
+      "jersey": "##",
+      "present": true
+    },
+    {
+      "id": "stitches_sub_198",
+      "name": "Sub",
+      "team": "Stitches",
+      "jersey": "##",
+      "present": false
+    },
+    {
+      "id": "dumb_pucks_dustin_backus_38",
+      "name": "Dustin Backus",
+      "team": "Dumb Pucks",
+      "jersey": "##",
+      "present": true
+    },
+    {
+      "id": "dumb_pucks_garrett_liles_61",
+      "name": "Garrett Liles",
+      "team": "Dumb Pucks",
+      "jersey": "##",
+      "present": true
+    },
+    {
+      "id": "dumb_pucks_kevin_neely_95",
+      "name": "Kevin Neely",
+      "team": "Dumb Pucks",
+      "jersey": "##",
+      "present": true
+    },
+    {
+      "id": "dumb_pucks_matthew_brewer_99",
+      "name": "Matthew Brewer",
+      "team": "Dumb Pucks",
+      "jersey": "##",
+      "present": true
+    },
+    {
+      "id": "dumb_pucks_nathan_kirby_124",
+      "name": "Nathan Kirby",
+      "team": "Dumb Pucks",
+      "jersey": "##",
+      "present": true
+    },
+    {
+      "id": "dumb_pucks_nic_nguyen_131",
+      "name": "Nic Nguyen",
+      "team": "Dumb Pucks",
+      "jersey": "##",
+      "present": true
+    },
+    {
+      "id": "dumb_pucks_riane_moore_147",
+      "name": "Riane Moore",
+      "team": "Dumb Pucks",
+      "jersey": "##",
+      "present": true
+    },
+    {
+      "id": "dumb_pucks_ricky_streeter_159",
+      "name": "Ricky Streeter",
+      "team": "Dumb Pucks",
+      "jersey": "##",
+      "present": true
+    },
+    {
+      "id": "dumb_pucks_stephan_herbel_166",
+      "name": "Stephan Herbel",
+      "team": "Dumb Pucks",
+      "jersey": "##",
+      "present": true
+    },
+    {
+      "id": "dumb_pucks_tom_snow_178",
+      "name": "Tom Snow",
+      "team": "Dumb Pucks",
+      "jersey": "##",
+      "present": true
+    },
+    {
+      "id": "dumb_pucks_sub_195",
+      "name": "Sub",
+      "team": "Dumb Pucks",
+      "jersey": "##",
+      "present": false
+    },
+    {
+      "id": "skate_invaders_bishop_moniz_11",
+      "name": "Bishop Moniz",
+      "team": "Skate Invaders",
+      "jersey": "##",
+      "present": true
+    },
+    {
+      "id": "skate_invaders_brandon_santan_17",
+      "name": "Brandon Santan",
+      "team": "Skate Invaders",
+      "jersey": "##",
+      "present": true
+    },
+    {
+      "id": "skate_invaders_david_nessly_36",
+      "name": "David Nessly",
+      "team": "Skate Invaders",
+      "jersey": "##",
+      "present": true
+    },
+    {
+      "id": "skate_invaders_eli_vest_40",
+      "name": "Eli Vest",
+      "team": "Skate Invaders",
+      "jersey": "##",
+      "present": true
+    },
+    {
+      "id": "skate_invaders_jacob_wilson_66",
+      "name": "Jacob Wilson",
+      "team": "Skate Invaders",
+      "jersey": "##",
+      "present": true
+    },
+    {
+      "id": "skate_invaders_jonathan_vatt_86",
+      "name": "Jonathan Vatt",
+      "team": "Skate Invaders",
+      "jersey": "##",
+      "present": true
+    },
+    {
+      "id": "skate_invaders_mark_vest_98",
+      "name": "Mark Vest",
+      "team": "Skate Invaders",
+      "jersey": "##",
+      "present": true
+    },
+    {
+      "id": "skate_invaders_philip_pugliese_135",
+      "name": "Philip Pugliese",
+      "team": "Skate Invaders",
+      "jersey": "##",
+      "present": true
+    },
+    {
+      "id": "skate_invaders_rebekah_bissell_140",
+      "name": "Rebekah Bissell",
+      "team": "Skate Invaders",
+      "jersey": "##",
+      "present": true
+    },
+    {
+      "id": "skate_invaders_tyler_dunkel_180",
+      "name": "Tyler Dunkel",
+      "team": "Skate Invaders",
+      "jersey": "##",
+      "present": true
+    },
+    {
+      "id": "skate_invaders_sub_197",
+      "name": "Sub",
+      "team": "Skate Invaders",
+      "jersey": "##",
+      "present": false
+    }
+  ],
+  "goals": [
+    {
+      "id": "1758370538452",
+      "team": "Dumb Pucks",
+      "player": "Dustin Backus",
+      "playerId": "dumb_pucks_dustin_backus_38",
+      "playerLabel": "## Dustin Backus",
+      "playerNumber": "##",
+      "assist": "",
+      "assistId": "",
+      "assistLabel": "",
+      "assistNumber": "",
+      "period": "1",
+      "time": "02:05",
+      "shotType": "wrist",
+      "goalType": "regular",
+      "breakaway": "no",
+      "clockSeconds": 125,
+      "teamScore": 1,
+      "opponentScore": 0,
+      "totalGameGoals": 1,
+      "scoreImpact": "first goal of the game",
+      "hatTrickIndicator": "no",
+      "lateGameGoal": "no",
+      "earlyGameGoal": "no",
+      "comebackGoal": "no",
+      "clutchGoal": "no",
+      "timestamp": "2025-09-20T12:15:38.452Z"
+    },
+    {
+      "id": "1758370546484",
+      "team": "Dumb Pucks",
+      "player": "Dustin Backus",
+      "playerId": "dumb_pucks_dustin_backus_38",
+      "playerLabel": "## Dustin Backus",
+      "playerNumber": "##",
+      "assist": "Matthew Brewer",
+      "assistId": "dumb_pucks_matthew_brewer_99",
+      "assistLabel": "## Matthew Brewer",
+      "assistNumber": "##",
+      "period": "3",
+      "time": "01:05",
+      "shotType": "wrist",
+      "goalType": "regular",
+      "breakaway": "no",
+      "clockSeconds": 65,
+      "teamScore": 2,
+      "opponentScore": 0,
+      "totalGameGoals": 2,
+      "scoreImpact": "insurance goal",
+      "hatTrickIndicator": "no",
+      "lateGameGoal": "yes",
+      "earlyGameGoal": "no",
+      "comebackGoal": "no",
+      "clutchGoal": "yes",
+      "timestamp": "2025-09-20T12:15:46.484Z"
+    }
+  ],
+  "penalties": [
+    {
+      "id": "1758370555688",
+      "team": "Dumb Pucks",
+      "player": "Dustin Backus",
+      "playerId": "dumb_pucks_dustin_backus_38",
+      "playerLabel": "## Dustin Backus",
+      "playerNumber": "##",
+      "type": "high-sticking",
+      "minutes": 2,
+      "period": "2",
+      "time": "02:05",
+      "clockSeconds": 125,
+      "teamScore": 2,
+      "opponentScore": 0,
+      "penaltiesThisGame": 1,
+      "teamPenaltyCount": 1,
+      "penaltyImpact": "costly penalty",
+      "momentumSwing": "yes",
+      "latePenalty": "no",
+      "earlyPenalty": "no",
+      "clutchPenalty": "no",
+      "comebackThreat": "no",
+      "powerPlayConverted": "no",
+      "timestamp": "2025-09-20T12:15:55.688Z"
+    },
+    {
+      "id": "1758370562145",
+      "team": "Dumb Pucks",
+      "player": "Dustin Backus",
+      "playerId": "dumb_pucks_dustin_backus_38",
+      "playerLabel": "## Dustin Backus",
+      "playerNumber": "##",
+      "type": "tripping",
+      "minutes": 2,
+      "period": "3",
+      "time": "01:05",
+      "clockSeconds": 65,
+      "teamScore": 2,
+      "opponentScore": 0,
+      "penaltiesThisGame": 2,
+      "teamPenaltyCount": 2,
+      "penaltyImpact": "costly penalty",
+      "momentumSwing": "yes",
+      "latePenalty": "yes",
+      "earlyPenalty": "no",
+      "clutchPenalty": "yes",
+      "comebackThreat": "no",
+      "powerPlayConverted": "no",
+      "timestamp": "2025-09-20T12:16:02.145Z"
+    }
+  ],
+  "homeScore": 2,
+  "awayScore": 0
+}
