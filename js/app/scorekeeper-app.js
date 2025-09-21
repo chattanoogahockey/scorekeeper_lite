@@ -8,6 +8,7 @@ import { historyView } from '../views/history-view.js';
 import { penaltyDetailsView } from '../views/penalty-details-view.js';
 import { scoringView } from '../views/scoring-view.js';
 import { startupView } from '../views/startup-view.js';
+import { statisticsView } from '../views/statistics-view.js';
 
 const VIEWS = [
   startupView,
@@ -17,6 +18,7 @@ const VIEWS = [
   goalDetailsView,
   penaltyDetailsView,
   historyView,
+  statisticsView,
 ];
 
 function parseClockTime(value) {
@@ -181,7 +183,7 @@ export class ScorekeeperApp {
   }
 
   showStatistics() {
-    window.alert('Statistics feature coming soon.');
+    this.showView('statistics');
   }
 
   startScoring() {

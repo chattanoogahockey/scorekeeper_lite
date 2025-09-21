@@ -913,3 +913,160 @@ header p {
         grid-template-columns: 1fr;
     }
 }
+
+.stats-card {
+    text-align: left;
+}
+
+.stats-card h2 {
+    text-align: left;
+    margin-bottom: 16px;
+}
+
+.stats-card .stats-section {
+    margin: 0;
+}
+
+.stats-card .stats-section + .stats-section {
+    margin-top: 28px;
+}
+
+.division-filter {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+.division-chip {
+    padding: 12px 16px;
+    border-radius: 999px;
+    border: 1px solid var(--border-color);
+    background: var(--card-background);
+    color: var(--secondary-color);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.division-chip:hover {
+    background: rgba(37, 99, 235, 0.08);
+    color: var(--primary-color);
+}
+
+.division-chip.is-active {
+    background: var(--primary-color);
+    color: #ffffff;
+    border-color: transparent;
+    box-shadow: var(--shadow);
+}
+
+.division-chip.is-active:hover {
+    background: #1d4ed8;
+    color: #ffffff;
+}
+
+.stats-table-container {
+    margin-top: 12px;
+    overflow-x: auto;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    background: var(--card-background);
+}
+
+.stats-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+    table-layout: fixed;
+}
+
+.stats-table col.stats-team-column {
+    width: 38%;
+}
+
+.stats-table col.stats-metric-column {
+    width: calc(62% / 7);
+}
+
+.stats-table--players col.stats-player-column {
+    width: 48%;
+}
+
+.stats-table--players col.stats-player-metric-column {
+    width: calc(52% / 5);
+}
+
+.stats-table thead {
+    background: rgba(37, 99, 235, 0.08);
+    color: var(--primary-color);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.stats-table th,
+.stats-table td {
+    padding: 10px 6px;
+    text-align: center;
+    border-bottom: 1px solid var(--border-color);
+    white-space: nowrap;
+}
+
+.stats-table th:first-child,
+.stats-table td:first-child {
+    text-align: left;
+    white-space: normal;
+    word-break: break-word;
+    line-height: 1.3;
+}
+
+.stats-table tbody th {
+    font-weight: 600;
+}
+
+@media (max-width: 480px) {
+    .stats-table {
+        font-size: 0.8rem;
+    }
+
+    .stats-table th,
+    .stats-table td {
+        padding: 8px 4px;
+    }
+
+    .stats-table col.stats-team-column {
+        width: 42%;
+    }
+
+    .stats-table--players col.stats-player-column {
+        width: 55%;
+    }
+}
+
+.stats-table tbody tr:nth-child(even) {
+    background: rgba(148, 163, 184, 0.12);
+}
+
+.stats-table tbody tr:hover {
+    background: rgba(37, 99, 235, 0.15);
+}
+
+.stats-player-name {
+    display: block;
+}
+
+.stats-player-team {
+    display: block;
+    margin-top: 2px;
+    font-size: 0.75rem;
+    color: var(--secondary-color);
+}
+
+.empty-state {
+    padding: 24px 16px;
+    text-align: center;
+    color: var(--secondary-color);
+    font-weight: 500;
+}
