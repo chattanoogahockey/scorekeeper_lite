@@ -335,7 +335,7 @@ function sortPlayerStandings(records) {
 
     return playerA.player.localeCompare(playerB.player);
   });
-}\nfunction computePlayerStandingsFromGames(games) {
+}\n\nfunction computePlayerStandingsFromGames(games) {
   const perDivision = new Map();
   const perDivisionWeekly = new Map();
   const divisionWeekFallback = new Map();
@@ -525,7 +525,7 @@ async function loadGameSummaries() {
       }
 
       const details = await fetchJson(entry.file);
-      const merged = details && typeof details === 'object' - details : {};
+      const merged = details && typeof details === 'object' ? details : {};
 
       return {
         file: entry.file ?? '',
@@ -594,7 +594,7 @@ async function loadStandings() {
 }
 
 function renderTeamStandingsTable(division) {
-  const standings = statisticsState.standings instanceof Map - statisticsState.standings : new Map();
+  const standings = statisticsState.standings instanceof Map ? statisticsState.standings : new Map();
   const teams = standings.get(division) ?? [];
 
   if (!teams.length) {
