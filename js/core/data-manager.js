@@ -221,6 +221,7 @@ export class DataManager {
     this.schedule = [];
     this.currentGame = null;
     this.gamesData = [];
+    this.remoteCompletedGameIds = new Set();
     this.isLoaded = false;
 
     this.syncQueue = queue;
@@ -305,31 +306,107 @@ export class DataManager {
   }
 
   async loadGamesData() {
-    const response = await this.safeFetch('data/games.json');
-    if (Array.isArray(response)) {
-      this.gamesData = response.map((game) => {
-        if (game && typeof game === 'object') {
-          this.ensureShotCounters(game);
+    const [legacyResponse, indexResponse] = await Promise.all([
+      this.safeFetch('data/games.json'),
+      this.safeFetch('data/games/index.json'),
+    ]);
+
+    const indexEntries = Array.isArray(indexResponse)
+      ? indexResponse
+          .map((entry) => {
+            if (!entry || typeof entry !== 'object') {
+              return null;
+            }
+
+            const id = `${entry.id ?? ''}`.trim();
+            if (!id) {
+              return null;
+            }
+
+            const normalized = {
+              id,
+              status: entry.status && entry.status !== 'in_progress' ? entry.status : 'completed',
+              homeTeam: entry.homeTeam ?? '',
+              awayTeam: entry.awayTeam ?? '',
+              homeScore: entry.homeScore ?? null,
+              awayScore: entry.awayScore ?? null,
+              division: entry.division ?? '',
+              date: entry.date ?? null,
+              time: entry.time ?? null,
+              created: entry.created ?? entry.lastUpdated ?? null,
+              lastUpdated: entry.lastUpdated ?? entry.created ?? null,
+              file: entry.file ?? '',
+              source: 'remote-index',
+            };
+
+            if (!normalized.created) {
+              normalized.created = new Date().toISOString();
+            }
+
+            this.ensureShotCounters(normalized);
+            return normalized;
+          })
+          .filter(Boolean)
+      : [];
+
+    this.remoteCompletedGameIds = new Set(indexEntries.map((game) => game.id));
+
+    const gamesById = new Map(indexEntries.map((game) => [game.id, game]));
+
+    if (Array.isArray(legacyResponse)) {
+      legacyResponse.forEach((game) => {
+        if (!game || typeof game !== 'object') {
+          return;
         }
-        return game;
+
+        const id = `${game.id ?? ''}`.trim();
+        if (!id) {
+          return;
+        }
+
+        this.ensureShotCounters(game);
+        gamesById.set(id, game);
       });
     }
+
+    this.gamesData = Array.from(gamesById.values());
   }
 
   loadCachedGames() {
     try {
       const cached = localStorage.getItem(STORAGE_KEY);
-      if (cached) {
-        const parsed = JSON.parse(cached);
-        if (Array.isArray(parsed)) {
-          this.gamesData = parsed.map((game) => {
-            if (game && typeof game === 'object') {
-              this.ensureShotCounters(game);
-            }
-            return game;
-          });
-        }
+      if (!cached) {
+        return;
       }
+
+      const parsed = JSON.parse(cached);
+      if (!Array.isArray(parsed)) {
+        return;
+      }
+
+      const gamesById = new Map(
+        Array.isArray(this.gamesData)
+          ? this.gamesData
+              .filter((game) => game && typeof game === 'object' && game.id)
+              .map((game) => [game.id, game])
+          : [],
+      );
+
+      parsed.forEach((game) => {
+        if (!game || typeof game !== 'object') {
+          return;
+        }
+
+        const id = `${game.id ?? ''}`.trim();
+        if (!id) {
+          return;
+        }
+
+        this.ensureShotCounters(game);
+        gamesById.set(id, game);
+      });
+
+      this.gamesData = Array.from(gamesById.values());
     } catch (error) {
       console.error('Failed to parse cached games', error);
     }
@@ -439,6 +516,8 @@ export class DataManager {
     if (!Array.isArray(this.gamesData)) {
       this.gamesData = [];
     }
+
+    this.remoteCompletedGameIds = new Set();
 
     if (this.syncQueue && typeof this.syncQueue.clear === 'function') {
       this.syncQueue.clear();
@@ -769,6 +848,8 @@ export class DataManager {
   endCurrentGame() {
     if (!this.currentGame) return null;
 
+    const isPracticeGame = Boolean(this.currentGame?.isPractice);
+
     this.currentGame.status = 'completed';
     this.currentGame.ended = new Date().toISOString();
 
@@ -781,10 +862,12 @@ export class DataManager {
       console.warn('Game validation warnings:', validation.error.flatten());
     }
 
-    this.gamesData.push(completedGame);
-    this.persistGames();
-    this.syncQueue.enqueue(completedGame);
-    this.notifySync({ type: 'queue:pending', pending: this.syncQueue.size });
+    if (!isPracticeGame) {
+      this.gamesData.push(completedGame);
+      this.persistGames();
+      this.syncQueue.enqueue(completedGame);
+      this.notifySync({ type: 'queue:pending', pending: this.syncQueue.size });
+    }
 
     this.clearCurrentGameState();
     this.currentGame = null;
@@ -798,7 +881,31 @@ export class DataManager {
   }
 
   getUpcomingGames() {
-    return this.schedule;
+    if (!Array.isArray(this.schedule)) {
+      return [];
+    }
+
+    const completedGameIds = new Set(
+      this.remoteCompletedGameIds instanceof Set ? this.remoteCompletedGameIds : [],
+    );
+
+    (Array.isArray(this.gamesData) ? this.gamesData : []).forEach((game) => {
+      if (game && game.id && game.status !== 'in_progress') {
+        completedGameIds.add(game.id);
+      }
+    });
+
+    return this.schedule.filter((game) => {
+      if (!game || !game.id) {
+        return false;
+      }
+
+      if (game.isPractice) {
+        return true;
+      }
+
+      return !completedGameIds.has(game.id);
+    });
   }
 
   getGameById(gameId) {

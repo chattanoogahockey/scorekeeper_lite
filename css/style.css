@@ -1006,6 +1006,18 @@ header p {
     letter-spacing: 0.05em;
 }
 
+.stats-table thead th {
+    vertical-align: bottom;
+}
+
+.stats-table thead th:not(:first-child) {
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    white-space: nowrap;
+    padding: 12px 4px;
+    line-height: 1.1;
+}
+
 .stats-table th,
 .stats-table td {
     padding: 10px 6px;
@@ -1039,6 +1051,10 @@ header p {
         padding: 8px 4px;
     }
 
+    .stats-table thead th:not(:first-child) {
+        padding: 10px 2px;
+    }
+
     .stats-table col.stats-team-column {
         width: 42%;
     }
@@ -1054,6 +1070,24 @@ header p {
 
 .stats-table tbody tr:hover {
     background: rgba(37, 99, 235, 0.15);
+}
+
+.traffic-table thead th {
+    vertical-align: bottom;
+}
+
+.traffic-table thead th:not(:first-child) {
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    white-space: nowrap;
+    padding: 12px 4px;
+    line-height: 1.1;
+}
+
+@media (max-width: 480px) {
+    .traffic-table thead th:not(:first-child) {
+        padding: 10px 2px;
+    }
 }
 
 .stats-player-name {
