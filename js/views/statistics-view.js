@@ -335,7 +335,9 @@ function sortPlayerStandings(records) {
 
     return playerA.player.localeCompare(playerB.player);
   });
-}\n\nfunction computePlayerStandingsFromGames(games) {
+}
+
+function computePlayerStandingsFromGames(games) {
   const perDivision = new Map();
   const perDivisionWeekly = new Map();
   const divisionWeekFallback = new Map();
