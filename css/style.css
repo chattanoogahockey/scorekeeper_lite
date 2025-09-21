@@ -1073,3 +1073,235 @@ header p {
     color: var(--secondary-color);
     font-weight: 500;
 }
+
+
+.stats-table-hint {
+    margin: 12px 0 6px;
+    font-size: 0.85rem;
+    color: var(--secondary-color);
+    text-align: left;
+}
+
+tbody .stats-player-row {
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+tbody .stats-player-row:hover {
+    background: rgba(37, 99, 235, 0.15);
+    transform: translateX(2px);
+}
+
+tbody .stats-player-row:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: -2px;
+    background: rgba(37, 99, 235, 0.15);
+}
+
+.stats-flyout[hidden] {
+    display: none;
+}
+
+.stats-flyout {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: rgba(15, 23, 42, 0.55);
+    z-index: 2000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+}
+
+.stats-flyout.is-visible {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.stats-flyout__panel {
+    background: var(--card-background);
+    border-radius: 16px;
+    box-shadow: 0 24px 60px rgba(15, 23, 42, 0.35);
+    max-width: 640px;
+    width: 100%;
+    padding: 28px;
+    border: 1px solid var(--border-color);
+    position: relative;
+}
+
+.stats-flyout__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.stats-flyout__close {
+    border: none;
+    background: transparent;
+    color: var(--secondary-color);
+    font-size: 1.6rem;
+    line-height: 1;
+    cursor: pointer;
+    padding: 4px 6px;
+    transition: color 0.2s ease;
+}
+
+.stats-flyout__close:hover,
+.stats-flyout__close:focus-visible {
+    color: var(--primary-color);
+}
+
+.stats-flyout__subtitle {
+    margin-bottom: 16px;
+    color: var(--secondary-color);
+    font-size: 0.9rem;
+}
+
+.stats-flyout__legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.stats-flyout__legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.85rem;
+    color: var(--secondary-color);
+}
+
+.stats-flyout__legend-item::before {
+    content: '';
+    width: 12px;
+    height: 12px;
+    border-radius: 999px;
+    background: currentColor;
+    display: inline-block;
+}
+
+.stats-flyout__legend-item--points::before {
+    background: var(--primary-color);
+}
+
+.stats-flyout__legend-item--goals::before {
+    background: var(--success-color);
+}
+
+.stats-flyout__legend-item--assists::before {
+    background: var(--warning-color);
+}
+
+.stats-flyout__chart {
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+.stats-chart__wrapper {
+    width: 100%;
+}
+
+.stats-chart__svg {
+    width: 100%;
+    height: auto;
+}
+
+.stats-chart__line {
+    fill: none;
+    stroke-width: 2.5;
+}
+
+.stats-chart__line--points {
+    stroke: var(--primary-color);
+}
+
+.stats-chart__line--goals {
+    stroke: var(--success-color);
+}
+
+.stats-chart__line--assists {
+    stroke: var(--warning-color);
+}
+
+.stats-chart__marker {
+    stroke: #ffffff;
+    stroke-width: 1.5;
+}
+
+.stats-chart__marker--points {
+    fill: var(--primary-color);
+}
+
+.stats-chart__marker--goals {
+    fill: var(--success-color);
+}
+
+.stats-chart__marker--assists {
+    fill: var(--warning-color);
+}
+
+.stats-chart__axis-line {
+    stroke: var(--border-color);
+    stroke-width: 1.2;
+}
+
+.stats-chart__grid-line {
+    stroke: rgba(148, 163, 184, 0.35);
+    stroke-width: 1;
+}
+
+.stats-chart__tick-line {
+    stroke: var(--border-color);
+    stroke-width: 1;
+}
+
+.stats-chart__tick-label {
+    fill: var(--secondary-color);
+    font-size: 0.7rem;
+    text-anchor: middle;
+}
+
+.stats-chart__tick-label--y {
+    text-anchor: end;
+}
+
+.stats-flyout__summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 12px;
+    margin-top: 8px;
+}
+
+.stats-flyout__summary dt {
+    font-size: 0.75rem;
+    color: var(--secondary-color);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.stats-flyout__summary dd {
+    margin: 4px 0 0;
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--text-color);
+}
+
+.stats-flyout__action {
+    margin-top: 12px;
+}
+
+@media (max-width: 640px) {
+    .stats-flyout {
+        padding: 16px;
+    }
+
+    .stats-flyout__panel {
+        padding: 20px;
+    }
+}
