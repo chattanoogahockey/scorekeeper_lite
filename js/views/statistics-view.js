@@ -1179,7 +1179,6 @@ export const statisticsView = {
       </div>
     `;
   },
-  },
   navigation() {
     return '<button class="nav-btn" data-action="back-to-menu">Back to Menu</button>';
   },
