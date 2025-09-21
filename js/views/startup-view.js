@@ -9,10 +9,10 @@
           <button class="btn" data-action="score-new">Score a New Game</button>
         </div>
         <div style="margin-top: 20px;">
-          <button class="btn" data-action="view-history">View Game History</button>
+          <button class="btn" data-action="statistics">Statistics</button>
         </div>
         <div style="margin-top: 20px;">
-          <button class="btn" data-action="statistics">Statistics</button>
+          <button class="btn" data-action="admin-panel">Admin Panel</button>
         </div>
       </div>
     `;
@@ -36,10 +36,21 @@
       }
     });
     main
-      .querySelector('[data-action="view-history"]')
-      .addEventListener('click', () => app.showGameHistory());
-    main
       .querySelector('[data-action="statistics"]')
       .addEventListener('click', () => app.showStatistics());
+    main
+      .querySelector('[data-action="admin-panel"]')
+      .addEventListener('click', () => {
+        const ADMIN_PASS = 'chahkyadmin';
+        const input = window.prompt('Enter admin password:');
+        if (input === null) {
+          return;
+        }
+        if (input === ADMIN_PASS) {
+          app.showAdmin();
+        } else {
+          window.alert('Incorrect password.');
+        }
+      });
   },
 };
