@@ -1,5 +1,19 @@
 [
   {
+    "id": "game_13",
+    "file": "data/games/2025-09-15_bronze_crease-crusaders_vs_skate-invaders_20-30_game-13.json",
+    "fileName": "2025-09-15_bronze_crease-crusaders_vs_skate-invaders_20-30_game-13.json",
+    "date": "2025-09-15 00:00:00",
+    "time": "20:30:00",
+    "division": "Bronze",
+    "created": "2025-09-21T04:19:07.216Z",
+    "homeTeam": "Crease Crusaders",
+    "awayTeam": "Skate Invaders",
+    "homeScore": 9,
+    "awayScore": 8,
+    "lastUpdated": "2025-09-21T04:35:48.974Z"
+  },
+  {
     "id": "game_12",
     "file": "data/games/2025-09-15_bronze_stitches_vs_dumb-pucks_19-30_game-12.json",
     "fileName": "2025-09-15_bronze_stitches_vs_dumb-pucks_19-30_game-12.json",
