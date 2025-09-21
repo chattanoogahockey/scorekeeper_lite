@@ -521,7 +521,7 @@ function renderPlayerStandingsTable(division) {
           <th scope="col">A</th>
           <th scope="col">PTS</th>
           <th scope="col">PIMS</th>
-          <th scope="col">HT</th>
+          <th scope="col">Hat Tricks</th>
         </tr>
       </thead>
       <tbody>
