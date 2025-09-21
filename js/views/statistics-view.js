@@ -6,6 +6,7 @@ const statisticsState = {
   standings: null,
   playerStandings: null,
   playerTimelines: null,
+  teamTimelines: null,
   errorMessage: null,
 };
 
@@ -30,6 +31,18 @@ const playerFlyoutElements = {
 
 let lastFocusedPlayerRow = null;
 let flyoutKeydownBound = false;
+const teamFlyoutElements = {
+  container: null,
+  panel: null,
+  title: null,
+  subtitle: null,
+  chart: null,
+  closeButtons: [],
+};
+
+let lastFocusedTeamRow = null;
+let teamFlyoutKeydownBound = false;
+
 
 function toTitleCase(value) {
   return value.replace(/\b\w/g, (character) => character.toUpperCase());
@@ -54,6 +67,31 @@ function normalizeDivision(value) {
   if (lower === 'silver') return 'Silver';
   if (lower === 'gold') return 'Gold';
   return toTitleCase(normalized);
+}
+
+function formatFlyoutSubtitle(parts) {
+  const bullet = '•';
+  return parts
+    .map((value) => `${value ?? ''}`.trim())
+    .filter((value) => value.length > 0)
+    .join(` ${bullet} `);
+}
+
+function computeTotalGames(timeline, override = null) {
+  if (Number.isFinite(override)) {
+    return override;
+  }
+
+  if (!Array.isArray(timeline) || !timeline.length) {
+    return 0;
+  }
+
+  const latest = timeline[timeline.length - 1];
+  if (latest && Number.isFinite(latest.cumulativeGames)) {
+    return latest.cumulativeGames;
+  }
+
+  return timeline.reduce((sum, point) => sum + (Number(point.games) || 0), 0);
 }
 
 function toScore(value) {
@@ -304,10 +342,27 @@ function ensurePlayerWeekStats(collection, playerKey, weekNumber) {
     return existing;
   }
 
-  const entry = { goals: 0, assists: 0, points: 0 };
+  const entry = { goals: 0, assists: 0, points: 0, games: new Set() };
   weekMap.set(weekNumber, entry);
   return entry;
 }
+
+function ensureTeamWeekStats(collection, teamKey, weekNumber) {
+  const weekMap = collection.get(teamKey) ?? new Map();
+  if (!collection.has(teamKey)) {
+    collection.set(teamKey, weekMap);
+  }
+
+  const existing = weekMap.get(weekNumber);
+  if (existing) {
+    return existing;
+  }
+
+  const entry = { goals: 0, assists: 0, points: 0, games: new Set() };
+  weekMap.set(weekNumber, entry);
+  return entry;
+}
+
 function sortPlayerStandings(records) {
   return [...records].sort((playerA, playerB) => {
     const pointsA = playerA.points;
@@ -392,6 +447,7 @@ function computePlayerStandingsFromGames(games) {
       goalCounts.set(key, (goalCounts.get(key) ?? 0) + 1);
 
       const goalWeeklyStats = ensurePlayerWeekStats(divisionWeekly, key, weekNumber);
+      goalWeeklyStats.games.add(gameId);
       goalWeeklyStats.goals += 1;
       goalWeeklyStats.points += 1;
 
@@ -404,6 +460,7 @@ function computePlayerStandingsFromGames(games) {
           assistRecord.games.add(gameId);
 
           const assistWeeklyStats = ensurePlayerWeekStats(divisionWeekly, assistKey, weekNumber);
+          assistWeeklyStats.games.add(gameId);
           assistWeeklyStats.assists += 1;
           assistWeeklyStats.points += 1;
         }
@@ -439,9 +496,12 @@ function computePlayerStandingsFromGames(games) {
 
       const penaltyEntry = ensurePlayerRecord(divisionStats, penalty.playerId, playerName, teamName);
       if (penaltyEntry) {
-        const { record } = penaltyEntry;
+        const { record, key } = penaltyEntry;
         record.pims += minutes;
         record.games.add(gameId);
+
+        const penaltyWeeklyStats = ensurePlayerWeekStats(divisionWeekly, key, weekNumber);
+        penaltyWeeklyStats.games.add(gameId);
       }
     });
   });
@@ -473,21 +533,26 @@ function computePlayerStandingsFromGames(games) {
       let cumulativeGoals = 0;
       let cumulativeAssists = 0;
       let cumulativePoints = 0;
+      let cumulativeGames = 0;
 
       const timeline = sortedWeeks.map((weekValue) => {
-        const weeklyTotals = weekStatsMap.get(weekValue) ?? { goals: 0, assists: 0, points: 0 };
+        const weeklyTotals = weekStatsMap.get(weekValue) ?? { goals: 0, assists: 0, points: 0, games: new Set() };
+        const gamesPlayed = weeklyTotals.games instanceof Set ? weeklyTotals.games.size : 0;
+        cumulativeGames += gamesPlayed;
         cumulativeGoals += weeklyTotals.goals;
         cumulativeAssists += weeklyTotals.assists;
         cumulativePoints += weeklyTotals.points;
 
         return {
           week: weekValue,
+          games: gamesPlayed,
           goals: weeklyTotals.goals,
           assists: weeklyTotals.assists,
           points: weeklyTotals.points,
           cumulativeGoals,
           cumulativeAssists,
           cumulativePoints,
+          cumulativeGames,
         };
       });
 
@@ -500,6 +565,124 @@ function computePlayerStandingsFromGames(games) {
   });
 
   return { standings: finalStandings, timelines: finalTimelines };
+}
+
+function computeTeamTimelinesFromGames(games) {
+  const perDivisionWeekly = new Map();
+  const divisionWeekFallback = new Map();
+
+  games.forEach((game) => {
+    if (!game || typeof game !== 'object') {
+      return;
+    }
+
+    const divisionName = normalizeDivision(game.division);
+    if (!divisionName) {
+      return;
+    }
+
+    const weekNumber = resolveWeekNumber(game, divisionName, divisionWeekFallback);
+    const gameId = game.file || `${game.homeTeam}-vs-${game.awayTeam}-${game.lastUpdated || ''}`;
+
+    const divisionWeekly = perDivisionWeekly.get(divisionName) ?? new Map();
+    if (!perDivisionWeekly.has(divisionName)) {
+      perDivisionWeekly.set(divisionName, divisionWeekly);
+    }
+
+    const homeTeam = `${game.homeTeam ?? ''}`.trim();
+    const awayTeam = `${game.awayTeam ?? ''}`.trim();
+    if (!homeTeam || !awayTeam) {
+      return;
+    }
+
+    const homeWeekStats = ensureTeamWeekStats(divisionWeekly, homeTeam, weekNumber);
+    const awayWeekStats = ensureTeamWeekStats(divisionWeekly, awayTeam, weekNumber);
+    homeWeekStats.games.add(gameId);
+    awayWeekStats.games.add(gameId);
+
+    const homeScore = toScore(game.homeScore) ?? 0;
+    const awayScore = toScore(game.awayScore) ?? 0;
+    homeWeekStats.goals += homeScore;
+    awayWeekStats.goals += awayScore;
+
+    const goals = Array.isArray(game.goals) ? game.goals : [];
+    goals.forEach((goal) => {
+      if (!goal || typeof goal !== 'object') {
+        return;
+      }
+
+      const scoringTeam = `${goal.team ?? ''}`.trim();
+      if (!scoringTeam) {
+        return;
+      }
+
+      const targetDivision = divisionWeekly.get(scoringTeam);
+      const targetStats = targetDivision ? targetDivision.get(weekNumber) : null;
+      if (!targetStats) {
+        return;
+      }
+
+      const assistName = `${goal.assist ?? ''}`.trim();
+      if (assistName) {
+        targetStats.assists += 1;
+      }
+    });
+
+    const overtimeGame = detectOvertime(game);
+    if (homeScore > awayScore) {
+      homeWeekStats.points += 2;
+      awayWeekStats.points += overtimeGame ? 1 : 0;
+    } else if (awayScore > homeScore) {
+      awayWeekStats.points += 2;
+      homeWeekStats.points += overtimeGame ? 1 : 0;
+    } else {
+      homeWeekStats.points += 1;
+      awayWeekStats.points += 1;
+    }
+  });
+
+  const finalTimelines = new Map();
+
+  perDivisionWeekly.forEach((divisionWeekly, divisionName) => {
+    const timelineMap = new Map();
+
+    divisionWeekly.forEach((weekStatsMap, teamName) => {
+      const sortedWeeks = [...weekStatsMap.keys()].sort((a, b) => a - b);
+      let cumulativeGoals = 0;
+      let cumulativeAssists = 0;
+      let cumulativePoints = 0;
+      let cumulativeGames = 0;
+
+      const timeline = sortedWeeks.map((weekValue) => {
+        const weeklyTotals = weekStatsMap.get(weekValue) ?? { goals: 0, assists: 0, points: 0, games: new Set() };
+        const gamesPlayed = weeklyTotals.games instanceof Set ? weeklyTotals.games.size : 0;
+        cumulativeGames += gamesPlayed;
+        cumulativeGoals += weeklyTotals.goals;
+        cumulativeAssists += weeklyTotals.assists;
+        cumulativePoints += weeklyTotals.points;
+
+        return {
+          week: weekValue,
+          games: gamesPlayed,
+          goals: weeklyTotals.goals,
+          assists: weeklyTotals.assists,
+          points: weeklyTotals.points,
+          cumulativeGoals,
+          cumulativeAssists,
+          cumulativePoints,
+          cumulativeGames,
+        };
+      });
+
+      if (timeline.length) {
+        timelineMap.set(teamName, timeline);
+      }
+    });
+
+    finalTimelines.set(divisionName, timelineMap);
+  });
+
+  return finalTimelines;
 }
 async function fetchJson(url) {
   try {
@@ -572,6 +755,7 @@ async function loadStandings() {
         const { standings: playerStandings, timelines } = computePlayerStandingsFromGames(games);
         statisticsState.playerStandings = playerStandings;
         statisticsState.playerTimelines = timelines;
+        statisticsState.teamTimelines = computeTeamTimelinesFromGames(games);
         statisticsState.errorMessage = null;
         return statisticsState.standings;
       })
@@ -580,6 +764,7 @@ async function loadStandings() {
         statisticsState.standings = new Map();
         statisticsState.playerStandings = new Map();
         statisticsState.playerTimelines = new Map();
+        statisticsState.teamTimelines = new Map();
         statisticsState.errorMessage = 'Unable to load statistics right now. Please try again later.';
         throw error;
       })
@@ -604,9 +789,17 @@ function renderTeamStandingsTable(division) {
   }
 
   const rows = teams
-    .map(
-      (team) => `
-        <tr>
+    .map((team) => {
+      const teamNameAttr = escapeAttribute(team.team);
+      const rowAriaLabel = escapeAttribute(`View cumulative trends for ${team.team}`);
+      return `
+        <tr
+          class="stats-team-row"
+          data-team-name="${teamNameAttr}"
+          tabindex="0"
+          role="button"
+          aria-label="${rowAriaLabel}"
+        >
           <th scope="row" aria-label="Team">${team.team}</th>
           <td>${team.gamesPlayed}</td>
           <td>${team.wins}</td>
@@ -616,11 +809,14 @@ function renderTeamStandingsTable(division) {
           <td>${team.goalsFor}</td>
           <td>${team.goalsAgainst}</td>
         </tr>
-      `,
-    )
+      `;
+    })
     .join('');
 
+  const hint = '<p class="stats-table-hint" role="note">Select a team row to view cumulative performance trends.</p>';
+
   return `
+    ${hint}
     <table class="stats-table">
       <colgroup>
         <col class="stats-team-column" />
@@ -644,7 +840,6 @@ function renderTeamStandingsTable(division) {
     </table>
   `;
 }
-
 function renderPlayerStandingsTable(division) {
   const standings = statisticsState.playerStandings instanceof Map ? statisticsState.playerStandings : new Map();
   const players = standings.get(division) ?? [];
@@ -659,6 +854,7 @@ function renderPlayerStandingsTable(division) {
       const playerKey = escapeAttribute(player.id);
       const playerNameAttr = escapeAttribute(player.player);
       const playerTeamAttr = escapeAttribute(player.team ?? '');
+      const playerGamesAttr = escapeAttribute(String(player.gamesPlayed ?? 0));
       const rowLabel = player.team ? `${player.player} - ${player.team}` : player.player;
       const rowAriaLabel = escapeAttribute(`View cumulative stats for ${rowLabel}`);
 
@@ -668,6 +864,7 @@ function renderPlayerStandingsTable(division) {
           data-player-key="${playerKey}"
           data-player-name="${playerNameAttr}"
           data-player-team="${playerTeamAttr}"
+          data-player-games="${playerGamesAttr}"
           tabindex="0"
           role="button"
           aria-label="${rowAriaLabel}"
@@ -715,7 +912,6 @@ function renderPlayerStandingsTable(division) {
     </table>
   `;
 }
-
 function markActiveDivision(filterContainer, division) {
   const buttons = filterContainer.querySelectorAll('[data-division]');
   buttons.forEach((button) => {
@@ -735,6 +931,7 @@ function updateStandingsView(containers, division) {
 
   if (statisticsState.errorMessage) {
     closePlayerFlyout();
+    closeTeamFlyout();
     const message = `<div class="empty-state">${statisticsState.errorMessage}</div>`;
     if (teamContainer) {
       teamContainer.innerHTML = message;
@@ -747,6 +944,7 @@ function updateStandingsView(containers, division) {
 
   if (teamContainer) {
     teamContainer.innerHTML = renderTeamStandingsTable(division);
+    ensureTeamRowInteractions(teamContainer);
   }
 
   if (playerContainer) {
@@ -754,7 +952,6 @@ function updateStandingsView(containers, division) {
     ensurePlayerRowInteractions(playerContainer);
   }
 }
-
 function getFocusableElements(root) {
   if (!root) {
     return [];
@@ -807,7 +1004,6 @@ function handlePlayerRowKeydown(event) {
   event.preventDefault();
   openPlayerFlyout(target);
 }
-
 function initializePlayerFlyout(root) {
   if (!root) {
     return;
@@ -845,7 +1041,7 @@ function initializePlayerFlyout(root) {
   }
 
   if (!flyoutKeydownBound) {
-    document.addEventListener('keydown', handleFlyoutKeydown);
+    document.addEventListener('keydown', handlePlayerFlyoutKeydown);
     flyoutKeydownBound = true;
   }
 }
@@ -872,6 +1068,8 @@ function openPlayerFlyout(row) {
 
   const playerName = row.dataset.playerName || row.querySelector('.stats-player-name')?.textContent?.trim() || 'Player';
   const teamName = row.dataset.playerTeam || row.querySelector('.stats-player-team')?.textContent?.trim() || '';
+  const gamesFromDataset = Number.parseInt(row.dataset.playerGames ?? '', 10);
+  const totalGames = Number.isFinite(gamesFromDataset) ? gamesFromDataset : null;
 
   if (playerFlyoutElements.title) {
     playerFlyoutElements.title.textContent = playerName;
@@ -879,17 +1077,11 @@ function openPlayerFlyout(row) {
 
   if (playerFlyoutElements.subtitle) {
     const divisionLabel = division ? `${division} Division` : '';
-    if (teamName && divisionLabel) {
-      playerFlyoutElements.subtitle.textContent = `${teamName} - ${divisionLabel}`;
-    } else if (teamName) {
-      playerFlyoutElements.subtitle.textContent = teamName;
-    } else {
-      playerFlyoutElements.subtitle.textContent = divisionLabel;
-    }
+    playerFlyoutElements.subtitle.textContent = formatFlyoutSubtitle([teamName, divisionLabel]);
   }
 
   if (playerFlyoutElements.chart) {
-    playerFlyoutElements.chart.innerHTML = renderPlayerTimelineChart(playerName, teamName, division, timeline);
+    playerFlyoutElements.chart.innerHTML = renderPlayerTimelineChart(playerName, teamName, division, timeline, totalGames);
   }
 
   container.removeAttribute('hidden');
@@ -928,7 +1120,7 @@ function closePlayerFlyout() {
   }
 }
 
-function handleFlyoutKeydown(event) {
+function handlePlayerFlyoutKeydown(event) {
   if (!isPlayerFlyoutOpen()) {
     return;
   }
@@ -968,17 +1160,18 @@ function handleFlyoutKeydown(event) {
     first.focus();
   }
 }
-
-function renderPlayerTimelineChart(playerName, teamName, division, timeline) {
+function renderPlayerTimelineChart(playerName, teamName, division, timeline, gamesPlayedOverride = null) {
   if (!Array.isArray(timeline) || !timeline.length) {
     return '<div class="empty-state">No scoring data recorded yet for this player.</div>';
   }
 
   const normalizedTimeline = timeline.map((point) => ({
     week: Number(point.week) || 0,
+    games: Number(point.games) || 0,
     cumulativeGoals: Number(point.cumulativeGoals) || 0,
     cumulativeAssists: Number(point.cumulativeAssists) || 0,
     cumulativePoints: Number(point.cumulativePoints) || 0,
+    cumulativeGames: Number(point.cumulativeGames) || 0,
   }));
 
   const { width, height, margin } = PLAYER_CHART_DIMENSIONS;
@@ -1075,17 +1268,18 @@ function renderPlayerTimelineChart(playerName, teamName, division, timeline) {
     .join('');
 
   const chartId = `player-chart-${Math.random().toString(36).slice(2, 8)}`;
-  const subtitleParts = [];
-  if (teamName) {
-    subtitleParts.push(teamName);
-  }
-  if (division) {
-    subtitleParts.push(`${division} Division`);
-  }
-  const subtitle = subtitleParts.join(' - ');
+  const subtitle = formatFlyoutSubtitle([
+    teamName,
+    division ? `${division} Division` : '',
+  ]);
 
   const latest = normalizedTimeline[normalizedTimeline.length - 1];
+  const gamesPlayedTotal = computeTotalGames(normalizedTimeline, gamesPlayedOverride);
   const summary = `<dl class="stats-flyout__summary">
+      <div>
+        <dt>Games Played</dt>
+        <dd>${gamesPlayedTotal}</dd>
+      </div>
       <div>
         <dt>Total Goals</dt>
         <dd>${latest.cumulativeGoals}</dd>
@@ -1132,7 +1326,358 @@ function renderPlayerTimelineChart(playerName, teamName, division, timeline) {
     ${summary}
   `;
 }
+function ensureTeamRowInteractions(container) {
+  if (!container || container.dataset.teamInteraction === 'bound') {
+    return;
+  }
 
+  container.addEventListener('click', handleTeamRowClick);
+  container.addEventListener('keydown', handleTeamRowKeydown);
+  container.dataset.teamInteraction = 'bound';
+}
+
+function handleTeamRowClick(event) {
+  const target = event.target instanceof HTMLElement ? event.target.closest('tr[data-team-name]') : null;
+  if (!target) {
+    return;
+  }
+
+  event.preventDefault();
+  openTeamFlyout(target);
+}
+
+function handleTeamRowKeydown(event) {
+  if (event.key !== 'Enter' && event.key !== ' ') {
+    return;
+  }
+
+  const target = event.target instanceof HTMLElement ? event.target.closest('tr[data-team-name]') : null;
+  if (!target) {
+    return;
+  }
+
+  event.preventDefault();
+  openTeamFlyout(target);
+}
+
+function initializeTeamFlyout(root) {
+  if (!root) {
+    return;
+  }
+
+  const container = root.querySelector('[data-team-flyout]');
+  if (!container) {
+    return;
+  }
+
+  teamFlyoutElements.container = container;
+  teamFlyoutElements.panel = container.querySelector('[data-team-flyout-panel]') ?? container.querySelector('.stats-flyout__panel');
+  teamFlyoutElements.title = container.querySelector('#team-flyout-title');
+  teamFlyoutElements.subtitle = container.querySelector('[data-team-flyout-subtitle]');
+  teamFlyoutElements.chart = container.querySelector('[data-team-chart]');
+  teamFlyoutElements.closeButtons = Array.from(container.querySelectorAll('[data-team-flyout-close]'));
+
+  teamFlyoutElements.closeButtons.forEach((button) => {
+    if (button.dataset.teamFlyoutBound === 'true') {
+      return;
+    }
+    button.addEventListener('click', () => {
+      closeTeamFlyout();
+    });
+    button.dataset.teamFlyoutBound = 'true';
+  });
+
+  if (container.dataset.teamFlyoutBackdrop !== 'true') {
+    container.addEventListener('click', (event) => {
+      if (event.target === container) {
+        closeTeamFlyout();
+      }
+    });
+    container.dataset.teamFlyoutBackdrop = 'true';
+  }
+
+  if (!teamFlyoutKeydownBound) {
+    document.addEventListener('keydown', handleTeamFlyoutKeydown);
+    teamFlyoutKeydownBound = true;
+  }
+}
+
+function isTeamFlyoutOpen() {
+  return Boolean(teamFlyoutElements.container && !teamFlyoutElements.container.hasAttribute('hidden'));
+}
+
+function openTeamFlyout(row) {
+  if (!row) {
+    return;
+  }
+
+  initializeTeamFlyout(document.getElementById('main-content'));
+
+  const container = teamFlyoutElements.container;
+  if (!container) {
+    return;
+  }
+
+  const teamName = row.dataset.teamName || row.querySelector('th')?.textContent?.trim() || 'Team';
+  const division = statisticsState.selectedDivision;
+  const timelines = statisticsState.teamTimelines instanceof Map ? statisticsState.teamTimelines : new Map();
+  const divisionTimelines = timelines.get(division);
+  const timeline = divisionTimelines instanceof Map ? divisionTimelines.get(teamName) : null;
+
+  if (teamFlyoutElements.title) {
+    teamFlyoutElements.title.textContent = teamName;
+  }
+
+  if (teamFlyoutElements.subtitle) {
+    const divisionLabel = division ? `${division} Division` : '';
+    teamFlyoutElements.subtitle.textContent = formatFlyoutSubtitle([divisionLabel]);
+  }
+
+  if (teamFlyoutElements.chart) {
+    teamFlyoutElements.chart.innerHTML = renderTeamTimelineChart(teamName, division, timeline);
+  }
+
+  container.removeAttribute('hidden');
+  container.classList.add('is-visible');
+  container.setAttribute('aria-hidden', 'false');
+
+  lastFocusedTeamRow = row;
+
+  const focusTargets = getFocusableElements(teamFlyoutElements.panel ?? container);
+  if (focusTargets.length) {
+    focusTargets[0].focus({ preventScroll: true });
+  } else {
+    container.setAttribute('tabindex', '-1');
+    container.focus({ preventScroll: true });
+  }
+}
+
+function closeTeamFlyout() {
+  const container = teamFlyoutElements.container;
+  if (!container || container.hasAttribute('hidden')) {
+    return;
+  }
+
+  container.classList.remove('is-visible');
+  container.setAttribute('aria-hidden', 'true');
+  container.setAttribute('hidden', '');
+
+  if (teamFlyoutElements.chart) {
+    teamFlyoutElements.chart.innerHTML = '';
+  }
+
+  const previousFocus = lastFocusedTeamRow;
+  lastFocusedTeamRow = null;
+  if (previousFocus && document.body.contains(previousFocus)) {
+    previousFocus.focus({ preventScroll: true });
+  }
+}
+
+function handleTeamFlyoutKeydown(event) {
+  if (!isTeamFlyoutOpen()) {
+    return;
+  }
+
+  const container = teamFlyoutElements.container;
+  if (!container || !container.contains(event.target)) {
+    return;
+  }
+
+  if (event.key === 'Escape') {
+    event.preventDefault();
+    closeTeamFlyout();
+    return;
+  }
+
+  if (event.key !== 'Tab') {
+    return;
+  }
+
+  const focusScope = teamFlyoutElements.panel ?? container;
+  const focusable = getFocusableElements(focusScope);
+  if (!focusable.length) {
+    event.preventDefault();
+    return;
+  }
+
+  const first = focusable[0];
+  const last = focusable[focusable.length - 1];
+
+  if (event.shiftKey) {
+    if (document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    }
+  } else if (document.activeElement === last) {
+    event.preventDefault();
+    first.focus();
+  }
+}
+
+function renderTeamTimelineChart(teamName, division, timeline) {
+  if (!Array.isArray(timeline) || !timeline.length) {
+    return '<div class="empty-state">No team data recorded yet for this division.</div>';
+  }
+
+  const normalizedTimeline = timeline.map((point) => ({
+    week: Number(point.week) || 0,
+    cumulativeGoals: Number(point.cumulativeGoals) || 0,
+    cumulativeAssists: Number(point.cumulativeAssists) || 0,
+    cumulativePoints: Number(point.cumulativePoints) || 0,
+    cumulativeGames: Number(point.cumulativeGames) || 0,
+  }));
+
+  const { width, height, margin } = PLAYER_CHART_DIMENSIONS;
+  const innerWidth = width - margin.left - margin.right;
+  const innerHeight = height - margin.top - margin.bottom;
+
+  const weeks = normalizedTimeline.map((point) => point.week);
+  const minWeek = Math.min(...weeks);
+  const maxWeek = Math.max(...weeks);
+  const weekSpan = Math.max(1, maxWeek - minWeek);
+
+  const maxValue = Math.max(
+    ...normalizedTimeline.map((point) =>
+      Math.max(point.cumulativePoints, point.cumulativeGoals, point.cumulativeAssists),
+    ),
+  );
+  const valueSpan = Math.max(1, maxValue);
+
+  const xPos = (week) =>
+    margin.left + (weekSpan === 0 ? 0 : ((week - minWeek) / weekSpan) * innerWidth);
+  const yPos = (value) => margin.top + innerHeight - (valueSpan === 0 ? 0 : (value / valueSpan) * innerHeight);
+
+  const buildPath = (key) =>
+    normalizedTimeline
+      .map((point, index) => {
+        const x = xPos(point.week).toFixed(2);
+        const y = yPos(point[key]).toFixed(2);
+        return `${index === 0 ? 'M' : 'L'}${x},${y}`;
+      })
+      .join(' ');
+
+  const pointsPath = buildPath('cumulativePoints');
+  const goalsPath = buildPath('cumulativeGoals');
+  const assistsPath = buildPath('cumulativeAssists');
+
+  const pointsMarkers = normalizedTimeline
+    .map(
+      (point) =>
+        `<circle class="stats-chart__marker stats-chart__marker--points" cx="${xPos(point.week).toFixed(2)}" cy="${yPos(point.cumulativePoints).toFixed(2)}" r="3"></circle>`,
+    )
+    .join('');
+  const goalsMarkers = normalizedTimeline
+    .map(
+      (point) =>
+        `<circle class="stats-chart__marker stats-chart__marker--goals" cx="${xPos(point.week).toFixed(2)}" cy="${yPos(point.cumulativeGoals).toFixed(2)}" r="3"></circle>`,
+    )
+    .join('');
+  const assistsMarkers = normalizedTimeline
+    .map(
+      (point) =>
+        `<circle class="stats-chart__marker stats-chart__marker--assists" cx="${xPos(point.week).toFixed(2)}" cy="${yPos(point.cumulativeAssists).toFixed(2)}" r="3"></circle>`,
+    )
+    .join('');
+
+  const uniqueWeeks = [...new Set(weeks)].sort((a, b) => a - b);
+  const axisY = height - margin.bottom;
+  const axisX = margin.left;
+
+  const xTicks = uniqueWeeks
+    .map((week) => {
+      const x = xPos(week).toFixed(2);
+      return `<g class="stats-chart__tick stats-chart__tick--x" transform="translate(${x}, ${axisY})">
+          <line class="stats-chart__tick-line" y2="6"></line>
+          <text class="stats-chart__tick-label" dy="1.8em">W${week}</text>
+        </g>`;
+    })
+    .join('');
+
+  const approxTicks = Math.min(5, Math.ceil(valueSpan) + 1);
+  const tickStep = Math.max(1, Math.floor(valueSpan / (approxTicks - 1)) || 1);
+  const tickValuesSet = new Set();
+  for (let value = 0; value <= valueSpan; value += tickStep) {
+    tickValuesSet.add(Math.min(valueSpan, Math.round(value)));
+  }
+  tickValuesSet.add(valueSpan);
+  tickValuesSet.add(0);
+  const tickValues = Array.from(tickValuesSet).sort((a, b) => a - b);
+
+  const yTicks = tickValues
+    .map((value) => {
+      const y = yPos(value).toFixed(2);
+      return `<g class="stats-chart__tick stats-chart__tick--y" transform="translate(${axisX}, ${y})">
+          <line class="stats-chart__tick-line" x1="-6"></line>
+          <text class="stats-chart__tick-label stats-chart__tick-label--y" dx="-0.8em" dy="0.32em">${value}</text>
+        </g>`;
+    })
+    .join('');
+
+  const gridLines = tickValues
+    .map((value) => {
+      const y = yPos(value).toFixed(2);
+      return `<line class="stats-chart__grid-line" x1="${margin.left}" x2="${width - margin.right}" y1="${y}" y2="${y}"></line>`;
+    })
+    .join('');
+
+  const chartId = `team-chart-${Math.random().toString(36).slice(2, 8)}`;
+  const subtitle = formatFlyoutSubtitle([
+    division ? `${division} Division` : '',
+  ]);
+
+  const latest = normalizedTimeline[normalizedTimeline.length - 1];
+  const gamesPlayedTotal = computeTotalGames(normalizedTimeline);
+  const summary = `<dl class="stats-flyout__summary">
+      <div>
+        <dt>Games Played</dt>
+        <dd>${gamesPlayedTotal}</dd>
+      </div>
+      <div>
+        <dt>Total Goals</dt>
+        <dd>${latest.cumulativeGoals}</dd>
+      </div>
+      <div>
+        <dt>Total Assists</dt>
+        <dd>${latest.cumulativeAssists}</dd>
+      </div>
+      <div>
+        <dt>Total Points</dt>
+        <dd>${latest.cumulativePoints}</dd>
+      </div>
+    </dl>`;
+
+  return `
+    <div class="stats-chart__wrapper">
+      <svg
+        class="stats-chart__svg"
+        viewBox="0 0 ${width} ${height}"
+        role="img"
+        aria-labelledby="${chartId}-title ${chartId}-desc"
+      >
+        <title id="${chartId}-title">Cumulative performance for ${teamName}</title>
+        <desc id="${chartId}-desc">${subtitle || 'Cumulative trend timeline'}</desc>
+        <g class="stats-chart__grid">
+          ${gridLines}
+        </g>
+        <line class="stats-chart__axis-line" x1="${margin.left}" x2="${width - margin.right}" y1="${axisY}" y2="${axisY}"></line>
+        <line class="stats-chart__axis-line" x1="${margin.left}" x2="${margin.left}" y1="${margin.top}" y2="${axisY}"></line>
+        <g class="stats-chart__ticks stats-chart__ticks--x">
+          ${xTicks}
+        </g>
+        <g class="stats-chart__ticks stats-chart__ticks--y">
+          ${yTicks}
+        </g>
+        <path class="stats-chart__line stats-chart__line--points" d="${pointsPath}"></path>
+        <path class="stats-chart__line stats-chart__line--goals" d="${goalsPath}"></path>
+        <path class="stats-chart__line stats-chart__line--assists" d="${assistsPath}"></path>
+        ${pointsMarkers}
+        ${goalsMarkers}
+        ${assistsMarkers}
+      </svg>
+    </div>
+    ${summary}
+  `;
+}
 export const statisticsView = {
   id: 'statistics',
   hideHeader: true,
@@ -1161,6 +1706,22 @@ export const statisticsView = {
           <div class="stats-table-container" data-player-standings>
             <div class="empty-state">Loading statistics...</div>
           </div>
+        </div>
+      </div>
+      <div class="stats-flyout" data-team-flyout hidden aria-hidden="true" tabindex="-1">
+        <div class="stats-flyout__panel" data-team-flyout-panel role="dialog" aria-modal="true" aria-labelledby="team-flyout-title">
+          <div class="stats-flyout__header">
+            <h3 id="team-flyout-title">Team Statistics</h3>
+            <button type="button" class="stats-flyout__close" data-team-flyout-close aria-label="Close team statistics">&times;</button>
+          </div>
+          <p class="stats-flyout__subtitle" data-team-flyout-subtitle></p>
+          <div class="stats-flyout__legend">
+            <span class="stats-flyout__legend-item stats-flyout__legend-item--points">Points</span>
+            <span class="stats-flyout__legend-item stats-flyout__legend-item--goals">Goals</span>
+            <span class="stats-flyout__legend-item stats-flyout__legend-item--assists">Assists</span>
+          </div>
+          <div class="stats-flyout__chart" data-team-chart></div>
+          <button type="button" class="btn stats-flyout__action" data-team-flyout-close>Close</button>
         </div>
       </div>
       <div class="stats-flyout" data-player-flyout hidden aria-hidden="true" tabindex="-1">
@@ -1208,7 +1769,9 @@ export const statisticsView = {
 
     const containers = { team: teamContainer, player: playerContainer };
 
+    initializeTeamFlyout(main);
     initializePlayerFlyout(main);
+    ensureTeamRowInteractions(teamContainer);
     ensurePlayerRowInteractions(playerContainer);
 
     filterContainer.addEventListener('click', (event) => {
@@ -1224,6 +1787,7 @@ export const statisticsView = {
 
       statisticsState.selectedDivision = division;
       closePlayerFlyout();
+      closeTeamFlyout();
       markActiveDivision(filterContainer, division);
       updateStandingsView(containers, division);
     });
@@ -1242,8 +1806,16 @@ export const statisticsView = {
       .catch(() => {
         statisticsState.errorMessage = statisticsState.errorMessage ?? 'Unable to load statistics right now. Please try again later.';
         closePlayerFlyout();
+        closeTeamFlyout();
         updateStandingsView(containers, statisticsState.selectedDivision);
       });
   },
 };
+
+
+
+
+
+
+
 
