@@ -992,11 +992,11 @@ header p {
 }
 
 .stats-table--players col.stats-player-column {
-    width: 48%;
+    width: 35%;
 }
 
 .stats-table--players col.stats-player-metric-column {
-    width: calc(52% / 5);
+    width: calc(65% / 7);
 }
 
 .stats-table thead {

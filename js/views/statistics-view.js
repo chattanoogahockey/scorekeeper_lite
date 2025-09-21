@@ -184,6 +184,8 @@ function createPlayerRecord(playerId, playerName, teamName) {
     assists: 0,
     pims: 0,
     hatTricks: 0,
+    gamesPlayed: 0,
+    games: new Set(),
   };
 }
 
@@ -256,6 +258,8 @@ function computePlayerStandingsFromGames(games) {
       return;
     }
 
+    const gameId = game.file || `${game.homeTeam}-vs-${game.awayTeam}-${game.lastUpdated || ''}`;
+
     const goals = Array.isArray(game.goals) ? game.goals : [];
     const penalties = Array.isArray(game.penalties) ? game.penalties : [];
 
@@ -284,6 +288,7 @@ function computePlayerStandingsFromGames(games) {
 
       const { record, key } = playerEntry;
       record.goals += 1;
+      record.games.add(gameId);
       goalCounts.set(key, (goalCounts.get(key) ?? 0) + 1);
 
       const assistName = `${goal.assist ?? ''}`.trim();
@@ -291,6 +296,7 @@ function computePlayerStandingsFromGames(games) {
         const assistEntry = ensurePlayerRecord(divisionStats, goal.assistId, assistName, teamName);
         if (assistEntry) {
           assistEntry.record.assists += 1;
+          assistEntry.record.games.add(gameId);
         }
       }
     });
@@ -325,7 +331,15 @@ function computePlayerStandingsFromGames(games) {
       const penaltyEntry = ensurePlayerRecord(divisionStats, penalty.playerId, playerName, teamName);
       if (penaltyEntry) {
         penaltyEntry.record.pims += minutes;
+        penaltyEntry.record.games.add(gameId);
       }
+    });
+  });
+
+  perDivision.forEach((divisionStats) => {
+    divisionStats.forEach((record) => {
+      record.gamesPlayed = record.games.size;
+      delete record.games;
     });
   });
 
@@ -335,6 +349,7 @@ function computePlayerStandingsFromGames(games) {
     const normalized = Array.from(divisionStats.values()).map((record) => ({
       ...record,
       points: record.goals + record.assists,
+      ptsPerGame: record.gamesPlayed > 0 ? Number((record.points / record.gamesPlayed).toFixed(2)) : 0,
     }));
 
     finalStandings.set(divisionName, sortPlayerStandings(normalized));
@@ -498,9 +513,11 @@ function renderPlayerStandingsTable(division) {
             <span class="stats-player-name">${player.player}</span>
             ${teamLine}
           </th>
+          <td>${player.gamesPlayed}</td>
           <td>${player.goals}</td>
           <td>${player.assists}</td>
           <td>${player.points}</td>
+          <td>${player.ptsPerGame}</td>
           <td>${player.pims}</td>
           <td>${player.hatTricks}</td>
         </tr>
@@ -512,14 +529,16 @@ function renderPlayerStandingsTable(division) {
     <table class="stats-table stats-table--players">
       <colgroup>
         <col class="stats-player-column" />
-        <col span="5" class="stats-player-metric-column" />
+        <col span="7" class="stats-player-metric-column" />
       </colgroup>
       <thead>
         <tr>
           <th scope="col">Player</th>
+          <th scope="col">GP</th>
           <th scope="col">G</th>
           <th scope="col">A</th>
           <th scope="col">PTS</th>
+          <th scope="col">PTS/GP</th>
           <th scope="col">PIMS</th>
           <th scope="col">Hat Tricks</th>
         </tr>
