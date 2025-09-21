@@ -609,13 +609,14 @@ export class DataManager {
     };
 
     this.currentGame.goals.push(goalRecord);
-    this.saveCurrentGameState();
 
     if (goalRecord.team === this.currentGame.homeTeam) {
       this.currentGame.homeScore += 1;
     } else if (goalRecord.team === this.currentGame.awayTeam) {
       this.currentGame.awayScore += 1;
     }
+
+    this.saveCurrentGameState();
   }
 
   addPenalty(penaltyData) {
