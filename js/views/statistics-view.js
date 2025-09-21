@@ -349,7 +349,7 @@ function computePlayerStandingsFromGames(games) {
     const normalized = Array.from(divisionStats.values()).map((record) => ({
       ...record,
       points: record.goals + record.assists,
-      ptsPerGame: record.gamesPlayed > 0 ? Number((record.points / record.gamesPlayed).toFixed(2)) : 0,
+      ptsPerGame: record.gamesPlayed > 0 ? Number(((record.goals + record.assists) / record.gamesPlayed).toFixed(1)) : 0,
     }));
 
     finalStandings.set(divisionName, sortPlayerStandings(normalized));
