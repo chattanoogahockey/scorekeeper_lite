@@ -1,5 +1,19 @@
 [
   {
+    "id": "game_6",
+    "file": "data/games/2025-09-10_silver_danglin-under-the-influence_vs_mracnaphobia_20-00_game-6.json",
+    "fileName": "2025-09-10_silver_danglin-under-the-influence_vs_mracnaphobia_20-00_game-6.json",
+    "date": "2025-09-10 00:00:00",
+    "time": "20:00:00",
+    "division": "Silver",
+    "created": "2025-09-22T13:53:49.025Z",
+    "homeTeam": "Danglin Under The Influence",
+    "awayTeam": "Mracnaphobia",
+    "homeScore": 5,
+    "awayScore": 6,
+    "lastUpdated": "2025-09-22T14:15:39.069Z"
+  },
+  {
     "id": "game_5",
     "file": "data/games/2025-09-10_silver_crease-grease_vs_board-busters_19-00_game-5.json",
     "fileName": "2025-09-10_silver_crease-grease_vs_board-busters_19-00_game-5.json",
