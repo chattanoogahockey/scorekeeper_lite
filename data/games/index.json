@@ -1,5 +1,19 @@
 [
   {
+    "id": "game_20",
+    "file": "data/games/2025-09-18_gold_corn-stars_vs_sislo_21-00_game-20.json",
+    "fileName": "2025-09-18_gold_corn-stars_vs_sislo_21-00_game-20.json",
+    "date": "2025-09-18 00:00:00",
+    "time": "21:00:00",
+    "division": "Gold",
+    "created": "2025-09-22T04:11:55.930Z",
+    "homeTeam": "Corn Stars",
+    "awayTeam": "Sislo",
+    "homeScore": 4,
+    "awayScore": 5,
+    "lastUpdated": "2025-09-22T04:16:42.138Z"
+  },
+  {
     "id": "game_19",
     "file": "data/games/2025-09-18_gold_noahs-arknemesis_vs_slappy-gilmores_20-00_game-19.json",
     "fileName": "2025-09-18_gold_noahs-arknemesis_vs_slappy-gilmores_20-00_game-19.json",
