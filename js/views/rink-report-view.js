@@ -194,13 +194,13 @@ async function fetchJson(url) {
   }
 }
 
-function buildPlayerNameMap(rosters) {
+function buildPlayerDirectory(rosters) {
   const map = new Map();
   if (!rosters || typeof rosters !== 'object') {
     return map;
   }
 
-  Object.values(rosters).forEach((players) => {
+  Object.entries(rosters).forEach(([teamName, players]) => {
     if (!Array.isArray(players)) {
       return;
     }
@@ -210,8 +210,12 @@ function buildPlayerNameMap(rosters) {
       }
       const id = `${player.id ?? ''}`.trim();
       const name = `${player.name ?? ''}`.trim();
+      const team = `${player.team ?? teamName ?? ''}`.trim();
       if (id) {
-        map.set(id, name || null);
+        map.set(id, {
+          name: name || null,
+          team: team || null,
+        });
       }
     });
   });
@@ -328,7 +332,8 @@ function formatAssistName(value, team) {
 }
 
 function formatScorerName(goal) {
-  return sanitizePlayerDisplayName(goal?.player, goal?.team ?? '');
+  const team = goal?.playerTeam ?? goal?.team ?? '';
+  return sanitizePlayerDisplayName(goal?.player, team);
 }
 
 function describeGoalAction(goal) {
@@ -425,7 +430,7 @@ function renderGoalTimeline(goals, game, options = {}) {
     }
     const { goal, homeBefore, awayBefore, homeAfter, awayAfter } = contexts[index];
     const scorerName = formatScorerName(goal);
-    const assistName = formatAssistName(goal.assist, goal.team ?? '');
+    const assistName = formatAssistName(goal.assist, goal.assistTeam ?? goal.team ?? '');
     const moment = formatGoalMoment(goal);
     const impact = describeScoreSwing(goal.team, homeBefore, awayBefore, homeAfter, awayAfter, game);
     const action = describeGoalAction(goal);
@@ -532,7 +537,7 @@ function buildGameStory(game, goals, options = {}) {
   const composeLine = (goal, context, extraOptions = {}) => {
     const { includeScore = false, extraFragment = null } = extraOptions;
     const scorerName = formatScorerName(goal);
-    const assistName = formatAssistName(goal.assist, goal.team ?? '');
+    const assistName = formatAssistName(goal.assist, goal.assistTeam ?? goal.team ?? '');
     const action = describeGoalAction(goal);
     const moment = formatGoalMoment(goal);
     const impact = describeScoreSwing(
@@ -783,7 +788,7 @@ async function loadRinkDataset() {
   const rosters = rostersResponse && typeof rostersResponse === 'object' ? rostersResponse : {};
 
   const teamDivisionMap = buildTeamDivisionMap(rosters);
-  const playerNameMap = buildPlayerNameMap(rosters);
+  const playerDirectory = buildPlayerDirectory(rosters);
   const weekFallback = new Map();
   const games = await Promise.all(
     indexEntries.map(async (entry) => {
@@ -812,16 +817,24 @@ async function loadRinkDataset() {
             .map((goal) => {
               const team = goal.team ?? '';
               const rawPlayer = `${goal.player ?? ''}`.trim();
-              const canonicalPlayer = (playerNameMap.get(`${goal.playerId ?? ''}`.trim()) ?? rawPlayer)?.trim();
+              const playerEntry = playerDirectory.get(`${goal.playerId ?? ''}`.trim());
+              const canonicalPlayer = (playerEntry?.name ?? rawPlayer)?.trim();
               const playerName = canonicalPlayer && canonicalPlayer.length > 0 ? canonicalPlayer : 'Unknown';
+              const playerTeam = (playerEntry?.team ?? team)?.trim() || team;
+
               const rawAssist = `${goal.assist ?? ''}`.trim();
-              const canonicalAssist = (playerNameMap.get(`${goal.assistId ?? ''}`.trim()) ?? rawAssist)?.trim();
+              const assistEntry = playerDirectory.get(`${goal.assistId ?? ''}`.trim());
+              const canonicalAssist = (assistEntry?.name ?? rawAssist)?.trim();
               const assistName = canonicalAssist && canonicalAssist.length > 0 ? canonicalAssist : '';
+              const assistTeam = (assistEntry?.team ?? team)?.trim() || team;
+
               return {
                 ...goal,
                 team,
                 player: playerName,
+                playerTeam,
                 assist: assistName,
+                assistTeam,
                 period: `${goal.period ?? ''}`,
                 time: `${goal.time ?? ''}`,
                 clockSeconds: Number.isFinite(goal.clockSeconds)
@@ -1112,19 +1125,20 @@ function computePlayerStatsByDivision(gamesByDivision) {
       const participants = new Map();
 
       goals.forEach((goal) => {
-        const goalTeam = goal.team ?? '';
-        const scorerName = sanitizePlayerDisplayName(goal.player, goalTeam);
+        const scorerTeam = goal.playerTeam ?? goal.team ?? '';
+        const scorerName = sanitizePlayerDisplayName(goal.player, scorerTeam);
         if (!scorerName) {
           return;
         }
-        const playerKey = buildPlayerKey(goal.playerId, scorerName, goalTeam);
+        const playerKey = buildPlayerKey(goal.playerId, scorerName, scorerTeam);
 
-        const assistName = sanitizePlayerDisplayName(goal.assist, goalTeam);
-        const assistKey = assistName ? buildPlayerKey(goal.assistId, assistName, goalTeam) : null;
+        const assistTeam = goal.assistTeam ?? goal.team ?? scorerTeam;
+        const assistName = sanitizePlayerDisplayName(goal.assist, assistTeam);
+        const assistKey = assistName ? buildPlayerKey(goal.assistId, assistName, assistTeam) : null;
 
         const scorerRecord = ensurePlayerRecord(players, playerKey, {
           player: scorerName,
-          team: goalTeam,
+          team: scorerTeam,
         });
         scorerRecord.goals += 1;
         scorerRecord.points = scorerRecord.goals + scorerRecord.assists;
@@ -1142,7 +1156,7 @@ function computePlayerStatsByDivision(gamesByDivision) {
         if (assistKey && assistName) {
           const assistRecord = ensurePlayerRecord(players, assistKey, {
             player: assistName,
-            team: goalTeam,
+            team: assistTeam,
           });
           assistRecord.assists += 1;
           assistRecord.points = assistRecord.goals + assistRecord.assists;
@@ -1683,22 +1697,24 @@ function computeGameStar(goals) {
 
   const totals = new Map();
   goals.forEach((goal) => {
-    const scorerName = sanitizePlayerDisplayName(goal.player, goal.team ?? '');
+    const scorerTeam = goal.playerTeam ?? goal.team ?? '';
+    const scorerName = sanitizePlayerDisplayName(goal.player, scorerTeam);
     if (scorerName) {
-      const key = buildPlayerKey(goal.playerId, scorerName, goal.team ?? '');
+      const key = buildPlayerKey(goal.playerId, scorerName, scorerTeam);
       const record = totals.get(key) ?? { player: scorerName, goals: 0, assists: 0 };
       record.player = scorerName;
-      record.team = goal.team;
+      record.team = scorerTeam;
       record.goals += 1;
       totals.set(key, record);
     }
 
-    const assistName = sanitizePlayerDisplayName(goal.assist, goal.team ?? '');
+    const helperTeam = goal.assistTeam ?? goal.team ?? '';
+    const assistName = sanitizePlayerDisplayName(goal.assist, helperTeam);
     if (assistName) {
-      const assistKey = buildPlayerKey(goal.assistId, assistName, goal.team ?? '');
+      const assistKey = buildPlayerKey(goal.assistId, assistName, helperTeam);
       const assistRecord = totals.get(assistKey) ?? { player: assistName, goals: 0, assists: 0 };
       assistRecord.player = assistName;
-      assistRecord.team = goal.team;
+      assistRecord.team = helperTeam;
       assistRecord.assists += 1;
       totals.set(assistKey, assistRecord);
     }
