@@ -22,18 +22,20 @@ const PRACTICE_GAME_SEED = Object.freeze({
 });
 const PRACTICE_ROSTER_SEED = Object.freeze({
   [PRACTICE_HOME_TEAM]: [
-    { id: 'practice_game_player_1', name: 'Practice Skater 1', team: PRACTICE_HOME_TEAM, division: PRACTICE_DIVISION },
-    { id: 'practice_game_player_2', name: 'Practice Skater 2', team: PRACTICE_HOME_TEAM, division: PRACTICE_DIVISION },
-    { id: 'practice_game_player_3', name: 'Practice Skater 3', team: PRACTICE_HOME_TEAM, division: PRACTICE_DIVISION },
-    { id: 'practice_game_player_4', name: 'Practice Skater 4', team: PRACTICE_HOME_TEAM, division: PRACTICE_DIVISION },
-    { id: 'practice_game_goalie_1', name: 'Practice Goalie', team: PRACTICE_HOME_TEAM, division: PRACTICE_DIVISION },
+    { id: 'practice_game_player_1', name: 'Practice Skater 1', team: PRACTICE_HOME_TEAM, division: PRACTICE_DIVISION, present: true },
+    { id: 'practice_game_player_2', name: 'Practice Skater 2', team: PRACTICE_HOME_TEAM, division: PRACTICE_DIVISION, present: true },
+    { id: 'practice_game_player_3', name: 'Practice Skater 3', team: PRACTICE_HOME_TEAM, division: PRACTICE_DIVISION, present: true },
+    { id: 'practice_game_player_4', name: 'Practice Skater 4', team: PRACTICE_HOME_TEAM, division: PRACTICE_DIVISION, present: true },
+    { id: 'practice_game_sub_1', name: 'Practice Sub', team: PRACTICE_HOME_TEAM, division: PRACTICE_DIVISION, present: false },
+    { id: 'practice_game_goalie_1', name: 'Practice Goalie', team: PRACTICE_HOME_TEAM, division: PRACTICE_DIVISION, present: true },
   ],
   [PRACTICE_AWAY_TEAM]: [
-    { id: 'practice_opponent_player_1', name: 'Opponent Skater 1', team: PRACTICE_AWAY_TEAM, division: PRACTICE_DIVISION },
-    { id: 'practice_opponent_player_2', name: 'Opponent Skater 2', team: PRACTICE_AWAY_TEAM, division: PRACTICE_DIVISION },
-    { id: 'practice_opponent_player_3', name: 'Opponent Skater 3', team: PRACTICE_AWAY_TEAM, division: PRACTICE_DIVISION },
-    { id: 'practice_opponent_player_4', name: 'Opponent Skater 4', team: PRACTICE_AWAY_TEAM, division: PRACTICE_DIVISION },
-    { id: 'practice_opponent_goalie_1', name: 'Opponent Goalie', team: PRACTICE_AWAY_TEAM, division: PRACTICE_DIVISION },
+    { id: 'practice_opponent_player_1', name: 'Opponent Skater 1', team: PRACTICE_AWAY_TEAM, division: PRACTICE_DIVISION, present: true },
+    { id: 'practice_opponent_player_2', name: 'Opponent Skater 2', team: PRACTICE_AWAY_TEAM, division: PRACTICE_DIVISION, present: true },
+    { id: 'practice_opponent_player_3', name: 'Opponent Skater 3', team: PRACTICE_AWAY_TEAM, division: PRACTICE_DIVISION, present: true },
+    { id: 'practice_opponent_player_4', name: 'Opponent Skater 4', team: PRACTICE_AWAY_TEAM, division: PRACTICE_DIVISION, present: true },
+    { id: 'practice_opponent_sub_1', name: 'Opponent Sub', team: PRACTICE_AWAY_TEAM, division: PRACTICE_DIVISION, present: false },
+    { id: 'practice_opponent_goalie_1', name: 'Opponent Goalie', team: PRACTICE_AWAY_TEAM, division: PRACTICE_DIVISION, present: true },
   ],
 });
 
