@@ -6,6 +6,7 @@ import { gameSelectionView } from '../views/game-selection-view.js';
 import { goalDetailsView } from '../views/goal-details-view.js';
 import { historyView } from '../views/history-view.js';
 import { penaltyDetailsView } from '../views/penalty-details-view.js';
+import { overtimeView } from '../views/overtime-view.js';
 import { scoringView } from '../views/scoring-view.js';
 import { startupView } from '../views/startup-view.js';
 import { statisticsView } from '../views/statistics-view.js';
@@ -17,6 +18,7 @@ const VIEWS = [
   scoringView,
   goalDetailsView,
   penaltyDetailsView,
+  overtimeView,
   historyView,
   statisticsView,
 ];
@@ -176,6 +178,10 @@ export class ScorekeeperApp {
 
   showPenaltyDetails() {
     this.showView('penalty-details');
+  }
+
+  showOvertimeSelection() {
+    this.showView('overtime');
   }
 
   showGameHistory() {
@@ -613,15 +619,58 @@ export class ScorekeeperApp {
     this.showScoring();
   }
 
-  submitGame() {
+  handleOvertimeWinnerSelection(teamName) {
     if (!this.data.currentGame) return;
 
-    const confirmSubmit = window.confirm('Submit this game and save the results?');
-    if (!confirmSubmit) return;
+    const normalized = typeof teamName === 'string' ? teamName.trim() : '';
+    if (!normalized) return;
+
+    const { homeTeam, awayTeam } = this.data.currentGame;
+    if (![homeTeam, awayTeam].includes(normalized)) {
+      return;
+    }
+
+    const confirmed = window.confirm(`Record ${normalized} as the OT/Shootout winner and submit the game now?`);
+    if (!confirmed) {
+      this.showScoring();
+      return;
+    }
+
+    const isPracticeGame = Boolean(this.data.currentGame?.isPractice);
+    this.data.recordOvertimeWinner(normalized);
+
+    const successMessage = isPracticeGame
+      ? `Practice game submitted for testing only. ${normalized} recorded as the OT/Shootout winner. No data was saved.`
+      : `${normalized} wins in OT/Shootout! Game submitted.`;
+
+    this.submitGame({ skipConfirm: true, successMessage });
+  }
+
+  submitGame(options = {}) {
+    if (!this.data.currentGame) return;
+
+    const { skipConfirm = false, successMessage = null } = options;
+    const isPracticeGame = Boolean(this.data.currentGame?.isPractice);
+
+    if (!skipConfirm) {
+      const confirmMessage = isPracticeGame
+        ? 'Submit this practice game? No data will be saved.'
+        : 'Submit this game and save the results?';
+      const confirmSubmit = window.confirm(confirmMessage);
+      if (!confirmSubmit) return;
+    }
 
     const completedGame = this.data.endCurrentGame();
     console.log('Game submitted', completedGame);
-    window.alert('Game submitted!');
+
+    const finalMessage = successMessage ?? (isPracticeGame
+      ? 'Practice game submitted for testing only. No data was saved.'
+      : 'Game submitted!');
+
+    if (finalMessage) {
+      window.alert(finalMessage);
+    }
+
     this.showStartupMenu();
   }
 }

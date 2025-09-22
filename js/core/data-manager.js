@@ -335,6 +335,7 @@ export class DataManager {
               time: entry.time ?? null,
               created: entry.created ?? entry.lastUpdated ?? null,
               lastUpdated: entry.lastUpdated ?? entry.created ?? null,
+              overtimeResult: entry.overtimeResult ?? null,
               file: entry.file ?? '',
               source: 'remote-index',
             };
@@ -344,6 +345,7 @@ export class DataManager {
             }
 
             this.ensureShotCounters(normalized);
+            this.ensureOvertimeResult(normalized);
             return normalized;
           })
           .filter(Boolean)
@@ -365,6 +367,7 @@ export class DataManager {
         }
 
         this.ensureShotCounters(game);
+        this.ensureOvertimeResult(game);
         gamesById.set(id, game);
       });
     }
@@ -403,6 +406,7 @@ export class DataManager {
         }
 
         this.ensureShotCounters(game);
+        this.ensureOvertimeResult(game);
         gamesById.set(id, game);
       });
 
@@ -440,6 +444,41 @@ export class DataManager {
 
     game.homeShots = toShotCount(game.homeShots);
     game.awayShots = toShotCount(game.awayShots);
+  }
+
+  ensureOvertimeResult(game) {
+    if (!game || typeof game !== 'object') {
+      return;
+    }
+
+    const result = game.overtimeResult;
+    if (!result || typeof result !== 'object') {
+      game.overtimeResult = null;
+      return;
+    }
+
+    const winner = typeof result.winner === 'string' ? result.winner.trim() : '';
+    if (!winner) {
+      game.overtimeResult = null;
+      return;
+    }
+
+    const decidedBy = typeof result.decidedBy === 'string' && result.decidedBy
+      ? result.decidedBy
+      : 'ot_shootout';
+    const recordedAt = typeof result.recordedAt === 'string' && result.recordedAt
+      ? result.recordedAt
+      : null;
+
+    const normalized = {
+      winner,
+      decidedBy,
+    };
+    if (recordedAt) {
+      normalized.recordedAt = recordedAt;
+    }
+
+    game.overtimeResult = normalized;
   }
 
   restoreCurrentGame() {
@@ -534,6 +573,7 @@ export class DataManager {
       attendance: gameInfo.attendance || [],
       goals: [],
       penalties: [],
+      overtimeResult: gameInfo.overtimeResult ?? null,
       homeScore: 0,
       awayScore: 0,
       homeShots: toShotCount(gameInfo?.homeShots),
@@ -547,6 +587,7 @@ export class DataManager {
     }
 
     this.ensureShotCounters(baseGame);
+    this.ensureOvertimeResult(baseGame);
 
     return baseGame;
   }
@@ -845,6 +886,26 @@ export class DataManager {
     });
   }
 
+  recordOvertimeWinner(teamName) {
+    if (!this.currentGame) return;
+
+    const normalized = typeof teamName === 'string' ? teamName.trim() : '';
+    if (!normalized) return;
+
+    const validTeams = new Set([this.currentGame.homeTeam, this.currentGame.awayTeam].filter(Boolean));
+    if (!validTeams.has(normalized)) {
+      return;
+    }
+
+    this.currentGame.overtimeResult = {
+      winner: normalized,
+      decidedBy: 'ot_shootout',
+      recordedAt: new Date().toISOString(),
+    };
+    this.ensureOvertimeResult(this.currentGame);
+    this.saveCurrentGameState();
+  }
+
   endCurrentGame() {
     if (!this.currentGame) return null;
 
@@ -857,6 +918,7 @@ export class DataManager {
 
     const validation = safeValidateGame(this.currentGame);
     const completedGame = validation.success ? validation.data : { ...this.currentGame };
+    this.ensureOvertimeResult(completedGame);
 
     if (!validation.success) {
       console.warn('Game validation warnings:', validation.error.flatten());

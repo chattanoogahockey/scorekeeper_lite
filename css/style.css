@@ -162,6 +162,16 @@ header p {
     background: #059669;
 }
 
+.btn-warning {
+    background: var(--warning-color);
+    color: #1f2937;
+}
+
+.btn-warning:hover {
+    background: #d97706;
+    color: #111827;
+}
+
 .btn-danger {
     background: var(--danger-color);
 }
@@ -795,6 +805,30 @@ header p {
     grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
     gap: 8px;
     margin-bottom: 14px;
+}
+
+.overtime-banner {
+    margin: 12px 0 18px;
+    padding: 12px;
+    border-radius: 10px;
+    background: rgba(37, 99, 235, 0.08);
+    color: var(--secondary-color);
+    font-weight: 500;
+}
+
+.overtime-banner.is-set {
+    background: rgba(16, 185, 129, 0.16);
+    color: var(--success-color);
+}
+
+.overtime-team-options {
+    justify-content: center;
+    gap: 12px;
+}
+
+.overtime-team-options .minutes-button {
+    flex: 1;
+    min-width: 140px;
 }
 
 .shot-button {

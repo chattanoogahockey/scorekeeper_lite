@@ -128,6 +128,16 @@ export const penaltySchema = z.object({
 
 
 
+export const overtimeResultSchema = z
+  .object({
+    winner: z.string().min(1),
+    decidedBy: z.string().min(1),
+    recordedAt: z.string().datetime().optional(),
+  })
+  .strict();
+
+
+
 export const gameSchema = z.object({
 
   id: z.string().min(1),
@@ -159,6 +169,8 @@ export const gameSchema = z.object({
   goals: z.array(goalSchema).default([]),
 
   penalties: z.array(penaltySchema).default([]),
+
+  overtimeResult: overtimeResultSchema.nullable().optional().default(null),
 
   homeScore: z.number().int().nonnegative().default(0),
 

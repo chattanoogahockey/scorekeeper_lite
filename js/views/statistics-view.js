@@ -109,7 +109,25 @@ function toScore(value) {
   return null;
 }
 
+function getOvertimeWinner(game) {
+  if (!game || typeof game !== 'object') {
+    return null;
+  }
+
+  const result = game.overtimeResult;
+  if (!result || typeof result !== 'object') {
+    return null;
+  }
+
+  const winner = `${result.winner ?? ''}`.trim();
+  return winner.length ? winner : null;
+}
+
 function detectOvertime(game) {
+  if (getOvertimeWinner(game)) {
+    return true;
+  }
+
   if (!game || !Array.isArray(game.goals)) {
     return false;
   }
@@ -203,7 +221,8 @@ function computeStandingsFromGames(games) {
     awayRecord.goalsFor += awayScore;
     awayRecord.goalsAgainst += homeScore;
 
-    const overtimeGame = detectOvertime(game);
+    const overtimeWinner = getOvertimeWinner(game);
+    const overtimeGame = overtimeWinner ? true : detectOvertime(game);
 
     if (homeScore > awayScore) {
       homeRecord.wins += 1;
@@ -223,8 +242,18 @@ function computeStandingsFromGames(games) {
       } else {
         homeRecord.losses += 1;
       }
+    } else if (overtimeWinner === homeTeam) {
+      homeRecord.wins += 1;
+      homeRecord.points += 2;
+      awayRecord.overtime += 1;
+      awayRecord.points += 1;
+    } else if (overtimeWinner === awayTeam) {
+      awayRecord.wins += 1;
+      awayRecord.points += 2;
+      homeRecord.overtime += 1;
+      homeRecord.points += 1;
     } else {
-      // Handle the rare case of a tie game.
+      // Handle the rare case of a tie game with no OT/Shootout result.
       homeRecord.points += 1;
       awayRecord.points += 1;
     }
@@ -628,13 +657,20 @@ function computeTeamTimelinesFromGames(games) {
       }
     });
 
-    const overtimeGame = detectOvertime(game);
+    const overtimeWinner = getOvertimeWinner(game);
+    const overtimeGame = overtimeWinner ? true : detectOvertime(game);
     if (homeScore > awayScore) {
       homeWeekStats.points += 2;
       awayWeekStats.points += overtimeGame ? 1 : 0;
     } else if (awayScore > homeScore) {
       awayWeekStats.points += 2;
       homeWeekStats.points += overtimeGame ? 1 : 0;
+    } else if (overtimeWinner === homeTeam) {
+      homeWeekStats.points += 2;
+      awayWeekStats.points += 1;
+    } else if (overtimeWinner === awayTeam) {
+      awayWeekStats.points += 2;
+      homeWeekStats.points += 1;
     } else {
       homeWeekStats.points += 1;
       awayWeekStats.points += 1;
@@ -723,6 +759,7 @@ async function loadGameSummaries() {
         date: merged.date ?? entry.date ?? null,
         goals: Array.isArray(merged.goals) ? merged.goals : [],
         penalties: Array.isArray(merged.penalties) ? merged.penalties : [],
+        overtimeResult: merged.overtimeResult ?? entry.overtimeResult ?? null,
         status: merged.status ?? entry.status ?? '',
         lastUpdated: merged.lastUpdated ?? entry.lastUpdated ?? null,
       };

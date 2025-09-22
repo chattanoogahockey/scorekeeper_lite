@@ -11,7 +11,8 @@
     "awayTeam": "Vice City Panthers",
     "homeScore": 4,
     "awayScore": 9,
-    "lastUpdated": "2025-09-21T04:52:37.254Z"
+    "lastUpdated": "2025-09-21T04:52:37.254Z",
+    "overtimeResult": null
   },
   {
     "id": "game_13",
@@ -25,7 +26,8 @@
     "awayTeam": "Skate Invaders",
     "homeScore": 9,
     "awayScore": 8,
-    "lastUpdated": "2025-09-21T04:35:48.974Z"
+    "lastUpdated": "2025-09-21T04:35:48.974Z",
+    "overtimeResult": null
   },
   {
     "id": "game_12",
@@ -39,7 +41,8 @@
     "awayTeam": "Dumb Pucks",
     "homeScore": 2,
     "awayScore": 4,
-    "lastUpdated": "2025-09-21T04:15:58.570Z"
+    "lastUpdated": "2025-09-21T04:15:58.570Z",
+    "overtimeResult": null
   },
   {
     "id": "game_11",
@@ -53,7 +56,8 @@
     "awayTeam": "Trailer Puck Boys",
     "homeScore": 8,
     "awayScore": 2,
-    "lastUpdated": "2025-09-21T04:07:49.353Z"
+    "lastUpdated": "2025-09-21T04:07:49.353Z",
+    "overtimeResult": null
   },
   {
     "id": "game_4",
@@ -67,7 +71,8 @@
     "awayTeam": "Trailer Puck Boys",
     "homeScore": 9,
     "awayScore": 6,
-    "lastUpdated": "2025-09-21T03:37:20.844Z"
+    "lastUpdated": "2025-09-21T03:37:20.844Z",
+    "overtimeResult": null
   },
   {
     "id": "game_3",
@@ -81,7 +86,8 @@
     "awayTeam": "Vice City Panthers",
     "homeScore": 8,
     "awayScore": 1,
-    "lastUpdated": "2025-09-21T03:18:17.279Z"
+    "lastUpdated": "2025-09-21T03:18:17.279Z",
+    "overtimeResult": null
   },
   {
     "id": "game_2",
@@ -95,7 +101,8 @@
     "awayTeam": "Stitches",
     "homeScore": 2,
     "awayScore": 8,
-    "lastUpdated": "2025-09-21T03:05:41.500Z"
+    "lastUpdated": "2025-09-21T03:05:41.500Z",
+    "overtimeResult": null
   },
   {
     "id": "game_1",
@@ -109,6 +116,7 @@
     "awayTeam": "Skate Invaders",
     "homeScore": 4,
     "awayScore": 1,
-    "lastUpdated": "2025-09-21T02:52:54.773Z"
+    "lastUpdated": "2025-09-21T02:52:54.773Z",
+    "overtimeResult": null
   }
 ]

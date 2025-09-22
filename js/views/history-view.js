@@ -20,6 +20,7 @@
             <p><strong>Date:</strong> ${new Date(game.created).toLocaleString()}</p>
             <p><strong>Final:</strong> ${game.homeTeam} ${game.homeScore} – ${game.awayTeam} ${game.awayScore}</p>
             <p><strong>Status:</strong> ${game.status}</p>
+            ${game.overtimeResult && game.overtimeResult.winner ? `<p><strong>OT/Shootout:</strong> ${game.overtimeResult.winner}</p>` : ''}
           </div>
         `,
       )

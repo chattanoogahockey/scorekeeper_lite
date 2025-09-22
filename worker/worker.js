@@ -119,9 +119,32 @@ function sanitizeGame(game) {
     attendance: Array.isArray(game.attendance) ? game.attendance : [],
     goals: Array.isArray(game.goals) ? game.goals : [],
     penalties: Array.isArray(game.penalties) ? game.penalties : [],
+    overtimeResult: sanitizeOvertimeResult(game.overtimeResult),
     homeScore: Number.isFinite(game.homeScore) ? game.homeScore : 0,
     awayScore: Number.isFinite(game.awayScore) ? game.awayScore : 0,
   };
+}
+
+function sanitizeOvertimeResult(rawResult) {
+  if (!rawResult || typeof rawResult !== 'object') {
+    return null;
+  }
+
+  const winner = typeof rawResult.winner === 'string' ? rawResult.winner.trim() : '';
+  if (!winner) {
+    return null;
+  }
+
+  const decidedBy = typeof rawResult.decidedBy === 'string' && rawResult.decidedBy.trim()
+    ? rawResult.decidedBy.trim()
+    : 'ot_shootout';
+  const recordedAt = typeof rawResult.recordedAt === 'string' && rawResult.recordedAt.trim()
+    ? rawResult.recordedAt.trim()
+    : null;
+
+  return recordedAt
+    ? { winner, decidedBy, recordedAt }
+    : { winner, decidedBy };
 }
 
 function buildGameFileName(game) {
@@ -243,6 +266,7 @@ async function updateIndex(env, owner, repo, branch, game, filePath) {
     awayTeam: game.awayTeam,
     homeScore: game.homeScore,
     awayScore: game.awayScore,
+    overtimeResult: game.overtimeResult ?? null,
     lastUpdated: new Date().toISOString(),
   };
 

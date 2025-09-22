@@ -78,7 +78,6 @@ export const goalDetailsView = {
               <button type="button" class="minutes-button" data-period="1">1</button>
               <button type="button" class="minutes-button" data-period="2">2</button>
               <button type="button" class="minutes-button" data-period="3">3</button>
-              <button type="button" class="minutes-button" data-period="OT">OT</button>
             </div>
             <input type="hidden" data-field="period" value="1">
           </div>

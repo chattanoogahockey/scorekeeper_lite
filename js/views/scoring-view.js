@@ -54,6 +54,10 @@ export const scoringView = {
     }
 
     const attendanceSummary = app.getAttendanceSummary();
+    const overtimeWinner = game.overtimeResult && game.overtimeResult.winner ? game.overtimeResult.winner : '';
+    const overtimeStatus = overtimeWinner
+      ? `<div class="overtime-banner is-set">OT/Shootout winner recorded: <strong>${overtimeWinner}</strong>.</div>`
+      : '<div class="overtime-banner">OT/Shootout winner not recorded yet.</div>';
 
     return `
       <div class="card">
@@ -74,10 +78,12 @@ export const scoringView = {
           <button type="button" class="shot-button" data-action="add-shot" data-team="${game.awayTeam}">Shots on Goal: ${game.awayTeam} (${game.awayShots ?? 0})</button>
         </div>
 
+        ${overtimeStatus}
         <div class="score-actions">
           <button class="btn btn-primary" data-action="add-goal">Add Goal</button>
           <button class="btn btn-primary" data-action="add-penalty">Add Penalty</button>
           <button class="btn" data-action="edit-attendance">Edit Attendance</button>
+          <button class="btn btn-warning" data-action="record-overtime">OT / Shootout</button>
           <button class="btn btn-success" data-action="submit-game">Submit Game</button>
         </div>
 
@@ -114,6 +120,9 @@ export const scoringView = {
     main
       .querySelector('[data-action="edit-attendance"]')
       ?.addEventListener('click', () => app.showAttendance());
+    main
+      .querySelector('[data-action="record-overtime"]')
+      ?.addEventListener('click', () => app.showOvertimeSelection());
     main
       .querySelectorAll('[data-action="add-shot"]')
       .forEach((button) => {
