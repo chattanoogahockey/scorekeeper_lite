@@ -117,6 +117,46 @@ function isAnonymousPlayerName(name) {
   return normalized === 'sub';
 }
 
+function sanitizePlayerDisplayName(name, team) {
+  const raw = `${name ?? ''}`.trim();
+  if (!raw || isAnonymousPlayerName(raw)) {
+    return null;
+  }
+
+  let cleaned = raw.replace(/^#\d+\s*/, '').trim();
+
+  if (team) {
+    const teamTokens = `${team}`
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean)
+      .map((token) => token.replace(/[^a-z0-9]/gi, '').toLowerCase());
+
+    const nameTokens = cleaned
+      .split(/\s+/)
+      .filter(Boolean);
+    const normalizedNameTokens = nameTokens.map((token) => token.replace(/[^a-z0-9]/gi, '').toLowerCase());
+
+    let matchesPrefix = teamTokens.length > 0 && normalizedNameTokens.length > teamTokens.length;
+    for (let index = 0; matchesPrefix && index < teamTokens.length; index += 1) {
+      if (normalizedNameTokens[index] !== teamTokens[index]) {
+        matchesPrefix = false;
+      }
+    }
+
+    if (matchesPrefix) {
+      cleaned = nameTokens.slice(teamTokens.length).join(' ').trim();
+    }
+  }
+
+  if (cleaned.includes(' - ')) {
+    const parts = cleaned.split(' - ');
+    cleaned = parts[parts.length - 1].trim();
+  }
+
+  return cleaned || null;
+}
+
 
 function resolveWeekNumber(rawWeek, referenceDate, division, fallback) {
   const fallbackState = fallback.get(division) ?? { next: 1 };
@@ -257,62 +297,29 @@ function describePeriod(value) {
 }
 
 
-function formatAssistName(value) {
-  const name = `${value ?? ''}`.trim();
-  if (!name || isAnonymousPlayerName(name)) {
-    return '';
-  }
-  return name;
+function formatAssistName(value, team) {
+  const display = sanitizePlayerDisplayName(value, team);
+  return display ?? '';
 }
 
-function describeShot(goal) {
-  const type = `${goal?.shotType ?? ''}`.toLowerCase();
-  let verb;
-  switch (type) {
-    case 'wrist':
-      verb = 'snapped home a wrist shot';
-      break;
-    case 'slap':
-      verb = 'hammered a slapper';
-      break;
-    case 'snap':
-      verb = 'whistled a snap shot';
-      break;
-    case 'backhand':
-      verb = 'lifted a backhander';
-      break;
-    case 'tip-in':
-    case 'tip in':
-      verb = 'redirected a tip-in';
-      break;
-    case 'deflection':
-      verb = 'got a deflection to fall';
-      break;
-    case 'wrap-around':
-    case 'wraparound':
-      verb = 'tucked a wraparound';
-      break;
-    case 'one-timer':
-    case 'one timer':
-      verb = 'crushed a one-timer';
-      break;
-    default:
-      verb = 'buried the chance';
-      break;
-  }
-  const descriptors = [];
-  const goalType = `${goal?.goalType ?? ''}`.toLowerCase();
-  if (goalType === 'power play') {
-    descriptors.push('on the power play');
-  } else if (goalType === 'shorthanded') {
-    descriptors.push('while shorthanded');
-  } else if (goalType === 'empty net') {
-    descriptors.push('into the empty net');
-  }
-  if (`${goal?.breakaway ?? ''}`.toLowerCase() === 'yes') {
-    descriptors.push('on a breakaway');
-  }
-  return descriptors.length ? `${verb} ${descriptors.join(' ')}` : verb;
+function formatScorerName(goal) {
+  return sanitizePlayerDisplayName(goal?.player, goal?.team ?? '');
+}
+
+function describeGoalAction(goal) {
+  const impact = `${goal?.scoreImpact ?? ''}`.trim().toLowerCase();
+  if (impact === 'first goal of the game') return 'opened the scoring';
+  if (impact === 'go ahead goal') return 'delivered the go-ahead strike';
+  if (impact === 'game tying goal') return 'found the equalizer';
+  if (impact === 'insurance goal') return 'added insurance';
+  if (impact === 'game winning goal') return 'buried the winner';
+
+  const goalType = `${goal?.goalType ?? ''}`.trim().toLowerCase();
+  if (goalType === 'power play') return 'scored on the power play';
+  if (goalType === 'shorthanded') return 'scored while shorthanded';
+  if (goalType === 'empty net') return 'hit the empty net';
+
+  return 'scored';
 }
 
 function formatGoalMoment(goal) {
@@ -392,18 +399,29 @@ function renderGoalTimeline(goals, game, options = {}) {
       break;
     }
     const { goal, homeBefore, awayBefore, homeAfter, awayAfter } = contexts[index];
-    const assistName = formatAssistName(goal.assist);
-    const shotPhrase = describeShot(goal);
+    const scorerName = formatScorerName(goal);
+    const assistName = formatAssistName(goal.assist, goal.team ?? '');
     const moment = formatGoalMoment(goal);
     const impact = describeScoreSwing(goal.team, homeBefore, awayBefore, homeAfter, awayAfter, game);
-    const assistClause = assistName ? ` off a feed from ${assistName}` : '';
-    const impactClause = impact ? ` ${impact}` : '';
+    const action = describeGoalAction(goal);
+    const subject = scorerName ? `${scorerName} (${goal.team})` : `${goal.team}`;
+    const fragments = [`${subject} ${action}`];
+    if (moment) {
+      fragments.push(moment);
+    }
+    if (impact) {
+      fragments.push(impact);
+    }
+    if (assistName) {
+      fragments.push(`with ${assistName} on the helper`);
+    }
+    const sentence = `${fragments.filter(Boolean).join(' ')}`.trim();
     const scoreboardLabel = formatScoreLine(game.homeTeam, game.awayTeam, homeAfter, awayAfter);
     items.push(`
       <li>
         <span class="report-timeline__time">${describePeriod(goal.period)} ${goal.time || '00:00'}</span>
         <div>
-          <p>${goal.team}'s ${goal.player} ${shotPhrase}${assistClause} ${moment}${impactClause}.</p>
+          <p>${sentence}.</p>
           ${includeScore ? `<span class="report-timeline__score">${scoreboardLabel}</span>` : ''}
         </div>
       </li>
@@ -477,30 +495,69 @@ function buildGameStory(game, goals, options = {}) {
     if (game.homeScore === game.awayScore) {
       return [`${game.homeTeam} and ${game.awayTeam} battled to a ${game.homeScore}-${game.awayScore} draw.`];
     }
-    const inferredWinner = game.winner ?? (game.homeScore > game.awayScore ? game.homeTeam : game.awayTeam);
-    const inferredLoser = inferredWinner === game.homeTeam ? game.awayTeam : game.homeTeam;
-    return [`${inferredWinner} edged ${inferredLoser} ${Math.max(game.homeScore, game.awayScore)}-${Math.min(game.homeScore, game.awayScore)} in a defensive tilt.`];
+    if (game.homeScore > game.awayScore) {
+      return [`${game.homeTeam} edged ${game.awayTeam} ${game.homeScore}-${game.awayScore} in a defensive tilt.`];
+    }
+    return [`${game.awayTeam} edged ${game.homeTeam} ${game.awayScore}-${game.homeScore} in a defensive tilt.`];
   }
 
   const contexts = buildGoalContexts(goals, game);
   const sentences = [];
+
+  const composeLine = (goal, context, extraOptions = {}) => {
+    const { includeScore = false, extraFragment = null } = extraOptions;
+    const scorerName = formatScorerName(goal);
+    const assistName = formatAssistName(goal.assist, goal.team ?? '');
+    const action = describeGoalAction(goal);
+    const moment = formatGoalMoment(goal);
+    const impact = describeScoreSwing(
+      goal.team,
+      context.homeBefore,
+      context.awayBefore,
+      context.homeAfter,
+      context.awayAfter,
+      game,
+    );
+
+    const subject = scorerName ? `${scorerName} (${goal.team})` : `${goal.team}`;
+    const fragments = [`${subject} ${action}`.trim()];
+    if (moment) {
+      fragments.push(moment);
+    }
+    if (impact) {
+      fragments.push(impact);
+    }
+    if (assistName) {
+      fragments.push(`with ${assistName} on the helper`);
+    }
+    if (extraFragment) {
+      fragments.push(extraFragment);
+    }
+
+    let line = fragments.filter(Boolean).join(' ');
+    if (includeScore) {
+      const scoreLine = formatScoreLine(game.homeTeam, game.awayTeam, context.homeAfter, context.awayAfter);
+      if (scoreLine) {
+        line = `${line} (${scoreLine})`;
+      }
+    }
+    return line ? `${line}.` : '';
+  };
+
   const firstContext = contexts[0];
   const firstGoal = firstContext.goal;
-  const firstAssist = formatAssistName(firstGoal.assist);
-  const firstMoment = formatGoalMoment(firstGoal);
-  const firstShot = describeShot(firstGoal);
-  const firstScore = formatScoreLine(game.homeTeam, game.awayTeam, firstContext.homeAfter, firstContext.awayAfter);
-  sentences.push(`${firstGoal.team}'s ${firstGoal.player} ${firstShot}${firstAssist ? ` off a feed from ${firstAssist}` : ''} ${firstMoment}, opening the scoring (${firstScore}).`);
+  const firstLine = composeLine(firstGoal, firstContext, { includeScore: true });
+  if (firstLine) {
+    sentences.push(firstLine);
+  }
 
   const responseContext = contexts.find((entry, index) => index > 0 && entry.goal.team !== firstGoal.team);
   if (responseContext) {
     const responseGoal = responseContext.goal;
-    const responseAssist = formatAssistName(responseGoal.assist);
-    const responseMoment = formatGoalMoment(responseGoal);
-    const responseShot = describeShot(responseGoal);
-    const responseScore = formatScoreLine(game.homeTeam, game.awayTeam, responseContext.homeAfter, responseContext.awayAfter);
-    const scoringTeamScore = responseGoal.team === game.homeTeam ? responseContext.homeAfter : responseContext.awayAfter;
-    const opponentScore = responseGoal.team === game.homeTeam ? responseContext.awayAfter : responseContext.homeAfter;
+    const scoringTeamScore =
+      responseGoal.team === game.homeTeam ? responseContext.homeAfter : responseContext.awayAfter;
+    const opponentScore =
+      responseGoal.team === game.homeTeam ? responseContext.awayAfter : responseContext.homeAfter;
     let responseClause = 'to answer right back';
     if (scoringTeamScore === opponentScore) {
       responseClause = 'to draw even';
@@ -509,7 +566,13 @@ function buildGameStory(game, goals, options = {}) {
     } else {
       responseClause = 'to trim the deficit';
     }
-    sentences.push(`${responseGoal.team} responded when ${responseGoal.player} ${responseShot}${responseAssist ? ` off a feed from ${responseAssist}` : ''} ${responseMoment}, ${responseClause} (${responseScore}).`);
+    const responseLine = composeLine(responseGoal, responseContext, {
+      includeScore: true,
+      extraFragment: responseClause,
+    });
+    if (responseLine) {
+      sentences.push(responseLine);
+    }
   }
 
   const flow = analyzeGameFlow(goals, game);
@@ -517,18 +580,29 @@ function buildGameStory(game, goals, options = {}) {
   if (goAheadGoal) {
     const index = goals.indexOf(goAheadGoal);
     const goContext = index >= 0 ? contexts[index] : null;
-    const goAssist = formatAssistName(goAheadGoal.assist);
-    const goMoment = formatGoalMoment(goAheadGoal);
-    const goShot = describeShot(goAheadGoal);
-    const goScore = goContext ? formatScoreLine(game.homeTeam, game.awayTeam, goContext.homeAfter, goContext.awayAfter) : '';
-    const comebackClause = flow.winnerTrailed && flow.largestDeficit > 0 ? ` after erasing a ${flow.largestDeficit}-goal hole` : '';
-    sentences.push(`${goAheadGoal.team} seized control for good when ${goAheadGoal.player} ${goShot}${goAssist ? ` off a feed from ${goAssist}` : ''} ${goMoment}${comebackClause}${goScore ? ` (${goScore})` : ''}.`);
+    if (goContext) {
+      const comebackFragment =
+        flow.winnerTrailed && flow.largestDeficit > 0
+          ? `after erasing a ${flow.largestDeficit}-goal hole`
+          : null;
+      const goLine = composeLine(goAheadGoal, goContext, {
+        includeScore: true,
+        extraFragment: comebackFragment,
+      });
+      if (goLine) {
+        sentences.push(goLine);
+      }
+    }
   } else if (flow.leadChanges > 0) {
-    sentences.push(`The lead changed ${flow.leadChanges} ${flow.leadChanges === 1 ? 'time' : 'times'} before the final horn.`);
+    sentences.push(
+      `The lead changed ${flow.leadChanges} ${flow.leadChanges === 1 ? 'time' : 'times'} before the final horn.`,
+    );
   }
 
   if (flow.largestRun.team && flow.largestRun.length >= 3) {
-    sentences.push(`${flow.largestRun.team} strung together ${flow.largestRun.length} unanswered to tilt the ice during the decisive stretch.`);
+    sentences.push(
+      `${flow.largestRun.team} strung together ${flow.largestRun.length} unanswered to tilt the ice during the decisive stretch.`,
+    );
   }
 
   const winnerName = game.winner;
@@ -547,7 +621,9 @@ function buildGameStory(game, goals, options = {}) {
   if (includeStar) {
     const star = computeGameStar(goals);
     if (star) {
-      sentences.push(`${star.player} finished with ${star.goals} goals${star.assists ? ` and ${star.assists} assists` : ''} to headline the sheet.`);
+      sentences.push(
+        `${star.player} finished with ${star.goals} goals${star.assists ? ` and ${star.assists} assists` : ''} to headline the sheet.`,
+      );
     }
   }
 
@@ -999,19 +1075,17 @@ function computePlayerStatsByDivision(gamesByDivision) {
 
       goals.forEach((goal) => {
         const goalTeam = goal.team ?? '';
-        const rawPlayerName = `${goal.player ?? ''}`.trim();
-        if (isAnonymousPlayerName(rawPlayerName)) {
+        const scorerName = sanitizePlayerDisplayName(goal.player, goalTeam);
+        if (!scorerName) {
           return;
         }
-        const playerName = rawPlayerName || 'Unknown';
-        const playerKey = buildPlayerKey(goal.playerId, playerName, goalTeam);
+        const playerKey = buildPlayerKey(goal.playerId, scorerName, goalTeam);
 
-        const rawAssistName = `${goal.assist ?? ''}`.trim();
-        const includeAssist = rawAssistName && !isAnonymousPlayerName(rawAssistName);
-        const assistKey = includeAssist ? buildPlayerKey(goal.assistId, rawAssistName, goalTeam) : null;
+        const assistName = sanitizePlayerDisplayName(goal.assist, goalTeam);
+        const assistKey = assistName ? buildPlayerKey(goal.assistId, assistName, goalTeam) : null;
 
         const scorerRecord = ensurePlayerRecord(players, playerKey, {
-          player: playerName,
+          player: scorerName,
           team: goalTeam,
         });
         scorerRecord.goals += 1;
@@ -1027,9 +1101,9 @@ function computePlayerStatsByDivision(gamesByDivision) {
         scorerWeekly.goals += 1;
         scorerWeekly.points += 1;
 
-        if (assistKey) {
+        if (assistKey && assistName) {
           const assistRecord = ensurePlayerRecord(players, assistKey, {
-            player: rawAssistName,
+            player: assistName,
             team: goalTeam,
           });
           assistRecord.assists += 1;
@@ -1476,15 +1550,28 @@ function renderWeeklySummarySection(division, weekNumber) {
     : 'Balanced scoring defined the week.';
 
   const headlineParts = [`Week ${weekNumber} in the ${division} division delivered ${totalGoals} goals across ${games.length} games (${averageGoals} per matchup).`];
-  if (biggestWin && Number.isFinite(biggestWin.margin)) {
+  if (
+    biggestWin &&
+    Number.isFinite(biggestWin.margin) &&
+    biggestWin.margin > 0 &&
+    biggestWin.winner &&
+    biggestWin.loser
+  ) {
     headlineParts.push(
       `${biggestWin.winner} flexed with a ${biggestWin.winnerScore}-${biggestWin.loserScore} result over ${biggestWin.loser}.`,
     );
   }
-  if (tightestGame && Number.isFinite(tightestGame.margin) && tightestGame.margin <= 2) {
-    headlineParts.push(
-      `${tightestGame.winner} squeezed past ${tightestGame.loser} ${tightestGame.winnerScore}-${tightestGame.loserScore} in a one-goal thriller.`,
-    );
+  if (tightestGame && Number.isFinite(tightestGame.margin)) {
+    if (tightestGame.margin > 0 && tightestGame.margin <= 2 && tightestGame.winner && tightestGame.loser) {
+      const thrillerLabel = tightestGame.margin === 1 ? 'one-goal thriller' : 'tight finish';
+      headlineParts.push(
+        `${tightestGame.winner} edged ${tightestGame.loser} ${tightestGame.winnerScore}-${tightestGame.loserScore} in a ${thrillerLabel}.`,
+      );
+    } else if (tightestGame.homeScore === tightestGame.awayScore) {
+      headlineParts.push(
+        `${tightestGame.homeTeam} and ${tightestGame.awayTeam} skated to a ${tightestGame.homeScore}-${tightestGame.awayScore} stalemate that stayed razor-close.`,
+      );
+    }
   }
   headlineParts.push(leaderSummary);
 
@@ -1558,18 +1645,18 @@ function computeGameStar(goals) {
 
   const totals = new Map();
   goals.forEach((goal) => {
-    const scorerName = `${goal.player ?? ''}`.trim();
-    if (!isAnonymousPlayerName(scorerName)) {
-      const key = buildPlayerKey(goal.playerId, scorerName || 'Unknown', goal.team ?? '');
-      const record = totals.get(key) ?? { player: scorerName || 'Unknown', goals: 0, assists: 0 };
-      record.player = scorerName || 'Unknown';
+    const scorerName = sanitizePlayerDisplayName(goal.player, goal.team ?? '');
+    if (scorerName) {
+      const key = buildPlayerKey(goal.playerId, scorerName, goal.team ?? '');
+      const record = totals.get(key) ?? { player: scorerName, goals: 0, assists: 0 };
+      record.player = scorerName;
       record.team = goal.team;
       record.goals += 1;
       totals.set(key, record);
     }
 
-    const assistName = `${goal.assist ?? ''}`.trim();
-    if (assistName && !isAnonymousPlayerName(assistName)) {
+    const assistName = sanitizePlayerDisplayName(goal.assist, goal.team ?? '');
+    if (assistName) {
       const assistKey = buildPlayerKey(goal.assistId, assistName, goal.team ?? '');
       const assistRecord = totals.get(assistKey) ?? { player: assistName, goals: 0, assists: 0 };
       assistRecord.player = assistName;
