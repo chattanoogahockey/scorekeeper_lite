@@ -194,6 +194,31 @@ async function fetchJson(url) {
   }
 }
 
+function buildPlayerNameMap(rosters) {
+  const map = new Map();
+  if (!rosters || typeof rosters !== 'object') {
+    return map;
+  }
+
+  Object.values(rosters).forEach((players) => {
+    if (!Array.isArray(players)) {
+      return;
+    }
+    players.forEach((player) => {
+      if (!player || typeof player !== 'object') {
+        return;
+      }
+      const id = `${player.id ?? ''}`.trim();
+      const name = `${player.name ?? ''}`.trim();
+      if (id) {
+        map.set(id, name || null);
+      }
+    });
+  });
+
+  return map;
+}
+
 function buildTeamDivisionMap(rosters) {
   if (!rosters || typeof rosters !== 'object') {
     return new Map();
@@ -758,6 +783,7 @@ async function loadRinkDataset() {
   const rosters = rostersResponse && typeof rostersResponse === 'object' ? rostersResponse : {};
 
   const teamDivisionMap = buildTeamDivisionMap(rosters);
+  const playerNameMap = buildPlayerNameMap(rosters);
   const weekFallback = new Map();
   const games = await Promise.all(
     indexEntries.map(async (entry) => {
@@ -783,14 +809,26 @@ async function loadRinkDataset() {
       const goals = Array.isArray(merged.goals)
         ? merged.goals
             .filter((goal) => goal && typeof goal === 'object')
-            .map((goal) => ({
-              ...goal,
-              team: goal.team ?? '',
-              player: goal.player ?? 'Unknown',
-              period: `${goal.period ?? ''}`,
-              time: `${goal.time ?? ''}`,
-              clockSeconds: Number.isFinite(goal.clockSeconds) ? goal.clockSeconds : parseClockSeconds(goal.time),
-            }))
+            .map((goal) => {
+              const team = goal.team ?? '';
+              const rawPlayer = `${goal.player ?? ''}`.trim();
+              const canonicalPlayer = (playerNameMap.get(`${goal.playerId ?? ''}`.trim()) ?? rawPlayer)?.trim();
+              const playerName = canonicalPlayer && canonicalPlayer.length > 0 ? canonicalPlayer : 'Unknown';
+              const rawAssist = `${goal.assist ?? ''}`.trim();
+              const canonicalAssist = (playerNameMap.get(`${goal.assistId ?? ''}`.trim()) ?? rawAssist)?.trim();
+              const assistName = canonicalAssist && canonicalAssist.length > 0 ? canonicalAssist : '';
+              return {
+                ...goal,
+                team,
+                player: playerName,
+                assist: assistName,
+                period: `${goal.period ?? ''}`,
+                time: `${goal.time ?? ''}`,
+                clockSeconds: Number.isFinite(goal.clockSeconds)
+                  ? goal.clockSeconds
+                  : parseClockSeconds(goal.time),
+              };
+            })
         : [];
 
       const penalties = Array.isArray(merged.penalties)
