@@ -81,7 +81,12 @@
     "awayTeam": "Purpetrators",
     "homeScore": 7,
     "awayScore": 7,
-    "lastUpdated": "2025-09-22T03:59:16.120Z"
+    "lastUpdated": "2025-09-22T03:59:16.120Z",
+    "overtimeResult": {
+      "winner": "Purpetrators",
+      "decidedBy": "ot_shootout",
+      "recordedAt": "2025-09-22T03:59:16.120Z"
+    }
   },
   {
     "id": "game_10",
