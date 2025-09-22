@@ -492,68 +492,6 @@ function sortPlayerStandings(records) {
   return [...records].sort(comparePlayersDefault);
 }
 
-  const sortState = getNormalizedSortState('player');
-  const sortedPlayers = [...players].sort((playerA, playerB) => compareRecordsBySort(playerA, playerB, sortState, PLAYER_SORT_CONFIG, comparePlayersDefault));
-
-  const rows = sortedPlayers
-    .map((player) => {
-      const teamLine = player.team ? `<span class="stats-player-team">${player.team}</span>` : '';
-      const playerKey = escapeAttribute(player.id);
-      const playerNameAttr = escapeAttribute(player.player);
-      const playerTeamAttr = escapeAttribute(player.team ?? '');
-      const playerGamesAttr = escapeAttribute(String(player.gamesPlayed ?? 0));
-      const rowLabel = player.team ? `${player.player} - ${player.team}` : player.player;
-      const rowAriaLabel = escapeAttribute(`View cumulative stats for ${rowLabel}`);
-
-      return `
-        <tr
-          class="stats-player-row"
-          data-player-key="${playerKey}"
-          data-player-name="${playerNameAttr}"
-          data-player-team="${playerTeamAttr}"
-          data-player-games="${playerGamesAttr}"
-          tabindex="0"
-          role="button"
-          aria-label="${rowAriaLabel}"
-        >
-          <th scope="row" aria-label="Player">
-            <span class="stats-player-name">${player.player}</span>
-            ${teamLine}
-          </th>
-          <td>${player.gamesPlayed}</td>
-          <td>${player.goals}</td>
-          <td>${player.assists}</td>
-          <td>${player.points}</td>
-          <td>${player.ptsPerGame}</td>
-          <td>${player.pims}</td>
-          <td>${player.hatTricks}</td>
-        </tr>
-      `;
-    })
-    .join('');
-
-  const header = PLAYER_TABLE_COLUMNS.map((column) => createSortHeader('player', column, sortState)).join('');
-  const hint = '<p class="stats-table-hint" role="note">Select a player row to view cumulative scoring trends.</p>';
-
-  return `
-    ${hint}
-    <table class="stats-table stats-table--players">
-      <colgroup>
-        <col class="stats-player-column" />
-        <col span="7" class="stats-player-metric-column" />
-      </colgroup>
-      <thead>
-        <tr>
-          ${header}
-        </tr>
-      </thead>
-      <tbody>
-        ${rows}
-      </tbody>
-    </table>
-  `;
-}
-
 function computePlayerStandingsFromGames(games) {
   const perDivision = new Map();
   const perDivisionWeekly = new Map();
@@ -1028,6 +966,41 @@ function ensureTeamSortInteractions(container, containers) {
   });
   container.dataset.teamSortBound = 'true';
 }
+function markActiveDivision(container, division) {
+  if (!container) {
+    return;
+  }
+
+  const buttons = Array.from(container.querySelectorAll('[data-division]')).filter((button) => button instanceof HTMLElement);
+  if (!buttons.length) {
+    return;
+  }
+
+  let activeFound = false;
+  buttons.forEach((button) => {
+    const isActive = button.dataset.division === division;
+    button.classList.toggle('is-active', isActive);
+    button.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+    button.setAttribute('tabindex', isActive ? '0' : '-1');
+    if (isActive) {
+      button.setAttribute('aria-current', 'true');
+      activeFound = true;
+    } else {
+      button.removeAttribute('aria-current');
+    }
+  });
+
+  if (!activeFound) {
+    const [firstButton] = buttons;
+    if (firstButton) {
+      firstButton.classList.add('is-active');
+      firstButton.setAttribute('aria-pressed', 'true');
+      firstButton.setAttribute('tabindex', '0');
+      firstButton.setAttribute('aria-current', 'true');
+    }
+  }
+}
+
 function updateStandingsView(containers, division) {
   const teamContainer = containers?.team ?? null;
   const playerContainer = containers?.player ?? null;

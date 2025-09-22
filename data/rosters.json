@@ -1,4 +1,88 @@
 {
+  "Practice Game": [
+    {
+      "id": "practice_game_player_1",
+      "name": "Practice Skater 1",
+      "number": 11,
+      "position": "Player",
+      "division": "Practice",
+      "team": "Practice Game"
+    },
+    {
+      "id": "practice_game_player_2",
+      "name": "Practice Skater 2",
+      "number": 22,
+      "position": "Player",
+      "division": "Practice",
+      "team": "Practice Game"
+    },
+    {
+      "id": "practice_game_player_3",
+      "name": "Practice Skater 3",
+      "number": 33,
+      "position": "Player",
+      "division": "Practice",
+      "team": "Practice Game"
+    },
+    {
+      "id": "practice_game_player_4",
+      "name": "Practice Skater 4",
+      "number": 44,
+      "position": "Player",
+      "division": "Practice",
+      "team": "Practice Game"
+    },
+    {
+      "id": "practice_game_goalie_1",
+      "name": "Practice Goalie",
+      "number": 1,
+      "position": "Goalie",
+      "division": "Practice",
+      "team": "Practice Game"
+    }
+  ],
+  "Practice Opponents": [
+    {
+      "id": "practice_opponent_player_1",
+      "name": "Opponent Skater 1",
+      "number": 12,
+      "position": "Player",
+      "division": "Practice",
+      "team": "Practice Opponents"
+    },
+    {
+      "id": "practice_opponent_player_2",
+      "name": "Opponent Skater 2",
+      "number": 24,
+      "position": "Player",
+      "division": "Practice",
+      "team": "Practice Opponents"
+    },
+    {
+      "id": "practice_opponent_player_3",
+      "name": "Opponent Skater 3",
+      "number": 36,
+      "position": "Player",
+      "division": "Practice",
+      "team": "Practice Opponents"
+    },
+    {
+      "id": "practice_opponent_player_4",
+      "name": "Opponent Skater 4",
+      "number": 48,
+      "position": "Player",
+      "division": "Practice",
+      "team": "Practice Opponents"
+    },
+    {
+      "id": "practice_opponent_goalie_1",
+      "name": "Opponent Goalie",
+      "number": 2,
+      "position": "Goalie",
+      "division": "Practice",
+      "team": "Practice Opponents"
+    }
+  ],
   "Barkcheck": [
     {
       "id": "barkcheck_anders_petersen_0",

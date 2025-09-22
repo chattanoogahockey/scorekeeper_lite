@@ -1,5 +1,16 @@
 [
   {
+    "id": "practice_game",
+    "date": "2025-01-01 00:00:00",
+    "time": "00:00:00",
+    "homeTeam": "Practice Game",
+    "awayTeam": "Practice Opponents",
+    "location": "Internal Test Session",
+    "season": "Practice",
+    "week": "Test",
+    "isPractice": true
+  },
+  {
     "id": "game_1",
     "date": "2025-09-08 00:00:00",
     "time": "18:30:00",
