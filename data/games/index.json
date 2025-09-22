@@ -1,5 +1,19 @@
 [
   {
+    "id": "game_9",
+    "file": "data/games/2025-09-11_gold_noahs-arknemesis_vs_purpetrators_20-00_game-9.json",
+    "fileName": "2025-09-11_gold_noahs-arknemesis_vs_purpetrators_20-00_game-9.json",
+    "date": "2025-09-11 00:00:00",
+    "time": "20:00:00",
+    "division": "Gold",
+    "created": "2025-09-22T03:35:32.705Z",
+    "homeTeam": "Noah's Arknemesis",
+    "awayTeam": "Purpetrators",
+    "homeScore": 5,
+    "awayScore": 8,
+    "lastUpdated": "2025-09-22T03:43:32.524Z"
+  },
+  {
     "id": "game_8",
     "file": "data/games/2025-09-11_gold_sislo_vs_utc_19-00_game-8.json",
     "fileName": "2025-09-11_gold_sislo_vs_utc_19-00_game-8.json",
