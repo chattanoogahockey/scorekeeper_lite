@@ -1044,6 +1044,37 @@ header p {
     vertical-align: bottom;
 }
 
+
+.stats-sort-button {
+    background: none;
+    border: none;
+    color: inherit;
+    font: inherit;
+    padding: 0;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.stats-sort-button:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+
+.stats-table thead th:not(:first-child) .stats-sort-button {
+    flex-direction: column;
+    gap: 6px;
+}
+
+.stats-sort-button .stats-sort-indicator {
+    font-size: 0.75em;
+}
+
+.stats-sort-button.is-active .stats-sort-indicator {
+    color: var(--primary-color);
+}
+
 .stats-table thead th:not(:first-child) {
     writing-mode: vertical-rl;
     text-orientation: mixed;
