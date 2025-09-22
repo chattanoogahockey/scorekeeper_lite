@@ -1,88 +1,4 @@
 {
-  "Practice Game": [
-    {
-      "id": "practice_game_player_1",
-      "name": "Practice Skater 1",
-      "number": 11,
-      "position": "Player",
-      "division": "Practice",
-      "team": "Practice Game"
-    },
-    {
-      "id": "practice_game_player_2",
-      "name": "Practice Skater 2",
-      "number": 22,
-      "position": "Player",
-      "division": "Practice",
-      "team": "Practice Game"
-    },
-    {
-      "id": "practice_game_player_3",
-      "name": "Practice Skater 3",
-      "number": 33,
-      "position": "Player",
-      "division": "Practice",
-      "team": "Practice Game"
-    },
-    {
-      "id": "practice_game_player_4",
-      "name": "Practice Skater 4",
-      "number": 44,
-      "position": "Player",
-      "division": "Practice",
-      "team": "Practice Game"
-    },
-    {
-      "id": "practice_game_goalie_1",
-      "name": "Practice Goalie",
-      "number": 1,
-      "position": "Goalie",
-      "division": "Practice",
-      "team": "Practice Game"
-    }
-  ],
-  "Practice Opponents": [
-    {
-      "id": "practice_opponent_player_1",
-      "name": "Opponent Skater 1",
-      "number": 12,
-      "position": "Player",
-      "division": "Practice",
-      "team": "Practice Opponents"
-    },
-    {
-      "id": "practice_opponent_player_2",
-      "name": "Opponent Skater 2",
-      "number": 24,
-      "position": "Player",
-      "division": "Practice",
-      "team": "Practice Opponents"
-    },
-    {
-      "id": "practice_opponent_player_3",
-      "name": "Opponent Skater 3",
-      "number": 36,
-      "position": "Player",
-      "division": "Practice",
-      "team": "Practice Opponents"
-    },
-    {
-      "id": "practice_opponent_player_4",
-      "name": "Opponent Skater 4",
-      "number": 48,
-      "position": "Player",
-      "division": "Practice",
-      "team": "Practice Opponents"
-    },
-    {
-      "id": "practice_opponent_goalie_1",
-      "name": "Opponent Goalie",
-      "number": 2,
-      "position": "Goalie",
-      "division": "Practice",
-      "team": "Practice Opponents"
-    }
-  ],
   "Barkcheck": [
     {
       "id": "barkcheck_anders_petersen_0",
@@ -371,8 +287,8 @@
       "team": "Corn Stars"
     },
     {
-      "id": "corn_stars_corn_stars_bachman_18",
-      "name": "Corn Stars Bachman",
+      "id": "corn_stars_avery_bachman_18",
+      "name": "Avery Bachman",
       "number": 19,
       "position": "Player",
       "division": "Gold",
@@ -747,8 +663,8 @@
       "team": "Slappy Gilmore's"
     },
     {
-      "id": "slappy_gilmore_s_slappy_gilmoresory_marshall_110",
-      "name": "Slappy Gilmoresory Marshall",
+      "id": "slappy_gilmore_s_greg_marshall_110",
+      "name": "Greg Marshall",
       "number": 111,
       "position": "Goalie",
       "division": "Gold",
@@ -1237,8 +1153,8 @@
       "team": "Stitches"
     },
     {
-      "id": "stitches_noah_s_arknemesis_miller_133",
-      "name": "Noah's Arknemesis Miller",
+      "id": "stitches_noah_miller_133",
+      "name": "Noah Miller",
       "number": 134,
       "position": "Player",
       "division": "Bronze",
@@ -1721,8 +1637,8 @@
       "team": "Noah's Arknemesis"
     },
     {
-      "id": "noah_s_arknemesis_noah_s_arknemesis_dillingham_179",
-      "name": "Noah's Arknemesis Dillingham",
+      "id": "noah_s_arknemesis_noah_dillingham_179",
+      "name": "Noah Dillingham",
       "number": 180,
       "position": "Player",
       "division": "Gold",
@@ -1755,8 +1671,8 @@
       "team": "Purpetrators"
     },
     {
-      "id": "purpetrators_purpetrators_marshall_88",
-      "name": "Purpetrators Marshall",
+      "id": "purpetrators_dante_marshall_88",
+      "name": "Dante Marshall",
       "number": 89,
       "position": "Player",
       "division": "Gold",
@@ -1779,8 +1695,8 @@
       "team": "Purpetrators"
     },
     {
-      "id": "purpetrators_slappy_gilmores_williams_106",
-      "name": "Slappy Gilmores Williams",
+      "id": "purpetrators_greg_williams_106",
+      "name": "Greg Williams",
       "number": 107,
       "position": "Player",
       "division": "Gold",
