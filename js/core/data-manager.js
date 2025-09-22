@@ -957,7 +957,7 @@ export class DataManager {
       }
     });
 
-    return this.schedule.filter((game) => {
+    const upcoming = this.schedule.filter((game) => {
       if (!game || !game.id) {
         return false;
       }
@@ -968,6 +968,11 @@ export class DataManager {
 
       return !completedGameIds.has(game.id);
     });
+
+    const practiceGames = upcoming.filter((game) => Boolean(game?.isPractice));
+    const competitiveGames = upcoming.filter((game) => !game?.isPractice);
+
+    return [...practiceGames, ...competitiveGames];
   }
 
   getGameById(gameId) {
