@@ -1,5 +1,5 @@
-const DIVISIONS = ['Gold', 'Silver', 'Bronze'];
-const DEFAULT_DIVISION = 'Bronze';
+﻿const DIVISIONS = ['Gold', 'Silver', 'Bronze'];
+const DEFAULT_DIVISION = 'Gold';
 
 const TEAM_SORT_DEFAULT = Object.freeze({ key: 'points', direction: 'desc' });
 const PLAYER_SORT_DEFAULT = Object.freeze({ key: 'points', direction: 'desc' });
@@ -137,7 +137,7 @@ function isAnonymousPlayerName(name) {
 
 
 function formatFlyoutSubtitle(parts) {
-  const bullet = 'â€¢';
+  const bullet = 'Ã¢â‚¬Â¢';
   return parts
     .map((value) => `${value ?? ''}`.trim())
     .filter((value) => value.length > 0)
@@ -2022,6 +2022,8 @@ export const statisticsView = {
       return;
     }
 
+    statisticsState.selectedDivision = DEFAULT_DIVISION;
+
     if (!DIVISIONS.includes(statisticsState.selectedDivision)) {
       statisticsState.selectedDivision = DEFAULT_DIVISION;
     }
@@ -2073,6 +2075,8 @@ export const statisticsView = {
       });
   },
 };
+
+
 
 
 

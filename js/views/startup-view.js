@@ -12,7 +12,7 @@
           <button class="btn" data-action="statistics">Statistics</button>
         </div>
         <div style="margin-top: 20px;">
-          <button class="btn" data-action="rink-report">The Rink Report</button>
+          <button class="btn" data-action="rink-report">The Rink Report (Coming Soon)</button>
         </div>
         <div style="margin-top: 20px;">
           <button class="btn" data-action="admin-panel">Admin Panel</button>
@@ -43,7 +43,18 @@
       .addEventListener('click', () => app.showStatistics());
     main
       .querySelector('[data-action="rink-report"]')
-      .addEventListener('click', () => app.showRinkReport());
+      .addEventListener('click', () => {
+        const RINK_REPORT_PASS = 'rinkreport2025';
+        const input = window.prompt('Enter password to view The Rink Report:');
+        if (input === null) {
+          return;
+        }
+        if (input === RINK_REPORT_PASS) {
+          app.showRinkReport();
+        } else {
+          window.alert('Incorrect password.');
+        }
+      });
     main
       .querySelector('[data-action="admin-panel"]')
       .addEventListener('click', () => {
