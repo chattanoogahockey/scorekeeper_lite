@@ -12,6 +12,9 @@
           <button class="btn" data-action="statistics">Statistics</button>
         </div>
         <div style="margin-top: 20px;">
+          <button class="btn" data-action="rink-report">The Rink Report</button>
+        </div>
+        <div style="margin-top: 20px;">
           <button class="btn" data-action="admin-panel">Admin Panel</button>
         </div>
       </div>
@@ -38,6 +41,9 @@
     main
       .querySelector('[data-action="statistics"]')
       .addEventListener('click', () => app.showStatistics());
+    main
+      .querySelector('[data-action="rink-report"]')
+      .addEventListener('click', () => app.showRinkReport());
     main
       .querySelector('[data-action="admin-panel"]')
       .addEventListener('click', () => {

@@ -7,6 +7,7 @@ import { goalDetailsView } from '../views/goal-details-view.js';
 import { historyView } from '../views/history-view.js';
 import { overtimeView } from '../views/overtime-view.js';
 import { penaltyDetailsView } from '../views/penalty-details-view.js';
+import { rinkReportView } from '../views/rink-report-view.js';
 import { scoringView } from '../views/scoring-view.js';
 import { startupView } from '../views/startup-view.js';
 import { statisticsView } from '../views/statistics-view.js';
@@ -21,6 +22,7 @@ const VIEWS = [
   overtimeView,
   historyView,
   statisticsView,
+  rinkReportView,
 ];
 
 function parseClockTime(value) {
@@ -190,6 +192,10 @@ export class ScorekeeperApp {
 
   showStatistics() {
     this.showView('statistics');
+  }
+
+  showRinkReport() {
+    this.showView('rink-report');
   }
 
   startScoring() {
