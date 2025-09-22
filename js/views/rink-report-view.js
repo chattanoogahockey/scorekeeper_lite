@@ -109,6 +109,14 @@ function formatPercentage(value) {
   }
   return `${Math.round(value * 100)}%`;
 }
+function isAnonymousPlayerName(name) {
+  const normalized = `${name ?? ''}`.trim().toLowerCase();
+  if (!normalized) {
+    return false;
+  }
+  return normalized === 'sub';
+}
+
 
 function resolveWeekNumber(rawWeek, referenceDate, division, fallback) {
   const fallbackState = fallback.get(division) ?? { next: 1 };
@@ -584,10 +592,16 @@ function computePlayerStatsByDivision(gamesByDivision) {
 
       goals.forEach((goal) => {
         const goalTeam = goal.team ?? '';
-        const playerName = `${goal.player ?? 'Unknown'}`.trim() || 'Unknown';
+        const rawPlayerName = `${goal.player ?? ''}`.trim();
+        if (isAnonymousPlayerName(rawPlayerName)) {
+          return;
+        }
+        const playerName = rawPlayerName || 'Unknown';
         const playerKey = buildPlayerKey(goal.playerId, playerName, goalTeam);
-        const assistName = `${goal.assist ?? ''}`.trim();
-        const assistKey = assistName ? buildPlayerKey(goal.assistId, assistName, goalTeam) : null;
+
+        const rawAssistName = `${goal.assist ?? ''}`.trim();
+        const includeAssist = rawAssistName && !isAnonymousPlayerName(rawAssistName);
+        const assistKey = includeAssist ? buildPlayerKey(goal.assistId, rawAssistName, goalTeam) : null;
 
         const scorerRecord = ensurePlayerRecord(players, playerKey, {
           player: playerName,
@@ -608,7 +622,7 @@ function computePlayerStatsByDivision(gamesByDivision) {
 
         if (assistKey) {
           const assistRecord = ensurePlayerRecord(players, assistKey, {
-            player: assistName,
+            player: rawAssistName,
             team: goalTeam,
           });
           assistRecord.assists += 1;
@@ -1161,18 +1175,21 @@ function computeGameStar(goals) {
 
   const totals = new Map();
   goals.forEach((goal) => {
-    const key = goal.playerId ? `id:${goal.playerId}` : goal.player;
-    const record = totals.get(key) ?? { player: goal.player, goals: 0, assists: 0 };
-    record.player = goal.player;
-    record.team = goal.team;
-    record.goals += 1;
-    totals.set(key, record);
+    const scorerName = `${goal.player ?? ''}`.trim();
+    if (!isAnonymousPlayerName(scorerName)) {
+      const key = buildPlayerKey(goal.playerId, scorerName || 'Unknown', goal.team ?? '');
+      const record = totals.get(key) ?? { player: scorerName || 'Unknown', goals: 0, assists: 0 };
+      record.player = scorerName || 'Unknown';
+      record.team = goal.team;
+      record.goals += 1;
+      totals.set(key, record);
+    }
 
-    const assist = `${goal.assist ?? ''}`.trim();
-    if (assist) {
-      const assistKey = goal.assistId ? `id:${goal.assistId}` : assist;
-      const assistRecord = totals.get(assistKey) ?? { player: assist, goals: 0, assists: 0 };
-      assistRecord.player = assist;
+    const assistName = `${goal.assist ?? ''}`.trim();
+    if (assistName && !isAnonymousPlayerName(assistName)) {
+      const assistKey = buildPlayerKey(goal.assistId, assistName, goal.team ?? '');
+      const assistRecord = totals.get(assistKey) ?? { player: assistName, goals: 0, assists: 0 };
+      assistRecord.player = assistName;
       assistRecord.team = goal.team;
       assistRecord.assists += 1;
       totals.set(assistKey, assistRecord);

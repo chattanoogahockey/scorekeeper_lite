@@ -127,6 +127,14 @@ function normalizeDivision(value) {
   if (lower === 'gold') return 'Gold';
   return toTitleCase(normalized);
 }
+function isAnonymousPlayerName(name) {
+  const normalized = `${name ?? ''}`.trim().toLowerCase();
+  if (!normalized) {
+    return false;
+  }
+  return normalized === 'sub';
+}
+
 
 function formatFlyoutSubtitle(parts) {
   const bullet = 'â€¢';
@@ -347,7 +355,7 @@ function createPlayerRecord(playerId, playerName, teamName) {
 function ensurePlayerRecord(collection, playerId, playerName, teamName) {
   const name = `${playerName ?? ''}`.trim();
   const team = `${teamName ?? ''}`.trim();
-  if (!name) {
+  if (!name || isAnonymousPlayerName(name)) {
     return null;
   }
 
