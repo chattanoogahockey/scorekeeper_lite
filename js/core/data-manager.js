@@ -5,6 +5,38 @@ const STORAGE_KEY = 'chahky_games';
 const IN_PROGRESS_STORAGE_KEY = 'chahky_current_game';
 const DATA_VERSION_KEY = 'chahky_data_version';
 
+const PRACTICE_HOME_TEAM = 'Practice Game';
+const PRACTICE_AWAY_TEAM = 'Practice Opponents';
+const PRACTICE_DIVISION = 'Practice';
+const PRACTICE_GAME_SEED = Object.freeze({
+  id: 'practice_game',
+  date: '2025-01-01 00:00:00',
+  time: '00:00:00',
+  homeTeam: PRACTICE_HOME_TEAM,
+  awayTeam: PRACTICE_AWAY_TEAM,
+  location: 'Internal Test Session',
+  season: 'Practice Session',
+  week: 'Test',
+  division: PRACTICE_DIVISION,
+  isPractice: true,
+});
+const PRACTICE_ROSTER_SEED = Object.freeze({
+  [PRACTICE_HOME_TEAM]: [
+    { id: 'practice_game_player_1', name: 'Practice Skater 1', team: PRACTICE_HOME_TEAM, division: PRACTICE_DIVISION },
+    { id: 'practice_game_player_2', name: 'Practice Skater 2', team: PRACTICE_HOME_TEAM, division: PRACTICE_DIVISION },
+    { id: 'practice_game_player_3', name: 'Practice Skater 3', team: PRACTICE_HOME_TEAM, division: PRACTICE_DIVISION },
+    { id: 'practice_game_player_4', name: 'Practice Skater 4', team: PRACTICE_HOME_TEAM, division: PRACTICE_DIVISION },
+    { id: 'practice_game_goalie_1', name: 'Practice Goalie', team: PRACTICE_HOME_TEAM, division: PRACTICE_DIVISION },
+  ],
+  [PRACTICE_AWAY_TEAM]: [
+    { id: 'practice_opponent_player_1', name: 'Opponent Skater 1', team: PRACTICE_AWAY_TEAM, division: PRACTICE_DIVISION },
+    { id: 'practice_opponent_player_2', name: 'Opponent Skater 2', team: PRACTICE_AWAY_TEAM, division: PRACTICE_DIVISION },
+    { id: 'practice_opponent_player_3', name: 'Opponent Skater 3', team: PRACTICE_AWAY_TEAM, division: PRACTICE_DIVISION },
+    { id: 'practice_opponent_player_4', name: 'Opponent Skater 4', team: PRACTICE_AWAY_TEAM, division: PRACTICE_DIVISION },
+    { id: 'practice_opponent_goalie_1', name: 'Opponent Goalie', team: PRACTICE_AWAY_TEAM, division: PRACTICE_DIVISION },
+  ],
+});
+
 function buildSeedSignature(schedule, rosters) {
   const schedulePart = Array.isArray(schedule)
     ? schedule
@@ -296,13 +328,19 @@ export class DataManager {
     } else {
       this.rosters = {};
     }
+
+    this.ensurePracticeRosters();
   }
 
   async loadSchedule() {
     const response = await this.safeFetch('data/schedule.json');
     if (response) {
       this.schedule = response;
+    } else if (!Array.isArray(this.schedule)) {
+      this.schedule = [];
     }
+
+    this.ensurePracticeGameEntry();
   }
 
   async loadGamesData() {
@@ -479,6 +517,71 @@ export class DataManager {
     }
 
     game.overtimeResult = normalized;
+  }
+
+  ensurePracticeRosters() {
+    if (!this.rosters || typeof this.rosters !== 'object') {
+      this.rosters = {};
+    }
+
+    const applySeed = (teamName) => {
+      const seeds = PRACTICE_ROSTER_SEED[teamName];
+      if (!Array.isArray(seeds) || !seeds.length) {
+        return;
+      }
+
+      const existing = Array.isArray(this.rosters[teamName]) ? this.rosters[teamName] : [];
+      if (!existing.length) {
+        this.rosters[teamName] = seeds.map((player) => ({ ...player }));
+        return;
+      }
+
+      const normalized = existing.map((player) => ({
+        ...player,
+        team: player.team ?? teamName,
+        division: player.division ?? PRACTICE_DIVISION,
+      }));
+
+      if (normalized.length < seeds.length) {
+        for (let index = normalized.length; index < seeds.length; index += 1) {
+          normalized.push({ ...seeds[index] });
+        }
+      }
+
+      this.rosters[teamName] = normalized;
+    };
+
+    applySeed(PRACTICE_HOME_TEAM);
+    applySeed(PRACTICE_AWAY_TEAM);
+  }
+
+  ensurePracticeGameEntry() {
+    const seed = { ...PRACTICE_GAME_SEED };
+
+    if (!Array.isArray(this.schedule)) {
+      this.schedule = [seed];
+      return;
+    }
+
+    const practiceEntries = this.schedule.filter((game) => game && game.id === PRACTICE_GAME_SEED.id);
+    const remainder = this.schedule.filter((game) => !game || game.id !== PRACTICE_GAME_SEED.id);
+
+    if (practiceEntries.length) {
+      const merged = practiceEntries.reduce(
+        (accumulator, game) => ({
+          ...accumulator,
+          ...game,
+          isPractice: true,
+          homeTeam: game.homeTeam || accumulator.homeTeam,
+          awayTeam: game.awayTeam || accumulator.awayTeam,
+        }),
+        seed,
+      );
+      this.schedule = [merged, ...remainder];
+      return;
+    }
+
+    this.schedule = [seed, ...remainder];
   }
 
   restoreCurrentGame() {
