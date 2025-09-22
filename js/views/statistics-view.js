@@ -1208,7 +1208,7 @@ function renderTeamStandingsTable(division) {
     .join('');
 
   const header = TEAM_TABLE_COLUMNS.map((column) => createSortHeader('team', column, sortState)).join('');
-  const hint = '<p class="stats-table-hint" role="note">Select a team row to view cumulative performance trends.</p>';
+  const hint = '<p class="stats-table-hint" role="note">Select a team row to view cumulative performance trends. Click any column heading to sort.</p>';
 
   return `
     ${hint}
@@ -1278,7 +1278,7 @@ function renderPlayerStandingsTable(division) {
     .join('');
 
   const header = PLAYER_TABLE_COLUMNS.map((column) => createSortHeader('player', column, sortState)).join('');
-  const hint = '<p class="stats-table-hint" role="note">Select a player row to view cumulative scoring trends.</p>'
+  const hint = '<p class="stats-table-hint" role="note">Select a player row to view cumulative scoring trends. Click any column heading to sort.</p>'
 
   return `
     ${hint}
