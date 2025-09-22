@@ -11,7 +11,8 @@
     "awayTeam": "Timinators",
     "homeScore": 5,
     "awayScore": 9,
-    "lastUpdated": "2025-09-22T14:24:57.504Z"
+    "lastUpdated": "2025-09-22T14:24:57.504Z",
+    "overtimeResult": null
   },
   {
     "id": "game_6",
@@ -25,7 +26,8 @@
     "awayTeam": "Mracnaphobia",
     "homeScore": 5,
     "awayScore": 6,
-    "lastUpdated": "2025-09-22T14:15:39.069Z"
+    "lastUpdated": "2025-09-22T14:15:39.069Z",
+    "overtimeResult": null
   },
   {
     "id": "game_5",
@@ -39,7 +41,8 @@
     "awayTeam": "Board Busters",
     "homeScore": 11,
     "awayScore": 2,
-    "lastUpdated": "2025-09-22T13:40:24.024Z"
+    "lastUpdated": "2025-09-22T13:40:24.024Z",
+    "overtimeResult": null
   },
   {
     "id": "game_20",
@@ -53,7 +56,8 @@
     "awayTeam": "Sislo",
     "homeScore": 4,
     "awayScore": 5,
-    "lastUpdated": "2025-09-22T04:16:42.138Z"
+    "lastUpdated": "2025-09-22T04:16:42.138Z",
+    "overtimeResult": null
   },
   {
     "id": "game_19",
@@ -67,7 +71,8 @@
     "awayTeam": "Slappy Gilmores",
     "homeScore": 12,
     "awayScore": 7,
-    "lastUpdated": "2025-09-22T04:11:00.993Z"
+    "lastUpdated": "2025-09-22T04:11:00.993Z",
+    "overtimeResult": null
   },
   {
     "id": "game_18",
@@ -100,7 +105,8 @@
     "awayTeam": "Slappy Gilmores",
     "homeScore": 7,
     "awayScore": 4,
-    "lastUpdated": "2025-09-22T03:49:50.606Z"
+    "lastUpdated": "2025-09-22T03:49:50.606Z",
+    "overtimeResult": null
   },
   {
     "id": "game_9",
@@ -114,7 +120,8 @@
     "awayTeam": "Purpetrators",
     "homeScore": 5,
     "awayScore": 8,
-    "lastUpdated": "2025-09-22T03:43:32.524Z"
+    "lastUpdated": "2025-09-22T03:43:32.524Z",
+    "overtimeResult": null
   },
   {
     "id": "game_8",
@@ -128,7 +135,8 @@
     "awayTeam": "UTC",
     "homeScore": 4,
     "awayScore": 7,
-    "lastUpdated": "2025-09-22T03:33:39.487Z"
+    "lastUpdated": "2025-09-22T03:33:39.487Z",
+    "overtimeResult": null
   },
   {
     "id": "game_14",

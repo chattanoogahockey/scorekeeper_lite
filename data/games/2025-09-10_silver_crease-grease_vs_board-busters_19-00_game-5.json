@@ -549,5 +549,6 @@
   ],
   "penalties": [],
   "homeScore": 11,
-  "awayScore": 2
+  "awayScore": 2,
+  "overtimeResult": null
 }

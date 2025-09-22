@@ -1890,7 +1890,7 @@ function renderSeasonSummarySection(division) {
             <tr>
               <th>#</th>
               <th>Team</th>
-              <th>Record</th>
+              <th>Record (W-L-OTL)</th>
               <th>PTS</th>
               <th>GD</th>
               <th>Win %</th>
@@ -1939,7 +1939,9 @@ function renderSeasonOutlookSection(division) {
       const projectionLine = formatScoreLine(matchup.homeTeam, matchup.awayTeam, projection.home, projection.away);
       const margin = Math.abs(projection.home - projection.away);
       const marginPhrase = margin === 1 ? 'by a goal' : `by ${margin}`;
-      const rationale = `${favorite} (${summarizeRecord(favoriteStats)}, ${formatPercentage(favoriteStats.winPct)} win rate) has the edge. ${underdogStats.team} (${summarizeRecord(underdogStats)}, ${formatPercentage(underdogStats.winPct)} win rate) will try to counter. Projection: ${projectionLine} with ${favorite} ${marginPhrase}.`;
+      const favoriteRecordLabel = `${summarizeRecord(favoriteStats)} (W-L-OTL)`;
+      const underdogRecordLabel = `${summarizeRecord(underdogStats)} (W-L-OTL)`;
+      const rationale = `${favorite} (${favoriteRecordLabel}, ${formatPercentage(favoriteStats.winPct)} win rate) has the edge. ${underdogStats.team} (${underdogRecordLabel}, ${formatPercentage(underdogStats.winPct)} win rate) will try to counter. Projection: ${projectionLine} with ${favorite} ${marginPhrase}.`;
 
       return `
         <li>
