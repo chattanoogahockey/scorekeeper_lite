@@ -1,5 +1,19 @@
 [
   {
+    "id": "game_7",
+    "file": "data/games/2025-09-10_silver_nets-sticks-and-chill_vs_timinators_21-00_game-7.json",
+    "fileName": "2025-09-10_silver_nets-sticks-and-chill_vs_timinators_21-00_game-7.json",
+    "date": "2025-09-10 00:00:00",
+    "time": "21:00:00",
+    "division": "Silver",
+    "created": "2025-09-22T14:17:53.365Z",
+    "homeTeam": "Nets, Sticks, and Chill",
+    "awayTeam": "Timinators",
+    "homeScore": 5,
+    "awayScore": 9,
+    "lastUpdated": "2025-09-22T14:24:57.504Z"
+  },
+  {
     "id": "game_6",
     "file": "data/games/2025-09-10_silver_danglin-under-the-influence_vs_mracnaphobia_20-00_game-6.json",
     "fileName": "2025-09-10_silver_danglin-under-the-influence_vs_mracnaphobia_20-00_game-6.json",
