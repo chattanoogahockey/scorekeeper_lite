@@ -1572,18 +1572,30 @@ tbody .stats-player-row:focus-visible {
     color: var(--secondary-color);
 }
 
+.report-timeline li div {
+    flex: 1;
+}
+
+.report-timeline li p {
+    margin: 0;
+    color: var(--text-color);
+    line-height: 1.4;
+}
+
 .report-timeline__time {
     font-weight: 600;
     color: var(--text-color);
 }
 
 .report-timeline__score {
+    display: inline-block;
+    margin-top: 4px;
     font-weight: 600;
     color: var(--primary-color);
 }
 
 .report-timeline--full li {
-    align-items: center;
+    align-items: flex-start;
     flex-wrap: wrap;
 }
 
@@ -1672,6 +1684,17 @@ tbody .stats-player-row:focus-visible {
     margin-top: 4px;
     font-size: 0.8rem;
     color: var(--secondary-color);
+}
+
+.report-list__meta {
+    color: var(--text-color);
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+
+.report-list__note {
+    color: var(--secondary-color);
+    font-size: 0.8rem;
 }
 
 @media (max-width: 540px) {

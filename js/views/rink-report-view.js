@@ -1,5 +1,5 @@
 const DIVISIONS = ['Gold', 'Silver', 'Bronze'];
-const DEFAULT_DIVISION = 'Bronze';
+const DEFAULT_DIVISION = 'Gold';
 const DEFAULT_SECTION = 'weekly';
 
 const SECTION_DEFINITIONS = [
@@ -256,11 +256,418 @@ function describePeriod(value) {
   return trimmed;
 }
 
+
+function formatAssistName(value) {
+  const name = `${value ?? ''}`.trim();
+  if (!name || isAnonymousPlayerName(name)) {
+    return '';
+  }
+  return name;
+}
+
+function describeShot(goal) {
+  const type = `${goal?.shotType ?? ''}`.toLowerCase();
+  let verb;
+  switch (type) {
+    case 'wrist':
+      verb = 'snapped home a wrist shot';
+      break;
+    case 'slap':
+      verb = 'hammered a slapper';
+      break;
+    case 'snap':
+      verb = 'whistled a snap shot';
+      break;
+    case 'backhand':
+      verb = 'lifted a backhander';
+      break;
+    case 'tip-in':
+    case 'tip in':
+      verb = 'redirected a tip-in';
+      break;
+    case 'deflection':
+      verb = 'got a deflection to fall';
+      break;
+    case 'wrap-around':
+    case 'wraparound':
+      verb = 'tucked a wraparound';
+      break;
+    case 'one-timer':
+    case 'one timer':
+      verb = 'crushed a one-timer';
+      break;
+    default:
+      verb = 'buried the chance';
+      break;
+  }
+  const descriptors = [];
+  const goalType = `${goal?.goalType ?? ''}`.toLowerCase();
+  if (goalType === 'power play') {
+    descriptors.push('on the power play');
+  } else if (goalType === 'shorthanded') {
+    descriptors.push('while shorthanded');
+  } else if (goalType === 'empty net') {
+    descriptors.push('into the empty net');
+  }
+  if (`${goal?.breakaway ?? ''}`.toLowerCase() === 'yes') {
+    descriptors.push('on a breakaway');
+  }
+  return descriptors.length ? `${verb} ${descriptors.join(' ')}` : verb;
+}
+
+function formatGoalMoment(goal) {
+  const time = `${goal?.time ?? ''}`.trim() || '00:00';
+  const periodLabel = describePeriod(goal?.period);
+  if (!periodLabel) {
+    return `at ${time}`;
+  }
+  if (periodLabel === 'OT') {
+    return `in overtime at ${time}`;
+  }
+  if (periodLabel === 'Shootout') {
+    return 'in the shootout';
+  }
+  return `at ${time} of the ${periodLabel} period`;
+}
+
+function buildGoalContexts(goals, game) {
+  const contexts = [];
+  let home = 0;
+  let away = 0;
+  const homeTeam = game.homeTeam;
+  goals.forEach((goal) => {
+    const entry = {
+      goal,
+      homeBefore: home,
+      awayBefore: away,
+    };
+    if (goal.team === homeTeam) {
+      home += 1;
+    } else {
+      away += 1;
+    }
+    entry.homeAfter = home;
+    entry.awayAfter = away;
+    contexts.push(entry);
+  });
+  return contexts;
+}
+
+function describeScoreSwing(scoringTeam, prevHome, prevAway, nextHome, nextAway, game) {
+  if (!Number.isFinite(prevHome) || !Number.isFinite(prevAway) || !Number.isFinite(nextHome) || !Number.isFinite(nextAway)) {
+    return '';
+  }
+  if (nextHome === nextAway) {
+    return 'to tie it up';
+  }
+  const leader = nextHome > nextAway ? game.homeTeam : game.awayTeam;
+  const margin = Math.abs(nextHome - nextAway);
+  const scoringIsLeader = scoringTeam === leader;
+  const prevDiff = prevHome - prevAway;
+  const afterDiff = nextHome - nextAway;
+  if (scoringIsLeader) {
+    if (prevDiff === 0) {
+      return `to give ${leader} the edge`;
+    }
+    if (Math.sign(afterDiff) !== Math.sign(prevDiff) && prevDiff !== 0) {
+      return `to flip momentum back to ${leader}`;
+    }
+    return `to extend the ${leader} cushion`;
+  }
+  if (Math.abs(afterDiff) < Math.abs(prevDiff)) {
+    return `to pull ${scoringTeam} back within ${margin === 1 ? 'a goal' : `${margin} goals`}`;
+  }
+  return `to keep ${scoringTeam} within reach`;
+}
+
+function renderGoalTimeline(goals, game, options = {}) {
+  const { limit = null, includeScore = true } = options;
+  if (!Array.isArray(goals) || !goals.length) {
+    return '<li><span class="report-timeline__time">--:--</span><div><p>No scoring logged.</p></div></li>';
+  }
+  const contexts = buildGoalContexts(goals, game);
+  const items = [];
+  for (let index = 0; index < contexts.length; index += 1) {
+    if (limit && items.length >= limit) {
+      break;
+    }
+    const { goal, homeBefore, awayBefore, homeAfter, awayAfter } = contexts[index];
+    const assistName = formatAssistName(goal.assist);
+    const shotPhrase = describeShot(goal);
+    const moment = formatGoalMoment(goal);
+    const impact = describeScoreSwing(goal.team, homeBefore, awayBefore, homeAfter, awayAfter, game);
+    const assistClause = assistName ? ` off a feed from ${assistName}` : '';
+    const impactClause = impact ? ` ${impact}` : '';
+    const scoreboardLabel = formatScoreLine(game.homeTeam, game.awayTeam, homeAfter, awayAfter);
+    items.push(`
+      <li>
+        <span class="report-timeline__time">${describePeriod(goal.period)} ${goal.time || '00:00'}</span>
+        <div>
+          <p>${goal.team}'s ${goal.player} ${shotPhrase}${assistClause} ${moment}${impactClause}.</p>
+          ${includeScore ? `<span class="report-timeline__score">${scoreboardLabel}</span>` : ''}
+        </div>
+      </li>
+    `);
+  }
+  return items.join('');
+}
+
+function analyzeGameFlow(goals, game) {
+  const contexts = buildGoalContexts(goals, game);
+  let leadChanges = 0;
+  let winnerTrailed = false;
+  let largestDeficit = 0;
+  let previousLeader = null;
+  const winner = game.winner;
+  const homeTeam = game.homeTeam;
+  let currentTeam = null;
+  let currentRun = 0;
+  let currentStart = 0;
+  const largestRun = { team: null, length: 0, startIndex: 0, endIndex: 0 };
+  contexts.forEach((entry, index) => {
+    const { goal, homeAfter, awayAfter } = entry;
+    const leader = homeAfter === awayAfter ? null : homeAfter > awayAfter ? homeTeam : game.awayTeam;
+    if (leader && previousLeader && leader !== previousLeader) {
+      leadChanges += 1;
+    }
+    if (leader !== previousLeader) {
+      previousLeader = leader;
+    }
+    if (goal.team === currentTeam) {
+      currentRun += 1;
+    } else {
+      currentTeam = goal.team;
+      currentRun = 1;
+      currentStart = index;
+    }
+    if (currentRun > largestRun.length) {
+      largestRun.team = currentTeam;
+      largestRun.length = currentRun;
+      largestRun.startIndex = currentStart;
+      largestRun.endIndex = index;
+    }
+    if (winner) {
+      const winnerScore = winner === homeTeam ? homeAfter : awayAfter;
+      const opponentScore = winner === homeTeam ? awayAfter : homeAfter;
+      if (opponentScore > winnerScore) {
+        winnerTrailed = true;
+        largestDeficit = Math.max(largestDeficit, opponentScore - winnerScore);
+      }
+    }
+  });
+  let closingRun = 0;
+  if (winner) {
+    for (let index = contexts.length - 1; index >= 0; index -= 1) {
+      if (contexts[index].goal.team === winner) {
+        closingRun += 1;
+      } else {
+        break;
+      }
+    }
+  }
+  return { leadChanges, winnerTrailed, largestDeficit, closingRun, largestRun };
+}
+
+function buildGameStory(game, goals, options = {}) {
+  const { includeStar = false } = options;
+  if (!Array.isArray(goals) || !goals.length) {
+    if (!Number.isFinite(game.homeScore) || !Number.isFinite(game.awayScore)) {
+      return ['No scoring summary is available for this matchup yet.'];
+    }
+    if (game.homeScore === game.awayScore) {
+      return [`${game.homeTeam} and ${game.awayTeam} battled to a ${game.homeScore}-${game.awayScore} draw.`];
+    }
+    const inferredWinner = game.winner ?? (game.homeScore > game.awayScore ? game.homeTeam : game.awayTeam);
+    const inferredLoser = inferredWinner === game.homeTeam ? game.awayTeam : game.homeTeam;
+    return [`${inferredWinner} edged ${inferredLoser} ${Math.max(game.homeScore, game.awayScore)}-${Math.min(game.homeScore, game.awayScore)} in a defensive tilt.`];
+  }
+
+  const contexts = buildGoalContexts(goals, game);
+  const sentences = [];
+  const firstContext = contexts[0];
+  const firstGoal = firstContext.goal;
+  const firstAssist = formatAssistName(firstGoal.assist);
+  const firstMoment = formatGoalMoment(firstGoal);
+  const firstShot = describeShot(firstGoal);
+  const firstScore = formatScoreLine(game.homeTeam, game.awayTeam, firstContext.homeAfter, firstContext.awayAfter);
+  sentences.push(`${firstGoal.team}'s ${firstGoal.player} ${firstShot}${firstAssist ? ` off a feed from ${firstAssist}` : ''} ${firstMoment}, opening the scoring (${firstScore}).`);
+
+  const responseContext = contexts.find((entry, index) => index > 0 && entry.goal.team !== firstGoal.team);
+  if (responseContext) {
+    const responseGoal = responseContext.goal;
+    const responseAssist = formatAssistName(responseGoal.assist);
+    const responseMoment = formatGoalMoment(responseGoal);
+    const responseShot = describeShot(responseGoal);
+    const responseScore = formatScoreLine(game.homeTeam, game.awayTeam, responseContext.homeAfter, responseContext.awayAfter);
+    const scoringTeamScore = responseGoal.team === game.homeTeam ? responseContext.homeAfter : responseContext.awayAfter;
+    const opponentScore = responseGoal.team === game.homeTeam ? responseContext.awayAfter : responseContext.homeAfter;
+    let responseClause = 'to answer right back';
+    if (scoringTeamScore === opponentScore) {
+      responseClause = 'to draw even';
+    } else if (scoringTeamScore > opponentScore) {
+      responseClause = 'to grab the lead';
+    } else {
+      responseClause = 'to trim the deficit';
+    }
+    sentences.push(`${responseGoal.team} responded when ${responseGoal.player} ${responseShot}${responseAssist ? ` off a feed from ${responseAssist}` : ''} ${responseMoment}, ${responseClause} (${responseScore}).`);
+  }
+
+  const flow = analyzeGameFlow(goals, game);
+  const goAheadGoal = findGoAheadGoal(goals, game);
+  if (goAheadGoal) {
+    const index = goals.indexOf(goAheadGoal);
+    const goContext = index >= 0 ? contexts[index] : null;
+    const goAssist = formatAssistName(goAheadGoal.assist);
+    const goMoment = formatGoalMoment(goAheadGoal);
+    const goShot = describeShot(goAheadGoal);
+    const goScore = goContext ? formatScoreLine(game.homeTeam, game.awayTeam, goContext.homeAfter, goContext.awayAfter) : '';
+    const comebackClause = flow.winnerTrailed && flow.largestDeficit > 0 ? ` after erasing a ${flow.largestDeficit}-goal hole` : '';
+    sentences.push(`${goAheadGoal.team} seized control for good when ${goAheadGoal.player} ${goShot}${goAssist ? ` off a feed from ${goAssist}` : ''} ${goMoment}${comebackClause}${goScore ? ` (${goScore})` : ''}.`);
+  } else if (flow.leadChanges > 0) {
+    sentences.push(`The lead changed ${flow.leadChanges} ${flow.leadChanges === 1 ? 'time' : 'times'} before the final horn.`);
+  }
+
+  if (flow.largestRun.team && flow.largestRun.length >= 3) {
+    sentences.push(`${flow.largestRun.team} strung together ${flow.largestRun.length} unanswered to tilt the ice during the decisive stretch.`);
+  }
+
+  const winnerName = game.winner;
+  if (winnerName) {
+    const finalScore = `${game.winnerScore}-${game.loserScore}`;
+    if (flow.closingRun > 1) {
+      sentences.push(`${winnerName} closed with ${flow.closingRun} straight to lock in the ${finalScore} win.`);
+    } else {
+      sentences.push(`${winnerName} managed the final minutes to ice the ${finalScore} decision.`);
+    }
+  } else {
+    const drawScore = `${game.homeScore}-${game.awayScore}`;
+    sentences.push(`${game.homeTeam} and ${game.awayTeam} traded blows until it settled at ${drawScore}.`);
+  }
+
+  if (includeStar) {
+    const star = computeGameStar(goals);
+    if (star) {
+      sentences.push(`${star.player} finished with ${star.goals} goals${star.assists ? ` and ${star.assists} assists` : ''} to headline the sheet.`);
+    }
+  }
+
+  return sentences;
+}
+
+function formatList(values) {
+  const filtered = values.filter(Boolean);
+  if (!filtered.length) {
+    return '';
+  }
+  if (filtered.length === 1) {
+    return filtered[0];
+  }
+  if (filtered.length === 2) {
+    return `${filtered[0]} and ${filtered[1]}`;
+  }
+  return `${filtered.slice(0, -1).join(', ')}, and ${filtered[filtered.length - 1]}`;
+}
+
+function formatResultHeading(game) {
+  if (!Number.isFinite(game.homeScore) || !Number.isFinite(game.awayScore)) {
+    return formatScoreLine(game.homeTeam, game.awayTeam, game.homeScore, game.awayScore);
+  }
+  if (!game.winner) {
+    return `${formatScoreLine(game.homeTeam, game.awayTeam, game.homeScore, game.awayScore)} (Draw)`;
+  }
+  return `${game.winner} ${game.winnerScore} - ${game.loser} ${game.loserScore}`;
+}
+
+function safeDivide(value, divisor) {
+  return divisor ? value / divisor : 0;
+}
+
+function formatTimeLabel(timeString) {
+  const trimmed = `${timeString ?? ''}`.trim();
+  if (!trimmed) {
+    return '';
+  }
+  const segments = trimmed.split(':');
+  if (segments.length < 2) {
+    return '';
+  }
+  const hour = Number.parseInt(segments[0], 10);
+  const minute = Number.parseInt(segments[1], 10);
+  if (!Number.isFinite(hour) || !Number.isFinite(minute)) {
+    return '';
+  }
+  const suffix = hour >= 12 ? 'PM' : 'AM';
+  const normalizedHour = ((hour + 11) % 12) + 1;
+  const minuteLabel = minute.toString().padStart(2, '0');
+  return `${normalizedHour}:${minuteLabel} ${suffix}`;
+}
+
+function formatScheduleLabel(date, timeString) {
+  const pieces = [];
+  if (date instanceof Date && !Number.isNaN(date.getTime())) {
+    const formatter = new Intl.DateTimeFormat('en-US', {
+      weekday: 'short',
+      month: 'short',
+      day: 'numeric',
+    });
+    pieces.push(formatter.format(date));
+  }
+  const timeLabel = formatTimeLabel(timeString);
+  if (timeLabel) {
+    pieces.push(timeLabel);
+  }
+  return pieces.length ? pieces.join(' - ') : 'Date/Time TBD';
+}
+
+function formatWeekLabel(week) {
+  return Number.isFinite(week) ? week : 'TBD';
+}
+
+function computeTeamEdgeScore(record) {
+  if (!record) {
+    return 0;
+  }
+  const games = Math.max(record.gamesPlayed || 0, 1);
+  const goalDiffPerGame = safeDivide(record.goalDiff ?? 0, games);
+  return (record.points ?? 0) + goalDiffPerGame * 3 + (record.winPct ?? 0) * 10;
+}
+
+function projectMatchupScore(home, away, favorite) {
+  const homeGames = Math.max(home?.gamesPlayed ?? 0, 1);
+  const awayGames = Math.max(away?.gamesPlayed ?? 0, 1);
+  const homeFor = safeDivide(home?.goalsFor ?? 0, homeGames);
+  const homeAgainst = safeDivide(home?.goalsAgainst ?? 0, homeGames);
+  const awayFor = safeDivide(away?.goalsFor ?? 0, awayGames);
+  const awayAgainst = safeDivide(away?.goalsAgainst ?? 0, awayGames);
+  const baseHome = (homeFor + awayAgainst) / 2;
+  const baseAway = (awayFor + homeAgainst) / 2;
+  const winEdge = ((home?.winPct ?? 0) - (away?.winPct ?? 0)) * 1.2;
+  const diffEdge = (safeDivide(home?.goalDiff ?? 0, homeGames) - safeDivide(away?.goalDiff ?? 0, awayGames)) * 0.25;
+  let projectedHome = baseHome + winEdge + diffEdge;
+  let projectedAway = baseAway - winEdge - diffEdge;
+  projectedHome = Math.max(Math.min(projectedHome, 10), 1.5);
+  projectedAway = Math.max(Math.min(projectedAway, 10), 1.5);
+  let homeScore = Math.round(projectedHome);
+  let awayScore = Math.round(projectedAway);
+  homeScore = Math.max(homeScore, 1);
+  awayScore = Math.max(awayScore, 1);
+  if (homeScore === awayScore) {
+    if (favorite && favorite === (home?.team ?? '')) {
+      homeScore += 1;
+    } else if (favorite && favorite === (away?.team ?? '')) {
+      awayScore += 1;
+    } else {
+      homeScore += 1;
+    }
+  }
+  return { home: homeScore, away: awayScore };
+}
+
 function formatScoreLine(homeTeam, awayTeam, homeScore, awayScore) {
   if (!Number.isFinite(homeScore) || !Number.isFinite(awayScore)) {
     return `${awayTeam} at ${homeTeam}`;
   }
-  return `${awayTeam} ${awayScore} ? ${homeTeam} ${homeScore}`;
+  return `${awayTeam} ${awayScore} - ${homeTeam} ${homeScore}`;
 }
 
 async function loadRinkDataset() {
@@ -909,7 +1316,7 @@ function applyDefaultFilters() {
 function formatStreak(record) {
   const { type, length } = record.currentStreak;
   if (!type || !length) {
-    return '?';
+    return 'None';
   }
   return `${length}${type}`;
 }
@@ -995,7 +1402,7 @@ function renderFilters(container) {
 
 function renderContent(container, statusContainer) {
   if (rinkReportState.loading) {
-    statusContainer.textContent = 'Loading the latest stories?';
+    statusContainer.textContent = 'Loading the latest stories...';
     container.innerHTML = '<div class="card"><p>Loading?</p></div>';
     return;
   }
@@ -1065,7 +1472,7 @@ function renderWeeklySummarySection(division, weekNumber) {
 
   const leaders = getWeeklyLeaders(division, weekNumber, 3);
   const leaderSummary = leaders.length
-    ? `${leaders[0].player} led the way with ${leaders[0].goals} goals and ${leaders[0].assists} assists.`
+    ? `${leaders[0].player} set the tone with ${leaders[0].goals} goals and ${leaders[0].assists} assists (${leaders[0].points} pts).`
     : 'Balanced scoring defined the week.';
 
   const headlineParts = [`Week ${weekNumber} in the ${division} division delivered ${totalGoals} goals across ${games.length} games (${averageGoals} per matchup).`];
@@ -1101,46 +1508,22 @@ function renderWeeklySummarySection(division, weekNumber) {
 
 function renderWeeklyGameCard(game) {
   const goals = sortGoals(game.goals ?? []);
-  const openingGoal = goals[0];
-  const goAhead = findGoAheadGoal(goals, game);
-  const star = computeGameStar(goals);
-
-  const timeline = goals
-    .slice(0, 4)
-    .map((goal) => {
-      const period = describePeriod(goal.period);
-      const time = goal.time || '00:00';
-      const assist = `${goal.assist ?? ''}`.trim();
-      const helper = assist ? ` (assist: ${assist})` : '';
-      return `<li><strong>${goal.team}</strong> ? ${goal.player} ${helper} <span>${period} ${time}</span></li>`;
-    })
-    .join('');
-
-  const openingLine = openingGoal
-    ? `${openingGoal.player} broke the ice for ${openingGoal.team} in the ${describePeriod(openingGoal.period)} (${openingGoal.time}).`
-    : 'Scoring opened late with a defensive start.';
-
-  const goAheadLine = goAhead
-    ? `${goAhead.player} supplied the go-ahead tally in the ${describePeriod(goAhead.period)}, a lead ${game.winner} never gave back.`
-    : 'The lead see-sawed before the final horn.';
-
-  const starLine = star
-    ? `${star.player} posted ${star.goals} goals${star.assists ? ` and ${star.assists} assists` : ''} to headline the night.`
-    : '';
-
-  const narrative = `${openingLine} ${goAheadLine} ${starLine}`.trim();
+  const storySentences = buildGameStory(game, goals, { includeStar: true });
+  const summary = storySentences.slice(0, 2).join(' ') || 'This one opened up in a hurry.';
+  const timeline = renderGoalTimeline(goals, game, { limit: 3, includeScore: true });
 
   return `
     <article class="report-game">
       <header>
-        <h3>${game.winner} ${game.winnerScore} ? ${game.loser} ${game.loserScore}</h3>
-        <p>${formatDateLabel(game.parsedDate)} ? ${game.awayTeam} at ${game.homeTeam}</p>
+        <h3>${formatResultHeading(game)}</h3>
+        <p>${formatDateLabel(game.parsedDate)} - ${game.awayTeam} at ${game.homeTeam}</p>
       </header>
-      <p>${narrative}</p>
+      <p>${summary}</p>
       <ul class="report-timeline">${timeline}</ul>
     </article>
   `;
 }
+
 function findGoAheadGoal(goals, game) {
   if (!goals.length) {
     return null;
@@ -1217,45 +1600,49 @@ function renderGameDetailsSection(division, gameId) {
   }
 
   const goals = sortGoals(game.goals ?? []);
-  let homeRunning = 0;
-  let awayRunning = 0;
-  const homeTeam = game.homeTeam;
-
-  const timeline = goals
-    .map((goal) => {
-      if (goal.team === homeTeam) {
-        homeRunning += 1;
-      } else {
-        awayRunning += 1;
-      }
-      const scoreLine = `${awayTeamLabel(game, awayRunning)} ? ${homeTeamLabel(game, homeRunning)}`;
-      const assist = `${goal.assist ?? ''}`.trim();
-      const helper = assist ? ` (assist: ${assist})` : '';
-      return `
-        <li>
-          <span class="report-timeline__time">${describePeriod(goal.period)} ${goal.time || '00:00'}</span>
-          <strong>${goal.team}</strong> ${goal.player}${helper}
-          <span class="report-timeline__score">${scoreLine}</span>
-        </li>
-      `;
-    })
-    .join('');
-
+  const storySentences = buildGameStory(game, goals);
+  const narrative = storySentences.join(' ');
+  const timeline = renderGoalTimeline(goals, game, { includeScore: true });
   const star = computeGameStar(goals);
+  const flow = analyzeGameFlow(goals, game);
   const penalties = Array.isArray(game.penalties) ? game.penalties.length : 0;
   const overtimeNote = game.isOvertime ? 'This one needed extra ice time.' : 'Handled in regulation.';
-  const starLine = star
-    ? `${star.player} drove the story with ${star.goals} goals${star.assists ? ` and ${star.assists} helpers` : ''}.`
-    : 'Scoring was spread across the bench.';
+
+  const ledeParts = [];
+  if (game.winner) {
+    ledeParts.push(`${game.winner} outlasted ${game.loser} ${game.winnerScore}-${game.loserScore}.`);
+    if (flow.winnerTrailed && flow.largestDeficit > 0) {
+      ledeParts.push(`${game.winner} climbed out of a ${flow.largestDeficit}-goal hole.`);
+    }
+    if (flow.leadChanges > 0) {
+      ledeParts.push(`${flow.leadChanges} lead ${flow.leadChanges === 1 ? 'change kept' : 'changes kept'} the rink buzzing.`);
+    }
+  } else {
+    ledeParts.push(`${game.homeTeam} and ${game.awayTeam} skated to a ${game.homeScore}-${game.awayScore} draw.`);
+    if (flow.leadChanges > 0) {
+      ledeParts.push(`The advantage flipped ${flow.leadChanges} ${flow.leadChanges === 1 ? 'time' : 'times'} along the way.`);
+    }
+  }
+  if (star) {
+    ledeParts.push(`${star.player} stacked ${star.goals} goals${star.assists ? ` and ${star.assists} assists` : ''}.`);
+  } else {
+    ledeParts.push('Scoring was spread across the bench.');
+  }
+  ledeParts.push(overtimeNote);
+  const lede = ledeParts.join(' ');
+
+  const finalScoreLabel = Number.isFinite(game.homeScore) && Number.isFinite(game.awayScore)
+    ? `${game.homeScore}-${game.awayScore}`
+    : '--';
 
   return `
     <div class="card report-card">
-      <h2>${formatScoreLine(game.homeTeam, game.awayTeam, game.homeScore, game.awayScore)}</h2>
-      <p class="report-lede">${game.winner} prevailed behind ${starLine} ${overtimeNote}</p>
+      <h2>${formatResultHeading(game)}</h2>
+      <p class="report-lede">${lede}</p>
       <div class="report-summary">
         <div>
           <span>Final</span>
-          <strong>${game.winnerScore}-${game.loserScore}</strong>
+          <strong>${finalScoreLabel}</strong>
         </div>
         <div>
           <span>Goals Logged</span>
@@ -1266,19 +1653,14 @@ function renderGameDetailsSection(division, gameId) {
           <strong>${penalties}</strong>
         </div>
       </div>
+      <h3>How It Happened</h3>
+      <p>${narrative}</p>
       <h3>Scoring Timeline</h3>
       <ul class="report-timeline report-timeline--full">${timeline}</ul>
     </div>
   `;
 }
 
-function awayTeamLabel(game, score) {
-  return `${game.awayTeam} ${score}`;
-}
-
-function homeTeamLabel(game, score) {
-  return `${game.homeTeam} ${score}`;
-}
 
 function renderSeasonSummarySection(division) {
   const teams = getTeamStats(division);
@@ -1304,14 +1686,44 @@ function renderSeasonSummarySection(division) {
     .sort((teamA, teamB) => teamB.longestWinStreak - teamA.longestWinStreak)[0];
   const stingiest = ordered
     .slice()
-    .sort((teamA, teamB) => teamA.goalsAgainst / Math.max(teamA.gamesPlayed, 1) - teamB.goalsAgainst / Math.max(teamB.gamesPlayed, 1))[0];
+    .sort((teamA, teamB) => safeDivide(teamA.goalsAgainst, Math.max(teamA.gamesPlayed, 1)) - safeDivide(teamB.goalsAgainst, Math.max(teamB.gamesPlayed, 1)))[0];
   const firepower = ordered
     .slice()
-    .sort((teamA, teamB) => teamB.goalsFor / Math.max(teamB.gamesPlayed, 1) - teamA.goalsFor / Math.max(teamA.gamesPlayed, 1))[0];
+    .sort((teamA, teamB) => safeDivide(teamB.goalsFor, Math.max(teamB.gamesPlayed, 1)) - safeDivide(teamA.goalsFor, Math.max(teamA.gamesPlayed, 1)))[0];
+  const chasingPack = ordered.slice(3, 5);
+  const skidTeam = ordered
+    .slice()
+    .reverse()
+    .find((team) => team.currentStreak.type === 'L' && team.currentStreak.length >= 2);
 
-  const headline = `${division} playoff picture is shaping up with ${leaders
-    .map((team) => team.team)
-    .join(', ')} anchoring the table. ${firepower.team} owns the league's most potent offense (${(firepower.goalsFor / Math.max(firepower.gamesPlayed, 1)).toFixed(1)} goals per game) while ${stingiest.team} clamps down defensively (${(stingiest.goalsAgainst / Math.max(stingiest.gamesPlayed, 1)).toFixed(1)} GA/GP). ${hottest.team} has authored a ${hottest.longestWinStreak}-game heater at their best.`;
+  const firepowerAvg = safeDivide(firepower.goalsFor, Math.max(firepower.gamesPlayed, 1));
+  const stingyAvg = safeDivide(stingiest.goalsAgainst, Math.max(stingiest.gamesPlayed, 1));
+
+  const headlineParts = [
+    `${division} playoff picture is forming with ${formatList(leaders.map((team) => team.team))} setting the tempo.`,
+    `${firepower.team} is pumping in ${firepowerAvg.toFixed(1)} goals per night while ${stingiest.team} is yielding just ${stingyAvg.toFixed(1)}.`,
+    `${hottest.team} owns the league's hottest streak at ${hottest.longestWinStreak} straight.`,
+  ];
+
+  if (chasingPack.length) {
+    const reference = leaders[2] ?? leaders[leaders.length - 1];
+    const gap = reference ? reference.points - chasingPack[0].points : 0;
+    let gapText;
+    if (!reference || gap <= 0) {
+      gapText = 'are level on points with the top tier';
+    } else if (gap === 1) {
+      gapText = 'sit a single point back of third';
+    } else {
+      gapText = `are ${gap} points off the third seed`;
+    }
+    headlineParts.push(`${formatList(chasingPack.map((team) => team.team))} ${chasingPack.length === 1 ? 'is' : 'are'} ${gapText}.`);
+  }
+
+  if (skidTeam) {
+    headlineParts.push(`${skidTeam.team} is searching for answers after dropping ${skidTeam.currentStreak.length} straight.`);
+  }
+
+  const headline = headlineParts.join(' ');
 
   const tableRows = ordered
     .map((team, index) => `
@@ -1351,6 +1763,7 @@ function renderSeasonSummarySection(division) {
   `;
 }
 
+
 function renderSeasonOutlookSection(division) {
   const { week, games } = getUpcomingGames(division);
   const teams = getTeamStats(division);
@@ -1364,31 +1777,34 @@ function renderSeasonOutlookSection(division) {
     .map((matchup) => {
       const home = teamLookup.get(matchup.homeTeam);
       const away = teamLookup.get(matchup.awayTeam);
+      const scheduleLabel = formatScheduleLabel(matchup.date, matchup.time);
 
       if (!home || !away) {
         return `
           <li>
             <strong>${matchup.awayTeam} at ${matchup.homeTeam}</strong>
-            <span>Fresh matchup ? no prior data to project.</span>
+            <span class="report-list__meta">${scheduleLabel}</span>
+            <span class="report-list__note">Fresh matchup - no prior data to project.</span>
           </li>
         `;
       }
 
-      const homeEdge = home.points + home.goalDiff * 0.1;
-      const awayEdge = away.points + away.goalDiff * 0.1;
+      const homeEdge = computeTeamEdgeScore(home);
+      const awayEdge = computeTeamEdgeScore(away);
       const favorite = homeEdge >= awayEdge ? matchup.homeTeam : matchup.awayTeam;
-      const underdog = favorite === matchup.homeTeam ? matchup.awayTeam : matchup.homeTeam;
       const favoriteStats = favorite === matchup.homeTeam ? home : away;
       const underdogStats = favorite === matchup.homeTeam ? away : home;
-
-      const rationale = `${favorite} leans on a ${summarizeRecord(favoriteStats)} mark and ${formatPercentage(
-        favoriteStats.winPct,
-      )} win rate; ${underdog} counters with ${formatPercentage(underdogStats.winPct)} so expect a tight finish.`;
+      const projection = projectMatchupScore(home, away, favorite);
+      const projectionLine = formatScoreLine(matchup.homeTeam, matchup.awayTeam, projection.home, projection.away);
+      const margin = Math.abs(projection.home - projection.away);
+      const marginPhrase = margin === 1 ? 'by a goal' : `by ${margin}`;
+      const rationale = `${favorite} (${summarizeRecord(favoriteStats)}, ${formatPercentage(favoriteStats.winPct)} win rate) has the edge. ${underdogStats.team} (${summarizeRecord(underdogStats)}, ${formatPercentage(underdogStats.winPct)} win rate) will try to counter. Projection: ${projectionLine} with ${favorite} ${marginPhrase}.`;
 
       return `
         <li>
           <strong>${matchup.awayTeam} at ${matchup.homeTeam}</strong>
-          <span>${rationale}</span>
+          <span class="report-list__meta">${scheduleLabel}</span>
+          <span class="report-list__note">${rationale}</span>
         </li>
       `;
     })
@@ -1398,14 +1814,14 @@ function renderSeasonOutlookSection(division) {
   const leaders = getWeeklyLeaders(division, latestWeek, 3);
   const watchList = leaders.length
     ? leaders
-        .map((player) => `<li><strong>${player.player}</strong> ? ${player.points} pts last week for ${player.team}</li>`)
+        .map((player) => `<li><strong>${player.player}</strong><span class="report-list__note">${player.team} - ${player.goals} G, ${player.assists} A (${player.points} pts last week)</span></li>`)
         .join('')
-    : '<li>Balanced contributions ? keep an eye on every bench.</li>';
+    : '<li><span class="report-list__note">Balanced contributions - keep an eye on every bench.</span></li>';
 
   return `
     <div class="card report-card">
-      <h2>${division} Outlook ? Week ${week ?? '?'} Preview</h2>
-      <p class="report-lede">The projection model leans on standings momentum and goal differential to size up the next slate.</p>
+      <h2>${division} Outlook - Week ${formatWeekLabel(week)} Preview</h2>
+      <p class="report-lede">The projection model leans on standings momentum, goal differential, and recent form to size up the next slate.</p>
       <div class="report-columns">
         <section>
           <h3>Matchup Forecasts</h3>
@@ -1419,6 +1835,7 @@ function renderSeasonOutlookSection(division) {
     </div>
   `;
 }
+
 
 export const rinkReportView = {
   id: 'rink-report',
@@ -1435,7 +1852,7 @@ export const rinkReportView = {
         <div class="report-filters" data-report-filters></div>
         <div class="report-status" data-report-status></div>
         <div class="report-content" data-report-content>
-          <div class="card"><p>Loading the latest stories?</p></div>
+          <div class="card"><p>Loading the latest stories...</p></div>
         </div>
       </div>
     `;
