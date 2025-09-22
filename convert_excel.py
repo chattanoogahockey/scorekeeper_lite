@@ -4,7 +4,7 @@ import json
 from datetime import datetime
 
 TEAM_ALIASES = {
-    'Slappy Gilmores': "Slappy Gilmore's",
+    "Slappy Gilmore's": 'Slappy Gilmores',
 }
 
 def normalize_team_name(raw):

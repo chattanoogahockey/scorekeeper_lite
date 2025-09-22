@@ -1,16 +1,5 @@
 [
   {
-    "id": "practice_game",
-    "date": "2025-01-01 00:00:00",
-    "time": "00:00:00",
-    "homeTeam": "Practice Game",
-    "awayTeam": "Practice Opponents",
-    "location": "Internal Test Session",
-    "season": "Practice",
-    "week": "Test",
-    "isPractice": true
-  },
-  {
     "id": "game_1",
     "date": "2025-09-08 00:00:00",
     "time": "18:30:00",
@@ -105,7 +94,7 @@
     "date": "2025-09-11 00:00:00",
     "time": "21:00:00",
     "homeTeam": "Corn Stars",
-    "awayTeam": "Slappy Gilmore's",
+    "awayTeam": "Slappy Gilmores",
     "location": "Slappy Gilmores at Corn Stars",
     "season": "Fall 2025",
     "week": "1"
@@ -195,7 +184,7 @@
     "date": "2025-09-18 00:00:00",
     "time": "20:00:00",
     "homeTeam": "Noah's Arknemesis",
-    "awayTeam": "Slappy Gilmore's",
+    "awayTeam": "Slappy Gilmores",
     "location": "Slappy Gilmores at Noah's Arknemesis",
     "season": "Fall 2025",
     "week": "2"
@@ -284,7 +273,7 @@
     "id": "game_28",
     "date": "2025-09-25 00:00:00",
     "time": "20:00:00",
-    "homeTeam": "Slappy Gilmore's",
+    "homeTeam": "Slappy Gilmores",
     "awayTeam": "Purpetrators",
     "location": "Purpetrators at Slappy Gilmores",
     "season": "Fall 2025",
@@ -385,7 +374,7 @@
     "date": "2025-10-02 00:00:00",
     "time": "19:00:00",
     "homeTeam": "Sislo",
-    "awayTeam": "Slappy Gilmore's",
+    "awayTeam": "Slappy Gilmores",
     "location": "Slappy Gilmores at Sislo",
     "season": "Fall 2025",
     "week": "4"
@@ -495,7 +484,7 @@
     "date": "2025-10-09 00:00:00",
     "time": "20:00:00",
     "homeTeam": "UTC",
-    "awayTeam": "Slappy Gilmore's",
+    "awayTeam": "Slappy Gilmores",
     "location": "Slappy Gilmores at UTC",
     "season": "Fall 2025",
     "week": "5"
@@ -585,7 +574,7 @@
     "date": "2025-10-16 00:00:00",
     "time": "19:00:00",
     "homeTeam": "Corn Stars",
-    "awayTeam": "Slappy Gilmore's",
+    "awayTeam": "Slappy Gilmores",
     "location": "Slappy Gilmores at Corn Stars",
     "season": "Fall 2025",
     "week": "6"
@@ -685,7 +674,7 @@
     "date": "2025-10-23 00:00:00",
     "time": "19:00:00",
     "homeTeam": "Noah's Arknemesis",
-    "awayTeam": "Slappy Gilmore's",
+    "awayTeam": "Slappy Gilmores",
     "location": "Slappy Gilmores at Noah's Arknemesis",
     "season": "Fall 2025",
     "week": "7"
@@ -794,7 +783,7 @@
     "id": "game_79",
     "date": "2025-10-30 00:00:00",
     "time": "20:00:00",
-    "homeTeam": "Slappy Gilmore's",
+    "homeTeam": "Slappy Gilmores",
     "awayTeam": "Purpetrators",
     "location": "Purpetrators at Slappy Gilmores",
     "season": "Fall 2025",
@@ -884,7 +873,7 @@
     "id": "game_88",
     "date": "2025-11-06 00:00:00",
     "time": "19:00:00",
-    "homeTeam": "Slappy Gilmore's",
+    "homeTeam": "Slappy Gilmores",
     "awayTeam": "Sislo",
     "location": "Sislo at Slappy Gilmores",
     "season": "Fall 2025",
@@ -1005,7 +994,7 @@
     "date": "2025-11-13 00:00:00",
     "time": "21:00:00",
     "homeTeam": "UTC",
-    "awayTeam": "Slappy Gilmore's",
+    "awayTeam": "Slappy Gilmores",
     "location": "Slappy Gilmores at UTC",
     "season": "Fall 2025",
     "week": "10"

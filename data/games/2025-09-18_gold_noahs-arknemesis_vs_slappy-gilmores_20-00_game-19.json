@@ -3,7 +3,7 @@
   "date": "2025-09-18 00:00:00",
   "time": "20:00:00",
   "homeTeam": "Noah's Arknemesis",
-  "awayTeam": "Slappy Gilmore's",
+  "awayTeam": "Slappy Gilmores",
   "division": "Gold",
   "location": "Slappy Gilmores at Noah's Arknemesis",
   "season": "Fall 2025",
@@ -78,63 +78,63 @@
     {
       "id": "slappy_gilmore_s_alexey_voronin_7",
       "name": "Alexey Voronin",
-      "team": "Slappy Gilmore's",
+      "team": "Slappy Gilmores",
       "jersey": "##",
       "present": true
     },
     {
       "id": "slappy_gilmore_s_brad_truel_26",
       "name": "Brad Truel",
-      "team": "Slappy Gilmore's",
+      "team": "Slappy Gilmores",
       "jersey": "##",
       "present": true
     },
     {
       "id": "slappy_gilmore_s_greg_marshall_110",
       "name": "Greg Marshall",
-      "team": "Slappy Gilmore's",
+      "team": "Slappy Gilmores",
       "jersey": "##",
       "present": false
     },
     {
       "id": "slappy_gilmore_s_jeron_summerville_127",
       "name": "Jeron Summerville",
-      "team": "Slappy Gilmore's",
+      "team": "Slappy Gilmores",
       "jersey": "##",
       "present": true
     },
     {
       "id": "slappy_gilmore_s_kyle_ludwig_150",
       "name": "Kyle Ludwig",
-      "team": "Slappy Gilmore's",
+      "team": "Slappy Gilmores",
       "jersey": "##",
       "present": false
     },
     {
       "id": "slappy_gilmore_s_marc_redinger_154",
       "name": "Marc Redinger",
-      "team": "Slappy Gilmore's",
+      "team": "Slappy Gilmores",
       "jersey": "##",
       "present": true
     },
     {
       "id": "slappy_gilmore_s_sam_bambrick_184",
       "name": "Sam Bambrick",
-      "team": "Slappy Gilmore's",
+      "team": "Slappy Gilmores",
       "jersey": "##",
       "present": true
     },
     {
       "id": "slappy_gilmore_s_shaun_olsen_190",
       "name": "Shaun Olsen",
-      "team": "Slappy Gilmore's",
+      "team": "Slappy Gilmores",
       "jersey": "##",
       "present": true
     },
     {
       "id": "slappy_gilmore_s_sub_205",
       "name": "Sub",
-      "team": "Slappy Gilmore's",
+      "team": "Slappy Gilmores",
       "jersey": "##",
       "present": false
     }
@@ -142,7 +142,7 @@
   "goals": [
     {
       "id": "slappy_gilmore_s_marc_redinger_154",
-      "team": "Slappy Gilmore's",
+      "team": "Slappy Gilmores",
       "player": "Marc Redinger",
       "playerId": "slappy_gilmore_s_marc_redinger_154",
       "playerLabel": "## Marc Redinger",
@@ -310,7 +310,7 @@
     },
     {
       "id": "slappy_gilmore_s_sam_bambrick_184",
-      "team": "Slappy Gilmore's",
+      "team": "Slappy Gilmores",
       "player": "Sam Bambrick",
       "playerId": "slappy_gilmore_s_sam_bambrick_184",
       "playerLabel": "## Sam Bambrick",
@@ -338,7 +338,7 @@
     },
     {
       "id": "slappy_gilmore_s_alexey_voronin_7",
-      "team": "Slappy Gilmore's",
+      "team": "Slappy Gilmores",
       "player": "Alexey Voronin",
       "playerId": "slappy_gilmore_s_alexey_voronin_7",
       "playerLabel": "## Alexey Voronin",
@@ -366,7 +366,7 @@
     },
     {
       "id": "slappy_gilmore_s_marc_redinger_154",
-      "team": "Slappy Gilmore's",
+      "team": "Slappy Gilmores",
       "player": "Marc Redinger",
       "playerId": "slappy_gilmore_s_marc_redinger_154",
       "playerLabel": "## Marc Redinger",
@@ -394,7 +394,7 @@
     },
     {
       "id": "slappy_gilmore_s_marc_redinger_154",
-      "team": "Slappy Gilmore's",
+      "team": "Slappy Gilmores",
       "player": "Marc Redinger",
       "playerId": "slappy_gilmore_s_marc_redinger_154",
       "playerLabel": "## Marc Redinger",
@@ -562,7 +562,7 @@
     },
     {
       "id": "slappy_gilmore_s_brad_truel_26",
-      "team": "Slappy Gilmore's",
+      "team": "Slappy Gilmores",
       "player": "Brad Truel",
       "playerId": "slappy_gilmore_s_brad_truel_26",
       "playerLabel": "## Brad Truel",
@@ -590,7 +590,7 @@
     },
     {
       "id": "slappy_gilmore_s_jeron_summerville_127",
-      "team": "Slappy Gilmore's",
+      "team": "Slappy Gilmores",
       "player": "Jeron Summerville",
       "playerId": "slappy_gilmore_s_jeron_summerville_127",
       "playerLabel": "## Jeron Summerville",
@@ -676,7 +676,7 @@
   "penalties": [
     {
       "id": "slappy_gilmore_s_marc_redinger_154",
-      "team": "Slappy Gilmore's",
+      "team": "Slappy Gilmores",
       "player": "Marc Redinger",
       "playerId": "slappy_gilmore_s_marc_redinger_154",
       "playerLabel": "## Marc Redinger",
