@@ -1,5 +1,19 @@
 [
   {
+    "id": "game_8",
+    "file": "data/games/2025-09-11_gold_sislo_vs_utc_19-00_game-8.json",
+    "fileName": "2025-09-11_gold_sislo_vs_utc_19-00_game-8.json",
+    "date": "2025-09-11 00:00:00",
+    "time": "19:00:00",
+    "division": "Gold",
+    "created": "2025-09-22T03:23:53.674Z",
+    "homeTeam": "Sislo",
+    "awayTeam": "UTC",
+    "homeScore": 4,
+    "awayScore": 7,
+    "lastUpdated": "2025-09-22T03:33:39.487Z"
+  },
+  {
     "id": "game_14",
     "file": "data/games/2025-09-15_bronze_silent-knights_vs_vice-city-panthers_21-30_game-14.json",
     "fileName": "2025-09-15_bronze_silent-knights_vs_vice-city-panthers_21-30_game-14.json",
