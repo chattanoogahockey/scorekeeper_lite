@@ -1,5 +1,19 @@
 [
   {
+    "id": "game_23",
+    "file": "data/games/2025-09-22_bronze_skate-invaders_vs_barkcheck_20-30_game-23.json",
+    "fileName": "2025-09-22_bronze_skate-invaders_vs_barkcheck_20-30_game-23.json",
+    "date": "2025-09-22 00:00:00",
+    "time": "20:30:00",
+    "division": "Bronze",
+    "created": "2025-09-23T00:46:33.242Z",
+    "homeTeam": "Skate Invaders",
+    "awayTeam": "Barkcheck",
+    "homeScore": 5,
+    "awayScore": 5,
+    "lastUpdated": "2025-09-23T01:46:47.325Z"
+  },
+  {
     "id": "game_22",
     "file": "data/games/2025-09-22_bronze_crease-crusaders_vs_vice-city-panthers_19-30_game-22.json",
     "fileName": "2025-09-22_bronze_crease-crusaders_vs_vice-city-panthers_19-30_game-22.json",
