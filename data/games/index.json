@@ -1,5 +1,19 @@
 [
   {
+    "id": "game_22",
+    "file": "data/games/2025-09-22_bronze_crease-crusaders_vs_vice-city-panthers_19-30_game-22.json",
+    "fileName": "2025-09-22_bronze_crease-crusaders_vs_vice-city-panthers_19-30_game-22.json",
+    "date": "2025-09-22 00:00:00",
+    "time": "19:30:00",
+    "division": "Bronze",
+    "created": "2025-09-22T23:38:40.528Z",
+    "homeTeam": "Crease Crusaders",
+    "awayTeam": "Vice City Panthers",
+    "homeScore": 7,
+    "awayScore": 7,
+    "lastUpdated": "2025-09-23T00:38:16.076Z"
+  },
+  {
     "id": "game_21",
     "file": "data/games/2025-09-22_bronze_trailer-puck-boys_vs_stitches_18-30_game-21.json",
     "fileName": "2025-09-22_bronze_trailer-puck-boys_vs_stitches_18-30_game-21.json",
