@@ -1,5 +1,19 @@
 [
   {
+    "id": "game_26",
+    "file": "data/games/2025-09-24_silver_danglin-under-the-influence_vs_board-busters_20-00_game-26.json",
+    "fileName": "2025-09-24_silver_danglin-under-the-influence_vs_board-busters_20-00_game-26.json",
+    "date": "2025-09-24 00:00:00",
+    "time": "20:00:00",
+    "division": "Silver",
+    "created": "2025-09-29T00:58:45.030Z",
+    "homeTeam": "Danglin Under The Influence",
+    "awayTeam": "Board Busters",
+    "homeScore": 7,
+    "awayScore": 3,
+    "lastUpdated": "2025-09-29T01:57:18.376Z"
+  },
+  {
     "id": "game_25",
     "file": "data/games/2025-09-24_silver_crease-grease_vs_timinators_19-00_game-25.json",
     "fileName": "2025-09-24_silver_crease-grease_vs_timinators_19-00_game-25.json",
