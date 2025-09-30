@@ -1,5 +1,19 @@
 [
   {
+    "id": "game_34",
+    "file": "data/games/2025-09-29_bronze_stitches_vs_silent-knights_21-30_game-34.json",
+    "fileName": "2025-09-29_bronze_stitches_vs_silent-knights_21-30_game-34.json",
+    "date": "2025-09-29 00:00:00",
+    "time": "21:30:00",
+    "division": "Bronze",
+    "created": "2025-09-30T01:51:24.705Z",
+    "homeTeam": "Stitches",
+    "awayTeam": "Silent Knights",
+    "homeScore": 13,
+    "awayScore": 6,
+    "lastUpdated": "2025-09-30T02:50:35.043Z"
+  },
+  {
     "id": "game_33",
     "file": "data/games/2025-09-29_bronze_trailer-puck-boys_vs_crease-crusaders_20-30_game-33.json",
     "fileName": "2025-09-29_bronze_trailer-puck-boys_vs_crease-crusaders_20-30_game-33.json",
