@@ -1,5 +1,19 @@
 [
   {
+    "id": "game_33",
+    "file": "data/games/2025-09-29_bronze_trailer-puck-boys_vs_crease-crusaders_20-30_game-33.json",
+    "fileName": "2025-09-29_bronze_trailer-puck-boys_vs_crease-crusaders_20-30_game-33.json",
+    "date": "2025-09-29 00:00:00",
+    "time": "20:30:00",
+    "division": "Bronze",
+    "created": "2025-09-30T00:54:08.615Z",
+    "homeTeam": "Trailer Puck Boys",
+    "awayTeam": "Crease Crusaders",
+    "homeScore": 9,
+    "awayScore": 4,
+    "lastUpdated": "2025-09-30T01:44:11.286Z"
+  },
+  {
     "id": "game_31",
     "file": "data/games/2025-09-29_bronze_barkcheck_vs_dumb-pucks_18-30_game-31.json",
     "fileName": "2025-09-29_bronze_barkcheck_vs_dumb-pucks_18-30_game-31.json",
