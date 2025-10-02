@@ -14,6 +14,10 @@ function renderGoals(goals = []) {
           const editButton = goal?.id
             ? `<button type="button" class="event-edit-button" data-action="edit-goal" data-goal-id="${goal.id}">Edit</button>`
             : '';
+          const deleteButton = goal?.id
+            ? `<button type="button" class="event-delete-button" data-action="delete-goal" data-goal-id="${goal.id}">Delete</button>`
+            : '';
+          const actionMarkup = goal?.id ? `<div class="event-actions">${editButton}${deleteButton}</div>` : '';
           return `
             <li>
               <div class="event-line">
@@ -21,7 +25,7 @@ function renderGoals(goals = []) {
                   <strong>${goal.team}</strong> - ${playerName} (${goal.period}P ${goal.time || '??:??'})
                   ${assistLine}
                 </div>
-                ${editButton}
+                ${actionMarkup}
               </div>
             </li>
           `;
@@ -45,6 +49,10 @@ function renderPenalties(penalties = []) {
           const editButton = penalty?.id
             ? `<button type="button" class="event-edit-button" data-action="edit-penalty" data-penalty-id="${penalty.id}">Edit</button>`
             : '';
+          const deleteButton = penalty?.id
+            ? `<button type="button" class="event-delete-button" data-action="delete-penalty" data-penalty-id="${penalty.id}">Delete</button>`
+            : '';
+          const actionMarkup = penalty?.id ? `<div class="event-actions">${editButton}${deleteButton}</div>` : '';
           return `
             <li>
               <div class="event-line">
@@ -52,7 +60,7 @@ function renderPenalties(penalties = []) {
                   <strong>${penalty.team}</strong> - ${playerName} (${penalty.minutes} min ${penalty.type})
                   <span class="muted">${penalty.period}P ${penalty.time || '??:??'}</span>
                 </div>
-                ${editButton}
+                ${actionMarkup}
               </div>
             </li>
           `;
@@ -168,6 +176,20 @@ export const scoringView = {
         const penaltyId = button.dataset.penaltyId;
         if (!penaltyId) return;
         button.addEventListener('click', () => app.showPenaltyDetails(penaltyId));
+      });
+    main
+      .querySelectorAll('[data-action="delete-goal"]')
+      .forEach((button) => {
+        const goalId = button.dataset.goalId;
+        if (!goalId) return;
+        button.addEventListener('click', () => app.deleteGoal(goalId));
+      });
+    main
+      .querySelectorAll('[data-action="delete-penalty"]')
+      .forEach((button) => {
+        const penaltyId = button.dataset.penaltyId;
+        if (!penaltyId) return;
+        button.addEventListener('click', () => app.deletePenalty(penaltyId));
       });
   },
 };

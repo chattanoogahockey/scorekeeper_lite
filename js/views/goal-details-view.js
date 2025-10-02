@@ -53,6 +53,9 @@ export const goalDetailsView = {
       ].join('');
 
     const submitLabel = isEditing ? 'Save Goal' : 'Add Goal';
+    const deleteButtonMarkup = isEditing
+      ? '<button class="btn btn-danger" data-action="delete-goal">Delete Goal</button>'
+      : '';
 
     return `
       <div class="card">
@@ -130,6 +133,7 @@ export const goalDetailsView = {
 
         <div class="form-actions">
           <button class="btn btn-success" data-action="save-goal">${submitLabel}</button>
+          ${deleteButtonMarkup}
           <button class="btn btn-secondary" data-action="cancel-goal">Cancel</button>
         </div>
       </div>
@@ -260,6 +264,11 @@ export const goalDetailsView = {
         app.editContext = null;
         app.showScoring();
       });
+    if (existingGoal?.id) {
+      main
+        .querySelector('[data-action="delete-goal"]')
+        ?.addEventListener('click', () => app.deleteGoal(existingGoal.id));
+    }
     main
       .querySelector('[data-action="save-goal"]')
       ?.addEventListener('click', () => app.submitGoalForm());

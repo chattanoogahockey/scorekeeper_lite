@@ -998,6 +998,27 @@ export class DataManager {
     return updatedRecord;
   }
 
+  removeGoal(goalId) {
+    if (!this.currentGame || !goalId) return null;
+
+    const goals = Array.isArray(this.currentGame.goals) ? this.currentGame.goals : [];
+    const index = goals.findIndex((goal) => goal.id === goalId);
+    if (index === -1) {
+      return null;
+    }
+
+    const [removed] = goals.splice(index, 1);
+
+    if (removed?.team === this.currentGame.homeTeam) {
+      this.currentGame.homeScore = Math.max(0, Number(this.currentGame.homeScore ?? 0) - 1);
+    } else if (removed?.team === this.currentGame.awayTeam) {
+      this.currentGame.awayScore = Math.max(0, Number(this.currentGame.awayScore ?? 0) - 1);
+    }
+
+    this.saveCurrentGameState();
+    return removed ?? null;
+  }
+
   getGoalById(goalId) {
     if (!this.currentGame || !Array.isArray(this.currentGame.goals)) {
       return null;
@@ -1044,6 +1065,20 @@ export class DataManager {
     penalties[index] = updatedRecord;
     this.saveCurrentGameState();
     return updatedRecord;
+  }
+
+  removePenalty(penaltyId) {
+    if (!this.currentGame || !penaltyId) return null;
+
+    const penalties = Array.isArray(this.currentGame.penalties) ? this.currentGame.penalties : [];
+    const index = penalties.findIndex((penalty) => penalty.id === penaltyId);
+    if (index === -1) {
+      return null;
+    }
+
+    const [removed] = penalties.splice(index, 1);
+    this.saveCurrentGameState();
+    return removed ?? null;
   }
 
   getPenaltyById(penaltyId) {

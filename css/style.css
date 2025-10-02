@@ -1794,3 +1794,24 @@ tbody .stats-player-row:focus-visible {
 .event-edit-button:focus {
   text-decoration: none;
 }
+
+.event-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.event-delete-button {
+  background: none;
+  border: none;
+  color: var(--danger-color);
+  cursor: pointer;
+  font: inherit;
+  padding: 0;
+  text-decoration: underline;
+}
+
+.event-delete-button:hover,
+.event-delete-button:focus {
+  text-decoration: none;
+}
+

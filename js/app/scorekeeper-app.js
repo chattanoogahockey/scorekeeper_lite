@@ -168,6 +168,14 @@ export class ScorekeeperApp {
     this.showView('scoring');
   }
 
+  refreshScoringView() {
+    if (this.currentView === 'scoring') {
+      this.render();
+    } else {
+      this.showScoring();
+    }
+  }
+
   addShotOnGoal(team) {
     if (!team) return;
     this.data.addShotOnGoal(team);
@@ -194,6 +202,40 @@ export class ScorekeeperApp {
       this.editContext = null;
     }
     this.showView('penalty-details');
+  }
+
+  deleteGoal(goalId) {
+    if (!goalId) return;
+
+    const goal = this.data.getGoalById(goalId);
+    if (!goal) {
+      this.showScoring();
+      return;
+    }
+
+    const confirmed = window.confirm(`Delete this goal for ${goal.team}?`);
+    if (!confirmed) return;
+
+    this.data.removeGoal(goalId);
+    this.editContext = null;
+    this.refreshScoringView();
+  }
+
+  deletePenalty(penaltyId) {
+    if (!penaltyId) return;
+
+    const penalty = this.data.getPenaltyById(penaltyId);
+    if (!penalty) {
+      this.showScoring();
+      return;
+    }
+
+    const confirmed = window.confirm(`Delete this penalty for ${penalty.team}?`);
+    if (!confirmed) return;
+
+    this.data.removePenalty(penaltyId);
+    this.editContext = null;
+    this.refreshScoringView();
   }
 
   showOvertimeSelection() {

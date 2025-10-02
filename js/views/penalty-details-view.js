@@ -36,6 +36,9 @@ export const penaltyDetailsView = {
       ].join('');
 
     const submitLabel = isEditing ? 'Save Penalty' : 'Add Penalty';
+    const deleteButtonMarkup = isEditing
+      ? '<button class="btn btn-danger" data-action="delete-penalty">Delete Penalty</button>'
+      : '';
 
     return `
       <div class="card">
@@ -102,6 +105,7 @@ export const penaltyDetailsView = {
 
         <div class="form-actions">
           <button class="btn btn-success" data-action="save-penalty">${submitLabel}</button>
+          ${deleteButtonMarkup}
           <button class="btn btn-secondary" data-action="cancel-penalty">Cancel</button>
         </div>
       </div>
@@ -227,6 +231,11 @@ export const penaltyDetailsView = {
         app.editContext = null;
         app.showScoring();
       });
+    if (existingPenalty?.id) {
+      main
+        .querySelector('[data-action="delete-penalty"]')
+        ?.addEventListener('click', () => app.deletePenalty(existingPenalty.id));
+    }
     main
       .querySelector('[data-action="save-penalty"]')
       ?.addEventListener('click', () => app.submitPenaltyForm());
