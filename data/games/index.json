@@ -179,7 +179,12 @@
     "awayTeam": "Barkcheck",
     "homeScore": 5,
     "awayScore": 5,
-    "lastUpdated": "2025-09-23T01:46:47.325Z"
+    "lastUpdated": "2025-09-23T01:46:47.325Z",
+    "overtimeResult": {
+      "winner": "Barkcheck",
+      "decidedBy": "overtime",
+      "recordedAt": "2025-09-23T01:46:47.325Z"
+    }
   },
   {
     "id": "game_22",
@@ -193,7 +198,12 @@
     "awayTeam": "Vice City Panthers",
     "homeScore": 7,
     "awayScore": 7,
-    "lastUpdated": "2025-09-23T00:38:16.076Z"
+    "lastUpdated": "2025-09-23T00:38:16.076Z",
+    "overtimeResult": {
+      "winner": "Vice City Panthers",
+      "decidedBy": "overtime",
+      "recordedAt": "2025-09-23T00:38:16.076Z"
+    }
   },
   {
     "id": "game_21",

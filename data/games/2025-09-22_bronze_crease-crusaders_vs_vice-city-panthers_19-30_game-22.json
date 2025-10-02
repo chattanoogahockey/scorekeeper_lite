@@ -582,5 +582,10 @@
     }
   ],
   "homeScore": 7,
-  "awayScore": 7
+  "awayScore": 7,
+  "overtimeResult": {
+    "winner": "Vice City Panthers",
+    "decidedBy": "overtime",
+    "recordedAt": "2025-09-23T00:38:14.712Z"
+  }
 }

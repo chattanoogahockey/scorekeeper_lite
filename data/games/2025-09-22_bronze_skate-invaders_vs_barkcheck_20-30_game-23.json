@@ -444,5 +444,10 @@
   ],
   "penalties": [],
   "homeScore": 5,
-  "awayScore": 5
+  "awayScore": 5,
+  "overtimeResult": {
+    "winner": "Barkcheck",
+    "decidedBy": "overtime",
+    "recordedAt": "2025-09-23T01:46:45.879Z"
+  }
 }
