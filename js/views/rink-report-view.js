@@ -617,9 +617,12 @@ async function loadRinkDataset() {
         totalGoals = homeScore + awayScore;
       }
 
+      const fallbackWinnerRaw = typeof overtimeRaw?.winner === 'string' ? overtimeRaw.winner.trim() : '';
+      const fallbackWinner = fallbackWinnerRaw.length ? fallbackWinnerRaw : null;
+      const resolvedWinner = overtimeWinnerName || fallbackWinner;
       const normalizedOvertimeResult =
         overtimeRaw && (overtimeWinnerName || overtimeDecision)
-          ? { ...overtimeRaw, winner: overtimeWinnerName || overtimeRaw.winner ?? null }
+          ? { ...overtimeRaw, winner: resolvedWinner }
           : overtimeRaw;
 
       const isOvertime = Boolean(
