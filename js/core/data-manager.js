@@ -244,6 +244,170 @@ function computeAbsoluteSeconds(period, clockSeconds) {
   return index * duration + elapsedInPeriod;
 }
 
+function normalizeGoalRecord(goalData, { existingGoals = [], existingRecord = null } = {}) {
+  const normalizedTeamScore = toScoreValue(goalData?.teamScore);
+  const normalizedOpponentScore = toScoreValue(goalData?.opponentScore);
+  const payload = { ...goalData };
+
+  if (normalizedTeamScore !== null) {
+    payload.teamScore = normalizedTeamScore;
+  } else {
+    delete payload.teamScore;
+  }
+
+  if (normalizedOpponentScore !== null) {
+    payload.opponentScore = normalizedOpponentScore;
+  } else {
+    delete payload.opponentScore;
+  }
+
+  if (!payload.scoreImpact) {
+    const impact = deriveScoreImpact(normalizedTeamScore, normalizedOpponentScore);
+    if (impact) {
+      payload.scoreImpact = impact;
+    }
+  }
+
+  const previousGoalsForPlayer = existingGoals.filter((goal) => goal.playerId === payload.playerId).length;
+  const fallbackTotal = previousGoalsForPlayer + 1;
+  const providedTotal = toScoreValue(payload.totalGameGoals);
+  const totalGameGoalsValue = Number.isInteger(providedTotal) && providedTotal > 0 ? providedTotal : fallbackTotal;
+  payload.totalGameGoals = totalGameGoalsValue;
+
+  payload.hatTrickIndicator = normalizeYesNo(payload.hatTrickIndicator, toYesNo(totalGameGoalsValue >= 3));
+
+  const periodValue = `${payload.period ?? ''}`;
+  const rawClockSeconds = Number.isFinite(payload.clockSeconds) ? payload.clockSeconds : toScoreValue(payload.clockSeconds);
+  const clockSecondsValue = Number.isFinite(rawClockSeconds) ? rawClockSeconds : null;
+
+  if (clockSecondsValue !== null) {
+    payload.clockSeconds = clockSecondsValue;
+  } else {
+    delete payload.clockSeconds;
+  }
+
+  const teamScoreValue = Number.isFinite(normalizedTeamScore) ? normalizedTeamScore : null;
+  const opponentScoreValue = Number.isFinite(normalizedOpponentScore) ? normalizedOpponentScore : null;
+
+  const lateGoalComputed = isLateGameGoal(periodValue, clockSecondsValue);
+  const earlyGoalComputed = isEarlyGameGoal(periodValue, clockSecondsValue);
+  const comebackComputed = isComebackGoal(teamScoreValue, opponentScoreValue);
+  const clutchComputed = isClutchGoal(periodValue, clockSecondsValue, teamScoreValue, opponentScoreValue);
+
+  payload.lateGameGoal = normalizeYesNo(payload.lateGameGoal, toYesNo(lateGoalComputed));
+  payload.earlyGameGoal = normalizeYesNo(payload.earlyGameGoal, toYesNo(earlyGoalComputed));
+  payload.comebackGoal = normalizeYesNo(payload.comebackGoal, toYesNo(comebackComputed));
+  payload.clutchGoal = normalizeYesNo(payload.clutchGoal, toYesNo(clutchComputed));
+
+  const id = `${payload.id ?? existingRecord?.id ?? Date.now()}`;
+  const timestamp = payload.timestamp ?? existingRecord?.timestamp ?? new Date().toISOString();
+
+  const record = {
+    ...(existingRecord ?? {}),
+    ...payload,
+    id,
+    timestamp,
+  };
+
+  return record;
+}
+
+function normalizePenaltyRecord(penaltyData, { existingPenalties = [], existingRecord = null, lastGoal = null } = {}) {
+  const normalizedTeamScore = toScoreValue(penaltyData?.teamScore);
+  const normalizedOpponentScore = toScoreValue(penaltyData?.opponentScore);
+  const payload = { ...penaltyData };
+
+  if (normalizedTeamScore !== null) {
+    payload.teamScore = normalizedTeamScore;
+  } else {
+    delete payload.teamScore;
+  }
+
+  if (normalizedOpponentScore !== null) {
+    payload.opponentScore = normalizedOpponentScore;
+  } else {
+    delete payload.opponentScore;
+  }
+
+  const penaltiesForPlayer = existingPenalties.filter((penalty) => penalty.playerId === payload.playerId).length;
+  const providedPlayerTotal = toScoreValue(payload.penaltiesThisGame);
+  const penaltiesThisGameValue = Number.isInteger(providedPlayerTotal) && providedPlayerTotal > 0 ? providedPlayerTotal : penaltiesForPlayer + 1;
+  payload.penaltiesThisGame = penaltiesThisGameValue;
+
+  const penaltiesForTeam = existingPenalties.filter((penalty) => penalty.team === payload.team).length;
+  const providedTeamCount = toScoreValue(payload.teamPenaltyCount);
+  const teamPenaltyCountValue = Number.isInteger(providedTeamCount) && providedTeamCount > 0 ? providedTeamCount : penaltiesForTeam + 1;
+  payload.teamPenaltyCount = teamPenaltyCountValue;
+
+  const periodValue = `${payload.period ?? ''}`;
+  const rawClockSeconds = Number.isFinite(payload.clockSeconds) ? payload.clockSeconds : toScoreValue(payload.clockSeconds);
+  const clockSecondsValue = Number.isFinite(rawClockSeconds) ? rawClockSeconds : null;
+
+  if (clockSecondsValue !== null) {
+    payload.clockSeconds = clockSecondsValue;
+  } else {
+    delete payload.clockSeconds;
+  }
+
+  const teamScoreValue = Number.isFinite(normalizedTeamScore) ? normalizedTeamScore : null;
+  const opponentScoreValue = Number.isFinite(normalizedOpponentScore) ? normalizedOpponentScore : null;
+
+  const latePenaltyComputed = isLateGameGoal(periodValue, clockSecondsValue);
+  const earlyPenaltyComputed = isEarlyGameGoal(periodValue, clockSecondsValue);
+  const clutchPenaltyComputed = isClutchGoal(periodValue, clockSecondsValue, teamScoreValue, opponentScoreValue);
+  const comebackThreatComputed =
+    periodValue === '3' &&
+    Number.isFinite(teamScoreValue) &&
+    Number.isFinite(opponentScoreValue) &&
+    teamScoreValue > opponentScoreValue &&
+    teamScoreValue - opponentScoreValue <= 1;
+
+  payload.latePenalty = normalizeYesNo(payload.latePenalty, toYesNo(latePenaltyComputed));
+  payload.earlyPenalty = normalizeYesNo(payload.earlyPenalty, toYesNo(earlyPenaltyComputed));
+  payload.clutchPenalty = normalizeYesNo(payload.clutchPenalty, toYesNo(clutchPenaltyComputed));
+  payload.comebackThreat = normalizeYesNo(payload.comebackThreat, toYesNo(comebackThreatComputed));
+
+  const lastGoalTeam = lastGoal?.team ?? null;
+  const momentumComputed = lastGoalTeam ? lastGoalTeam === payload.team : false;
+  payload.momentumSwing = normalizeYesNo(payload.momentumSwing, toYesNo(momentumComputed));
+
+  if (!payload.penaltyImpact) {
+    if (Number.isFinite(teamScoreValue) && Number.isFinite(opponentScoreValue)) {
+      const scoreDiff = teamScoreValue - opponentScoreValue;
+      if (scoreDiff < 0) {
+        payload.penaltyImpact = 'trailing penalty';
+      } else if (scoreDiff === 0) {
+        payload.penaltyImpact = 'tied penalty';
+      } else if (scoreDiff >= 2) {
+        payload.penaltyImpact = 'costly penalty';
+      } else {
+        payload.penaltyImpact = 'leading penalty';
+      }
+    } else {
+      payload.penaltyImpact = '';
+    }
+  }
+
+  payload.powerPlayConverted = payload.powerPlayConverted ?? '';
+
+  const minutesValue = Number.parseInt(`${payload.minutes ?? ''}`, 10);
+  if (Number.isFinite(minutesValue)) {
+    payload.minutes = minutesValue;
+  }
+
+  const id = `${payload.id ?? existingRecord?.id ?? Date.now()}`;
+  const timestamp = payload.timestamp ?? existingRecord?.timestamp ?? new Date().toISOString();
+
+  const record = {
+    ...(existingRecord ?? {}),
+    ...payload,
+    id,
+    timestamp,
+  };
+
+  return record;
+}
+
 export class DataManager {
   constructor({
     fetchImpl = window.fetch.bind(window),
@@ -778,160 +942,116 @@ export class DataManager {
   }
 
   addGoal(goalData) {
-    if (!this.currentGame) return;
+    if (!this.currentGame) return null;
 
-    const normalizedTeamScore = toScoreValue(goalData?.teamScore);
-    const normalizedOpponentScore = toScoreValue(goalData?.opponentScore);
-    const payload = { ...goalData };
-
-    if (normalizedTeamScore !== null) {
-      payload.teamScore = normalizedTeamScore;
-    } else {
-      delete payload.teamScore;
+    if (!Array.isArray(this.currentGame.goals)) {
+      this.currentGame.goals = [];
     }
 
-    if (normalizedOpponentScore !== null) {
-      payload.opponentScore = normalizedOpponentScore;
-    } else {
-      delete payload.opponentScore;
-    }
+    const record = normalizeGoalRecord(goalData, { existingGoals: this.currentGame.goals });
 
-    if (!payload.scoreImpact) {
-      const impact = deriveScoreImpact(normalizedTeamScore, normalizedOpponentScore);
-      if (impact) {
-        payload.scoreImpact = impact;
-      }
-    }
+    this.currentGame.goals.push(record);
 
-    const existingGoals = Array.isArray(this.currentGame.goals) ? this.currentGame.goals : [];
-    const previousGoalsForPlayer = existingGoals.filter((goal) => goal.playerId === goalData.playerId).length;
-    const fallbackTotal = previousGoalsForPlayer + 1;
-    const providedTotal = toScoreValue(payload.totalGameGoals);
-    const totalGameGoalsValue = Number.isInteger(providedTotal) && providedTotal > 0 ? providedTotal : fallbackTotal;
-    payload.totalGameGoals = totalGameGoalsValue;
-
-    payload.hatTrickIndicator = normalizeYesNo(payload.hatTrickIndicator, toYesNo(totalGameGoalsValue >= 3));
-
-    const periodValue = `${payload.period ?? ''}`;
-    const clockSecondsValue = Number.isFinite(payload.clockSeconds) ? payload.clockSeconds : toScoreValue(payload.clockSeconds);
-    const teamScoreValue = normalizedTeamScore !== null ? normalizedTeamScore : null;
-    const opponentScoreValue = normalizedOpponentScore !== null ? normalizedOpponentScore : null;
-
-    const lateGoalComputed = isLateGameGoal(periodValue, clockSecondsValue);
-    const earlyGoalComputed = isEarlyGameGoal(periodValue, clockSecondsValue);
-    const comebackComputed = isComebackGoal(teamScoreValue, opponentScoreValue);
-    const clutchComputed = isClutchGoal(periodValue, clockSecondsValue, teamScoreValue, opponentScoreValue);
-
-    payload.lateGameGoal = normalizeYesNo(payload.lateGameGoal, toYesNo(lateGoalComputed));
-    payload.earlyGameGoal = normalizeYesNo(payload.earlyGameGoal, toYesNo(earlyGoalComputed));
-    payload.comebackGoal = normalizeYesNo(payload.comebackGoal, toYesNo(comebackComputed));
-    payload.clutchGoal = normalizeYesNo(payload.clutchGoal, toYesNo(clutchComputed));
-
-    const goalRecord = {
-      id: `${Date.now()}`,
-      ...payload,
-      timestamp: new Date().toISOString(),
-    };
-
-    this.currentGame.goals.push(goalRecord);
-
-    if (goalRecord.team === this.currentGame.homeTeam) {
-      this.currentGame.homeScore += 1;
-    } else if (goalRecord.team === this.currentGame.awayTeam) {
-      this.currentGame.awayScore += 1;
+    if (record.team === this.currentGame.homeTeam) {
+      this.currentGame.homeScore = Number(this.currentGame.homeScore ?? 0) + 1;
+    } else if (record.team === this.currentGame.awayTeam) {
+      this.currentGame.awayScore = Number(this.currentGame.awayScore ?? 0) + 1;
     }
 
     this.saveCurrentGameState();
+    return record;
   }
 
+  updateGoal(goalId, updates = {}) {
+    if (!this.currentGame || !goalId) return null;
+
+    const goals = Array.isArray(this.currentGame.goals) ? this.currentGame.goals : [];
+    const index = goals.findIndex((goal) => goal.id === goalId);
+    if (index === -1) {
+      return null;
+    }
+
+    const existing = goals[index];
+    const merged = { ...existing, ...updates };
+    const otherGoals = goals.filter((goal) => goal.id !== goalId);
+    const updatedRecord = normalizeGoalRecord(merged, { existingGoals: otherGoals, existingRecord: existing });
+
+    const previousTeam = existing.team;
+    const nextTeam = updatedRecord.team;
+
+    if (previousTeam !== nextTeam) {
+      if (previousTeam === this.currentGame.homeTeam) {
+        this.currentGame.homeScore = Math.max(0, Number(this.currentGame.homeScore ?? 0) - 1);
+      } else if (previousTeam === this.currentGame.awayTeam) {
+        this.currentGame.awayScore = Math.max(0, Number(this.currentGame.awayScore ?? 0) - 1);
+      }
+
+      if (nextTeam === this.currentGame.homeTeam) {
+        this.currentGame.homeScore = Number(this.currentGame.homeScore ?? 0) + 1;
+      } else if (nextTeam === this.currentGame.awayTeam) {
+        this.currentGame.awayScore = Number(this.currentGame.awayScore ?? 0) + 1;
+      }
+    }
+
+    goals[index] = updatedRecord;
+    this.saveCurrentGameState();
+    return updatedRecord;
+  }
+
+  getGoalById(goalId) {
+    if (!this.currentGame || !Array.isArray(this.currentGame.goals)) {
+      return null;
+    }
+    return this.currentGame.goals.find((goal) => goal.id === goalId) ?? null;
+  }
   addPenalty(penaltyData) {
-    if (!this.currentGame) return;
+    if (!this.currentGame) return null;
 
-    const normalizedTeamScore = toScoreValue(penaltyData?.teamScore);
-    const normalizedOpponentScore = toScoreValue(penaltyData?.opponentScore);
-    const payload = { ...penaltyData };
-
-    if (normalizedTeamScore !== null) {
-      payload.teamScore = normalizedTeamScore;
-    } else {
-      delete payload.teamScore;
+    if (!Array.isArray(this.currentGame.penalties)) {
+      this.currentGame.penalties = [];
     }
-
-    if (normalizedOpponentScore !== null) {
-      payload.opponentScore = normalizedOpponentScore;
-    } else {
-      delete payload.opponentScore;
-    }
-
-    const currentPenalties = Array.isArray(this.currentGame.penalties) ? this.currentGame.penalties : [];
-
-    const previousPenaltiesForPlayer = currentPenalties.filter((penalty) => penalty.playerId === penaltyData.playerId).length;
-    const fallbackPlayerTotal = previousPenaltiesForPlayer + 1;
-    const providedPlayerTotal = toScoreValue(payload.penaltiesThisGame);
-    const penaltiesThisGameValue = Number.isInteger(providedPlayerTotal) && providedPlayerTotal > 0 ? providedPlayerTotal : fallbackPlayerTotal;
-    payload.penaltiesThisGame = penaltiesThisGameValue;
-
-    const teamPenaltyCountFallback = currentPenalties.filter((penalty) => penalty.team === penaltyData.team).length + 1;
-    const providedTeamPenaltyCount = toScoreValue(payload.teamPenaltyCount);
-    const teamPenaltyCountValue = Number.isInteger(providedTeamPenaltyCount) && providedTeamPenaltyCount > 0 ? providedTeamPenaltyCount : teamPenaltyCountFallback;
-    payload.teamPenaltyCount = teamPenaltyCountValue;
-
-    const periodValue = `${payload.period ?? ''}`;
-    const rawClockSeconds = Number.isFinite(payload.clockSeconds) ? payload.clockSeconds : toScoreValue(payload.clockSeconds);
-    const clockSecondsValue = Number.isFinite(rawClockSeconds) ? rawClockSeconds : null;
-    if (clockSecondsValue !== null) {
-      payload.clockSeconds = clockSecondsValue;
-    } else {
-      delete payload.clockSeconds;
-    }
-
-    const teamScoreValue = normalizedTeamScore !== null ? normalizedTeamScore : null;
-    const opponentScoreValue = normalizedOpponentScore !== null ? normalizedOpponentScore : null;
-
-    const latePenaltyComputed = isLateGameGoal(periodValue, clockSecondsValue);
-    const earlyPenaltyComputed = isEarlyGameGoal(periodValue, clockSecondsValue);
-    const comebackThreatComputed =
-      periodValue === '3' && Number.isFinite(teamScoreValue) && Number.isFinite(opponentScoreValue) && teamScoreValue > opponentScoreValue && teamScoreValue - opponentScoreValue <= 1;
-    const clutchPenaltyComputed = isClutchGoal(periodValue, clockSecondsValue, teamScoreValue, opponentScoreValue);
-
-    payload.latePenalty = normalizeYesNo(payload.latePenalty, toYesNo(latePenaltyComputed));
-    payload.earlyPenalty = normalizeYesNo(payload.earlyPenalty, toYesNo(earlyPenaltyComputed));
-    payload.comebackThreat = normalizeYesNo(payload.comebackThreat, toYesNo(comebackThreatComputed));
-    payload.clutchPenalty = normalizeYesNo(payload.clutchPenalty, toYesNo(clutchPenaltyComputed));
 
     const lastGoal = this.currentGame.goals?.length ? this.currentGame.goals[this.currentGame.goals.length - 1] : null;
-    const momentumComputed = lastGoal ? lastGoal.team === penaltyData.team : false;
-    payload.momentumSwing = normalizeYesNo(payload.momentumSwing, toYesNo(momentumComputed));
+    const record = normalizePenaltyRecord(penaltyData, {
+      existingPenalties: this.currentGame.penalties,
+      lastGoal,
+    });
 
-    if (!payload.penaltyImpact) {
-      if (Number.isFinite(teamScoreValue) && Number.isFinite(opponentScoreValue)) {
-        const scoreDiff = teamScoreValue - opponentScoreValue;
-        if (scoreDiff < 0) {
-          payload.penaltyImpact = 'trailing penalty';
-        } else if (scoreDiff === 0) {
-          payload.penaltyImpact = 'tied penalty';
-        } else if (scoreDiff >= 2) {
-          payload.penaltyImpact = 'costly penalty';
-        } else {
-          payload.penaltyImpact = 'leading penalty';
-        }
-      } else {
-        payload.penaltyImpact = '';
-      }
-    }
-
-    payload.powerPlayConverted = payload.powerPlayConverted ?? '';
-
-    const penaltyRecord = {
-      id: `${Date.now()}`,
-      ...payload,
-      timestamp: new Date().toISOString(),
-    };
-
-    this.currentGame.penalties.push(penaltyRecord);
+    this.currentGame.penalties.push(record);
     this.saveCurrentGameState();
+    return record;
   }
 
+  updatePenalty(penaltyId, updates = {}) {
+    if (!this.currentGame || !penaltyId) return null;
+
+    const penalties = Array.isArray(this.currentGame.penalties) ? this.currentGame.penalties : [];
+    const index = penalties.findIndex((penalty) => penalty.id === penaltyId);
+    if (index === -1) {
+      return null;
+    }
+
+    const existing = penalties[index];
+    const merged = { ...existing, ...updates };
+    const otherPenalties = penalties.filter((penalty) => penalty.id !== penaltyId);
+    const lastGoal = this.currentGame.goals?.length ? this.currentGame.goals[this.currentGame.goals.length - 1] : null;
+    const updatedRecord = normalizePenaltyRecord(merged, {
+      existingPenalties: otherPenalties,
+      existingRecord: existing,
+      lastGoal,
+    });
+
+    penalties[index] = updatedRecord;
+    this.saveCurrentGameState();
+    return updatedRecord;
+  }
+
+  getPenaltyById(penaltyId) {
+    if (!this.currentGame || !Array.isArray(this.currentGame.penalties)) {
+      return null;
+    }
+    return this.currentGame.penalties.find((penalty) => penalty.id === penaltyId) ?? null;
+  }
   annotatePenaltyPowerPlays(game) {
     if (!game || !Array.isArray(game.penalties) || !game.penalties.length) {
       return;
@@ -1139,4 +1259,5 @@ export class DataManager {
 }
 
 export const dataManager = new DataManager();
+
 
