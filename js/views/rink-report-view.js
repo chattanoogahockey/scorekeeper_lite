@@ -118,6 +118,35 @@ function formatPercentage(value) {
   return `${Math.round(value * 100)}%`;
 }
 
+function normalizeOvertimeDecision(decidedBy) {
+  const normalized = `${decidedBy ?? ''}`.trim().toLowerCase();
+  if (!normalized) {
+    return null;
+  }
+  if (normalized === 'regulation') {
+    return 'regulation';
+  }
+  if (normalized.includes('shootout') || normalized === 'shootout' || normalized === 'so') {
+    return 'shootout';
+  }
+  if (normalized.startsWith('ot') || normalized.includes('overtime')) {
+    return 'overtime';
+  }
+  return normalized;
+}
+
+function getDisplayedScores(game) {
+  if (!game || typeof game !== 'object') {
+    return { home: null, away: null };
+  }
+  const homeScore = Number.isFinite(game.homeScoreDisplay) ? game.homeScoreDisplay : game.homeScore;
+  const awayScore = Number.isFinite(game.awayScoreDisplay) ? game.awayScoreDisplay : game.awayScore;
+  return {
+    home: Number.isFinite(homeScore) ? homeScore : null,
+    away: Number.isFinite(awayScore) ? awayScore : null,
+  };
+}
+
 
 function resolveWeekNumber(rawWeek, referenceDate, division, fallback) {
   const fallbackState = fallback.get(division) ?? { next: 1 };
@@ -315,13 +344,37 @@ function formatList(values) {
 }
 
 function formatResultHeading(game) {
-  if (!Number.isFinite(game.homeScore) || !Number.isFinite(game.awayScore)) {
-    return formatScoreLine(game.homeTeam, game.awayTeam, game.homeScore, game.awayScore);
+  const { home: displayHomeScore, away: displayAwayScore } = getDisplayedScores(game);
+  if (!Number.isFinite(displayHomeScore) || !Number.isFinite(displayAwayScore)) {
+    return formatScoreLine(game.homeTeam, game.awayTeam, displayHomeScore, displayAwayScore);
   }
   if (!game.winner) {
-    return `${formatScoreLine(game.homeTeam, game.awayTeam, game.homeScore, game.awayScore)} (Draw)`;
+    return `${formatScoreLine(game.homeTeam, game.awayTeam, displayHomeScore, displayAwayScore)} (Draw)`;
   }
-  return `${game.winner} ${game.winnerScore} - ${game.loser} ${game.loserScore}`;
+  const winnerScore = Number.isFinite(game.winnerScore)
+    ? game.winnerScore
+    : game.winner === game.homeTeam
+      ? displayHomeScore
+      : game.winner === game.awayTeam
+        ? displayAwayScore
+        : null;
+  const loserScore = Number.isFinite(game.loserScore)
+    ? game.loserScore
+    : game.loser === game.homeTeam
+      ? displayHomeScore
+      : game.loser === game.awayTeam
+        ? displayAwayScore
+        : null;
+  const decision = normalizeOvertimeDecision(game.overtimeResult?.decidedBy);
+  const suffix =
+    decision === 'shootout'
+      ? ' (SO)'
+      : decision === 'overtime' || game.isOvertime
+        ? ' (OT)'
+        : '';
+  const winnerScoreLabel = Number.isFinite(winnerScore) ? winnerScore : '--';
+  const loserScoreLabel = Number.isFinite(loserScore) ? loserScore : '--';
+  return `${game.winner} ${winnerScoreLabel} - ${game.loser} ${loserScoreLabel}${suffix}`;
 }
 
 function safeDivide(value, divisor) {
@@ -486,31 +539,93 @@ async function loadRinkDataset() {
         return null;
       }
 
-      const winner = Number.isFinite(homeScore) && Number.isFinite(awayScore)
-        ? homeScore > awayScore
-          ? merged.homeTeam
-          : homeScore < awayScore
-          ? merged.awayTeam
-          : null
-        : null;
+      const homeTeamName = merged.homeTeam ?? 'Home';
+      const awayTeamName = merged.awayTeam ?? 'Away';
+      const normalizedHomeName = `${homeTeamName}`.trim();
+      const normalizedAwayName = `${awayTeamName}`.trim();
 
-      const loser = Number.isFinite(homeScore) && Number.isFinite(awayScore)
-        ? homeScore > awayScore
-          ? merged.awayTeam
-          : homeScore < awayScore
-          ? merged.homeTeam
-          : null
-        : null;
+      let winner = null;
+      let loser = null;
 
-      const winnerScore = winner === merged.homeTeam ? homeScore : awayScore;
-      const loserScore = loser === merged.homeTeam ? homeScore : awayScore;
+      if (Number.isFinite(homeScore) && Number.isFinite(awayScore)) {
+        if (homeScore > awayScore) {
+          winner = homeTeamName;
+          loser = awayTeamName;
+        } else if (awayScore > homeScore) {
+          winner = awayTeamName;
+          loser = homeTeamName;
+        }
+      }
 
-      const margin = Number.isFinite(winnerScore) && Number.isFinite(loserScore) ? Math.abs(winnerScore - loserScore) : null;
-      const totalGoals = Number.isFinite(homeScore) && Number.isFinite(awayScore) ? homeScore + awayScore : null;
+      const overtimeRaw = merged.overtimeResult && typeof merged.overtimeResult === 'object' ? merged.overtimeResult : null;
+      const overtimeDecision = normalizeOvertimeDecision(overtimeRaw?.decidedBy);
+      const overtimeWinnerName = `${overtimeRaw?.winner ?? ''}`.trim();
 
-      const overtimeResult = merged.overtimeResult && typeof merged.overtimeResult === 'object' ? merged.overtimeResult : null;
+      if (!winner && overtimeWinnerName) {
+        const winnerLower = overtimeWinnerName.toLowerCase();
+        if (winnerLower === normalizedHomeName.toLowerCase()) {
+          winner = homeTeamName;
+          loser = awayTeamName;
+        } else if (winnerLower === normalizedAwayName.toLowerCase()) {
+          winner = awayTeamName;
+          loser = homeTeamName;
+        }
+      }
+
+      let displayHomeScore = Number.isFinite(homeScore) ? homeScore : null;
+      let displayAwayScore = Number.isFinite(awayScore) ? awayScore : null;
+
+      if (
+        winner &&
+        loser &&
+        Number.isFinite(homeScore) &&
+        Number.isFinite(awayScore) &&
+        homeScore === awayScore
+      ) {
+        if (winner === homeTeamName) {
+          displayHomeScore = homeScore + 1;
+        } else if (winner === awayTeamName) {
+          displayAwayScore = awayScore + 1;
+        }
+      }
+
+      let winnerScore = null;
+      if (winner === homeTeamName) {
+        winnerScore = displayHomeScore;
+      } else if (winner === awayTeamName) {
+        winnerScore = displayAwayScore;
+      }
+
+      let loserScore = null;
+      if (loser === homeTeamName) {
+        loserScore = displayHomeScore;
+      } else if (loser === awayTeamName) {
+        loserScore = displayAwayScore;
+      }
+
+      let margin = null;
+      if (Number.isFinite(winnerScore) && Number.isFinite(loserScore)) {
+        margin = Math.abs(winnerScore - loserScore);
+      } else if (Number.isFinite(displayHomeScore) && Number.isFinite(displayAwayScore)) {
+        margin = Math.abs(displayHomeScore - displayAwayScore);
+      }
+
+      let totalGoals = null;
+      if (Number.isFinite(displayHomeScore) && Number.isFinite(displayAwayScore)) {
+        totalGoals = displayHomeScore + displayAwayScore;
+      } else if (Number.isFinite(homeScore) && Number.isFinite(awayScore)) {
+        totalGoals = homeScore + awayScore;
+      }
+
+      const normalizedOvertimeResult =
+        overtimeRaw && (overtimeWinnerName || overtimeDecision)
+          ? { ...overtimeRaw, winner: overtimeWinnerName || overtimeRaw.winner ?? null }
+          : overtimeRaw;
+
       const isOvertime = Boolean(
-        overtimeResult?.winner || goals.some((goal) => {
+        (overtimeDecision && overtimeDecision !== 'regulation') ||
+        overtimeWinnerName ||
+        goals.some((goal) => {
           const period = `${goal.period ?? ''}`.trim().toUpperCase();
           return period === 'OT' || period === '4' || period === 'SO';
         }),
@@ -525,10 +640,12 @@ async function loadRinkDataset() {
         parsedDate,
         timestamp,
         time: merged.time ?? null,
-        homeTeam: merged.homeTeam ?? 'Home',
-        awayTeam: merged.awayTeam ?? 'Away',
+        homeTeam: homeTeamName,
+        awayTeam: awayTeamName,
         homeScore,
         awayScore,
+        homeScoreDisplay: displayHomeScore,
+        awayScoreDisplay: displayAwayScore,
         winner,
         loser,
         winnerScore,
@@ -539,7 +656,7 @@ async function loadRinkDataset() {
         location: merged.location ?? '',
         goals,
         penalties,
-        overtimeResult,
+        overtimeResult: normalizedOvertimeResult,
         isOvertime,
         file: merged.file ?? '',
       };
@@ -1252,10 +1369,17 @@ function renderWeeklySummarySection(division, weekNumber) {
       headlineParts.push(
         `${tightestGame.winner} edged ${tightestGame.loser} ${tightestGame.winnerScore}-${tightestGame.loserScore} in a ${thrillerLabel}.`,
       );
-    } else if (tightestGame.homeScore === tightestGame.awayScore) {
-      headlineParts.push(
-        `${tightestGame.homeTeam} and ${tightestGame.awayTeam} skated to a ${tightestGame.homeScore}-${tightestGame.awayScore} stalemate that stayed razor-close.`,
-      );
+    } else if (!tightestGame.winner) {
+      const { home: tightHomeScore, away: tightAwayScore } = getDisplayedScores(tightestGame);
+      if (Number.isFinite(tightHomeScore) && Number.isFinite(tightAwayScore) && tightHomeScore === tightAwayScore) {
+        headlineParts.push(
+          `${tightestGame.homeTeam} and ${tightestGame.awayTeam} skated to a ${tightHomeScore}-${tightAwayScore} stalemate that stayed razor-close.`,
+        );
+      } else {
+        headlineParts.push(
+          `${tightestGame.homeTeam} and ${tightestGame.awayTeam} skated to a stalemate that stayed razor-close.`,
+        );
+      }
     }
   }
   headlineParts.push(leaderSummary);
@@ -1316,10 +1440,27 @@ function renderGameDetailsSection(division, gameId) {
   const flow = analyzeGameFlow(goals, game);
   const penalties = Array.isArray(game.penalties) ? game.penalties.length : 0;
   const overtimeNote = game.isOvertime ? 'This one needed extra ice time.' : 'Handled in regulation.';
+  const { home: displayHomeScore, away: displayAwayScore } = getDisplayedScores(game);
+  const winnerScoreDisplay = Number.isFinite(game.winnerScore)
+    ? game.winnerScore
+    : game.winner === game.homeTeam
+      ? displayHomeScore
+      : game.winner === game.awayTeam
+        ? displayAwayScore
+        : null;
+  const loserScoreDisplay = Number.isFinite(game.loserScore)
+    ? game.loserScore
+    : game.loser === game.homeTeam
+      ? displayHomeScore
+      : game.loser === game.awayTeam
+        ? displayAwayScore
+        : null;
 
   const ledeParts = [];
   if (game.winner) {
-    ledeParts.push(`${game.winner} outlasted ${game.loser} ${game.winnerScore}-${game.loserScore}.`);
+    const winnerScoreLabel = Number.isFinite(winnerScoreDisplay) ? winnerScoreDisplay : '--';
+    const loserScoreLabel = Number.isFinite(loserScoreDisplay) ? loserScoreDisplay : '--';
+    ledeParts.push(`${game.winner} outlasted ${game.loser} ${winnerScoreLabel}-${loserScoreLabel}.`);
     if (flow.winnerTrailed && flow.largestDeficit > 0) {
       ledeParts.push(`${game.winner} climbed out of a ${flow.largestDeficit}-goal hole.`);
     }
@@ -1327,7 +1468,14 @@ function renderGameDetailsSection(division, gameId) {
       ledeParts.push(`${flow.leadChanges} lead ${flow.leadChanges === 1 ? 'change kept' : 'changes kept'} the rink buzzing.`);
     }
   } else {
-    ledeParts.push(`${game.homeTeam} and ${game.awayTeam} skated to a ${game.homeScore}-${game.awayScore} draw.`);
+    const tieScoreLabel = Number.isFinite(displayHomeScore) && Number.isFinite(displayAwayScore)
+      ? `${displayHomeScore}-${displayAwayScore}`
+      : null;
+    ledeParts.push(
+      tieScoreLabel
+        ? `${game.homeTeam} and ${game.awayTeam} skated to a ${tieScoreLabel} draw.`
+        : `${game.homeTeam} and ${game.awayTeam} skated to a draw.`,
+    );
     if (flow.leadChanges > 0) {
       ledeParts.push(`The advantage flipped ${flow.leadChanges} ${flow.leadChanges === 1 ? 'time' : 'times'} along the way.`);
     }
@@ -1340,8 +1488,8 @@ function renderGameDetailsSection(division, gameId) {
   ledeParts.push(overtimeNote);
   const lede = ledeParts.join(' ');
 
-  const finalScoreLabel = Number.isFinite(game.homeScore) && Number.isFinite(game.awayScore)
-    ? `${game.homeScore}-${game.awayScore}`
+  const finalScoreLabel = Number.isFinite(displayHomeScore) && Number.isFinite(displayAwayScore)
+    ? `${displayHomeScore}-${displayAwayScore}`
     : '--';
 
   return `
