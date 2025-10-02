@@ -1,5 +1,19 @@
 [
   {
+    "id": "game_37",
+    "file": "data/games/2025-10-01_silver_danglin-under-the-influence_vs_nets-sticks-and-chill_21-00_game-37.json",
+    "fileName": "2025-10-01_silver_danglin-under-the-influence_vs_nets-sticks-and-chill_21-00_game-37.json",
+    "date": "2025-10-01 00:00:00",
+    "time": "21:00:00",
+    "division": "Silver",
+    "created": "2025-10-02T01:19:24.818Z",
+    "homeTeam": "Danglin Under The Influence",
+    "awayTeam": "Nets, Sticks, and Chill",
+    "homeScore": 5,
+    "awayScore": 5,
+    "lastUpdated": "2025-10-02T02:17:18.709Z"
+  },
+  {
     "id": "game_36",
     "file": "data/games/2025-10-01_silver_crease-grease_vs_mracnaphobia_20-00_game-36.json",
     "fileName": "2025-10-01_silver_crease-grease_vs_mracnaphobia_20-00_game-36.json",
