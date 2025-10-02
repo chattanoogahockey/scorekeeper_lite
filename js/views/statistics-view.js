@@ -41,8 +41,8 @@ const TEAM_TABLE_COLUMNS = [
   { key: 'gamesPlayed', label: 'GP', sortable: true },
   { key: 'wins', label: 'W', sortable: true },
   { key: 'losses', label: 'L', sortable: true },
+  { key: 'overtime', label: 'OTL', sortable: true },
   { key: 'points', label: 'PTS', sortable: true },
-  { key: 'overtime', label: 'OT', sortable: true },
   { key: 'goalsFor', label: 'GF', sortable: true },
   { key: 'goalsAgainst', label: 'GA', sortable: true },
 ];
@@ -176,6 +176,73 @@ function toScore(value) {
   return null;
 }
 
+function normalizeOvertimeDecision(decidedBy) {
+  const normalized = `${decidedBy ?? ''}`.trim().toLowerCase();
+  if (!normalized) {
+    return null;
+  }
+  if (normalized === 'regulation') {
+    return 'regulation';
+  }
+  if (normalized.includes('shootout') || normalized === 'shootout' || normalized === 'so') {
+    return 'shootout';
+  }
+  if (normalized.startsWith('ot') || normalized.includes('overtime')) {
+    return 'overtime';
+  }
+  return normalized;
+}
+
+function isOvertimePeriod(period) {
+  const normalized = `${period ?? ''}`.trim().toUpperCase();
+  if (!normalized) {
+    return false;
+  }
+  const compact = normalized.replace(/[^A-Z0-9]/g, '');
+  if (compact === 'OT' || compact === 'SO') {
+    return true;
+  }
+  if (compact.startsWith('OT') || compact.startsWith('SO') || compact.startsWith('SHOOT')) {
+    return true;
+  }
+  const numeric = Number.parseInt(compact, 10);
+  return Number.isFinite(numeric) && numeric > 3;
+}
+
+function createStableHash(input) {
+  let hash = 0;
+  for (let index = 0; index < input.length; index += 1) {
+    hash = (hash * 31 + input.charCodeAt(index)) | 0;
+  }
+  return Math.abs(hash).toString(36);
+}
+
+function resolveGameIdentifier(game) {
+  if (!game || typeof game !== 'object') {
+    return 'unknown-game';
+  }
+
+  const candidates = ['id', 'storageKey', 'fileName', 'file', 'key'];
+  for (const candidate of candidates) {
+    const value = `${game[candidate] ?? ''}`.trim();
+    if (value) {
+      return value;
+    }
+  }
+
+  const home = `${game.homeTeam ?? ''}`.trim().toLowerCase().replace(/\s+/g, '-');
+  const away = `${game.awayTeam ?? ''}`.trim().toLowerCase().replace(/\s+/g, '-');
+  const date = `${game.date ?? game.created ?? game.lastUpdated ?? ''}`.trim();
+  const time = `${game.time ?? ''}`.trim();
+  const fallbackParts = [home || 'home', away || 'away', date, time].filter((part) => part && part.length > 0);
+  if (fallbackParts.length) {
+    return fallbackParts.join('::');
+  }
+
+  const serialized = JSON.stringify(game, Object.keys(game).sort());
+  return `game-${createStableHash(serialized)}`;
+}
+
 function getOvertimeWinner(game) {
   if (!game || typeof game !== 'object') {
     return null;
@@ -186,11 +253,30 @@ function getOvertimeWinner(game) {
     return null;
   }
 
+  const decision = normalizeOvertimeDecision(result.decidedBy);
+  if (decision === 'regulation') {
+    return null;
+  }
+
   const winner = `${result.winner ?? ''}`.trim();
   return winner.length ? winner : null;
 }
 
 function detectOvertime(game) {
+  const result = game?.overtimeResult;
+  if (result && typeof result === 'object') {
+    const decision = normalizeOvertimeDecision(result.decidedBy);
+    if (decision === 'regulation') {
+      return false;
+    }
+    if (decision === 'overtime' || decision === 'shootout') {
+      return true;
+    }
+    if (`${result.winner ?? ''}`.trim()) {
+      return true;
+    }
+  }
+
   if (getOvertimeWinner(game)) {
     return true;
   }
@@ -203,11 +289,11 @@ function detectOvertime(game) {
     if (!goal || typeof goal !== 'object') {
       return false;
     }
-
-    const period = `${goal.period ?? ''}`.trim().toUpperCase();
-    return period === 'OT' || period === '4';
+    return isOvertimePeriod(goal.period);
   });
 }
+
+
 
 function createTeamRecord(teamName) {
   return {
@@ -516,7 +602,7 @@ function computePlayerStandingsFromGames(games) {
     }
 
     const weekNumber = resolveWeekNumber(game, divisionName, divisionWeekFallback);
-    const gameId = game.file || `${game.homeTeam}-vs-${game.awayTeam}-${game.lastUpdated || ''}`;
+    const gameId = resolveGameIdentifier(game);
 
     const goals = Array.isArray(game.goals) ? game.goals : [];
     const penalties = Array.isArray(game.penalties) ? game.penalties : [];
@@ -690,7 +776,7 @@ function computeTeamTimelinesFromGames(games) {
     }
 
     const weekNumber = resolveWeekNumber(game, divisionName, divisionWeekFallback);
-    const gameId = game.file || `${game.homeTeam}-vs-${game.awayTeam}-${game.lastUpdated || ''}`;
+    const gameId = resolveGameIdentifier(game);
 
     const divisionWeekly = perDivisionWeekly.get(divisionName) ?? new Map();
     if (!perDivisionWeekly.has(divisionName)) {
@@ -1206,8 +1292,8 @@ function renderTeamStandingsTable(division) {
           <td>${team.gamesPlayed}</td>
           <td>${team.wins}</td>
           <td>${team.losses}</td>
-          <td>${team.points}</td>
           <td>${team.overtime}</td>
+          <td>${team.points}</td>
           <td>${team.goalsFor}</td>
           <td>${team.goalsAgainst}</td>
         </tr>
@@ -1940,6 +2026,15 @@ function renderTeamTimelineChart(teamName, division, timeline) {
     ${summary}
   `;
 }
+export const statisticsInternals = {
+  computeStandingsFromGames,
+  computePlayerStandingsFromGames,
+  computeTeamTimelinesFromGames,
+  detectOvertime,
+  getOvertimeWinner,
+  resolveGameIdentifier,
+};
+
 export const statisticsView = {
   id: 'statistics',
   hideHeader: true,
