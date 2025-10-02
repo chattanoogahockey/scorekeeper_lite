@@ -743,8 +743,17 @@ function computeTeamStatsByDivision(gamesByDivision) {
         const homeRecord = ensureTeamRecord(teamMap, homeTeam, division);
         const awayRecord = ensureTeamRecord(teamMap, awayTeam, division);
 
-        const safeHomeScore = Number.isFinite(homeScore) ? homeScore : 0;
-        const safeAwayScore = Number.isFinite(awayScore) ? awayScore : 0;
+        const displayedScores = getDisplayedScores(game);
+        const safeHomeScore = Number.isFinite(displayedScores.home)
+          ? displayedScores.home
+          : Number.isFinite(homeScore)
+            ? homeScore
+            : 0;
+        const safeAwayScore = Number.isFinite(displayedScores.away)
+          ? displayedScores.away
+          : Number.isFinite(awayScore)
+            ? awayScore
+            : 0;
 
         updateTeamRecord(homeRecord, {
           opponent: awayTeam,
@@ -784,6 +793,7 @@ function ensureTeamRecord(collection, teamName, division) {
     wins: 0,
     losses: 0,
     overtimeLosses: 0,
+    ties: 0,
     goalsFor: 0,
     goalsAgainst: 0,
     points: 0,
@@ -815,7 +825,11 @@ function updateTeamRecord(record, context) {
       resultCode = 'OTL';
     } else {
       record.losses += 1;
+      resultCode = 'L';
     }
+  } else {
+    record.ties += 1;
+    resultCode = 'T';
   }
 
   record.results.push({
@@ -829,17 +843,18 @@ function updateTeamRecord(record, context) {
 }
 
 function finalizeTeamRecord(record) {
-  record.points = record.wins * 2 + record.overtimeLosses;
+  const ties = record.ties ?? 0;
+  record.points = record.wins * 2 + record.overtimeLosses + ties;
   record.goalDiff = record.goalsFor - record.goalsAgainst;
   record.winPct = record.gamesPlayed
-    ? (record.wins + record.overtimeLosses * 0.5) / record.gamesPlayed
+    ? (record.wins + (record.overtimeLosses + ties) * 0.5) / record.gamesPlayed
     : 0;
 
   let currentType = null;
   let currentLength = 0;
   for (let index = record.results.length - 1; index >= 0; index -= 1) {
     const entry = record.results[index];
-    const normalized = entry.result === 'W' ? 'W' : 'L';
+    const normalized = entry.result === 'W' ? 'W' : entry.result === 'T' ? 'T' : 'L';
     if (!currentType) {
       currentType = normalized;
       currentLength = 1;
@@ -1201,8 +1216,14 @@ function formatStreak(record) {
 }
 
 function summarizeRecord(record) {
-  return `${record.wins}-${record.losses}-${record.overtimeLosses}`;
+  const base = `${record.wins}-${record.losses}-${record.overtimeLosses}`;
+  return record.ties ? `${base}-${record.ties}` : base;
 }
+
+function describeRecordColumns(record) {
+  return record?.ties ? 'W-L-OTL-T' : 'W-L-OTL';
+}
+
 function renderDivisionFilter(container) {
   const buttons = DIVISIONS.map((division) => {
     const isActive = rinkReportState.division === division;
@@ -1609,7 +1630,7 @@ function renderSeasonSummarySection(division) {
             <tr>
               <th>#</th>
               <th>Team</th>
-              <th>Record (W-L-OTL)</th>
+              <th>Record (W-L-OTL[-T])</th>
               <th>PTS</th>
               <th>GD</th>
               <th>Win %</th>
@@ -1658,8 +1679,8 @@ function renderSeasonOutlookSection(division) {
       const projectionLine = formatScoreLine(matchup.homeTeam, matchup.awayTeam, projection.home, projection.away);
       const margin = Math.abs(projection.home - projection.away);
       const marginPhrase = margin === 1 ? 'by a goal' : `by ${margin}`;
-      const favoriteRecordLabel = `${summarizeRecord(favoriteStats)} (W-L-OTL)`;
-      const underdogRecordLabel = `${summarizeRecord(underdogStats)} (W-L-OTL)`;
+      const favoriteRecordLabel = `${summarizeRecord(favoriteStats)} (${describeRecordColumns(favoriteStats)})`;
+      const underdogRecordLabel = `${summarizeRecord(underdogStats)} (${describeRecordColumns(underdogStats)})`;
       const rationale = `${favorite} (${favoriteRecordLabel}, ${formatPercentage(favoriteStats.winPct)} win rate) has the edge. ${underdogStats.team} (${underdogRecordLabel}, ${formatPercentage(underdogStats.winPct)} win rate) will try to counter. Projection: ${projectionLine} with ${favorite} ${marginPhrase}.`;
 
       return `

@@ -262,6 +262,32 @@ function getOvertimeWinner(game) {
   return winner.length ? winner : null;
 }
 
+function resolveDisplayedScores(game) {
+  const homeDisplay = toScore(game?.homeScoreDisplay);
+  const awayDisplay = toScore(game?.awayScoreDisplay);
+  let homeScore = Number.isFinite(homeDisplay) ? homeDisplay : toScore(game?.homeScore);
+  let awayScore = Number.isFinite(awayDisplay) ? awayDisplay : toScore(game?.awayScore);
+
+  if (Number.isFinite(homeScore) && Number.isFinite(awayScore) && homeScore === awayScore) {
+    const winner = getOvertimeWinner(game);
+    if (winner) {
+      const homeTeam = `${game?.homeTeam ?? ''}`.trim().toLowerCase();
+      const awayTeam = `${game?.awayTeam ?? ''}`.trim().toLowerCase();
+      const normalizedWinner = winner.trim().toLowerCase();
+      if (normalizedWinner && normalizedWinner === homeTeam) {
+        homeScore += 1;
+      } else if (normalizedWinner && normalizedWinner === awayTeam) {
+        awayScore += 1;
+      }
+    }
+  }
+
+  return {
+    home: Number.isFinite(homeScore) ? homeScore : null,
+    away: Number.isFinite(awayScore) ? awayScore : null,
+  };
+}
+
 function detectOvertime(game) {
   const result = game?.overtimeResult;
   if (result && typeof result === 'object') {
@@ -353,8 +379,9 @@ function computeStandingsFromGames(games) {
       return;
     }
 
-    const homeScore = toScore(game.homeScore);
-    const awayScore = toScore(game.awayScore);
+    const displayedScores = resolveDisplayedScores(game);
+    const homeScore = Number.isFinite(displayedScores.home) ? displayedScores.home : toScore(game.homeScore);
+    const awayScore = Number.isFinite(displayedScores.away) ? displayedScores.away : toScore(game.awayScore);
     if (!Number.isFinite(homeScore) || !Number.isFinite(awayScore)) {
       return;
     }
@@ -794,8 +821,19 @@ function computeTeamTimelinesFromGames(games) {
     homeWeekStats.games.add(gameId);
     awayWeekStats.games.add(gameId);
 
-    const homeScore = toScore(game.homeScore) ?? 0;
-    const awayScore = toScore(game.awayScore) ?? 0;
+    const displayedScores = resolveDisplayedScores(game);
+    const fallbackHome = toScore(game.homeScore);
+    const fallbackAway = toScore(game.awayScore);
+    const homeScore = Number.isFinite(displayedScores.home)
+      ? displayedScores.home
+      : Number.isFinite(fallbackHome)
+        ? fallbackHome
+        : 0;
+    const awayScore = Number.isFinite(displayedScores.away)
+      ? displayedScores.away
+      : Number.isFinite(fallbackAway)
+        ? fallbackAway
+        : 0;
     homeWeekStats.goals += homeScore;
     awayWeekStats.goals += awayScore;
 
@@ -2032,6 +2070,7 @@ export const statisticsInternals = {
   computeTeamTimelinesFromGames,
   detectOvertime,
   getOvertimeWinner,
+  resolveDisplayedScores,
   resolveGameIdentifier,
 };
 

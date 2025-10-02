@@ -95,6 +95,46 @@ describe('statistics overtime handling', () => {
     expect(detectOvertime(regulationGame)).toBe(false);
     expect(detectOvertime(extraPeriodGame)).toBe(true);
   });
+
+  it('applies overtime shootout winners to displayed scores', () => {
+    const games = [
+      {
+        division: 'Gold',
+        homeTeam: 'Wolves',
+        awayTeam: 'Hawks',
+        homeScore: 3,
+        awayScore: 3,
+        overtimeResult: { winner: 'Hawks', decidedBy: 'ot_shootout' },
+      },
+    ];
+
+    const standings = computeStandingsFromGames(games);
+    const gold = standings.get('Gold') ?? [];
+    const records = Object.fromEntries(gold.map((team) => [team.team, team]));
+    expect(records.Wolves).toMatchObject({
+      wins: 0,
+      losses: 0,
+      overtime: 1,
+      goalsFor: 3,
+      goalsAgainst: 4,
+      points: 1,
+    });
+    expect(records.Hawks).toMatchObject({
+      wins: 1,
+      losses: 0,
+      overtime: 0,
+      goalsFor: 4,
+      goalsAgainst: 3,
+      points: 2,
+    });
+
+    const timelines = computeTeamTimelinesFromGames(games);
+    const goldTimelines = timelines.get('Gold');
+    const wolvesTimeline = goldTimelines?.get('Wolves') ?? [];
+    const hawksTimeline = goldTimelines?.get('Hawks') ?? [];
+    expect(wolvesTimeline[0]).toMatchObject({ goals: 3, points: 1 });
+    expect(hawksTimeline[0]).toMatchObject({ goals: 4, points: 2 });
+  });
 });
 
 describe('statistics game identifiers', () => {
