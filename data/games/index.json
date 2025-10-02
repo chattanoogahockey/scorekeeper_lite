@@ -1,5 +1,19 @@
 [
   {
+    "id": "game_36",
+    "file": "data/games/2025-10-01_silver_crease-grease_vs_mracnaphobia_20-00_game-36.json",
+    "fileName": "2025-10-01_silver_crease-grease_vs_mracnaphobia_20-00_game-36.json",
+    "date": "2025-10-01 00:00:00",
+    "time": "20:00:00",
+    "division": "Silver",
+    "created": "2025-10-02T00:19:51.593Z",
+    "homeTeam": "Crease Grease",
+    "awayTeam": "Mracnaphobia",
+    "homeScore": 11,
+    "awayScore": 7,
+    "lastUpdated": "2025-10-02T01:07:20.463Z"
+  },
+  {
     "id": "game_35",
     "file": "data/games/2025-10-01_silver_board-busters_vs_timinators_19-00_game-35.json",
     "fileName": "2025-10-01_silver_board-busters_vs_timinators_19-00_game-35.json",
