@@ -57,6 +57,7 @@ export class ScorekeeperApp {
     this.attendanceState = new Map();
     this.dialogContext = null;
     this.boundNumberKeyHandler = null;
+    this.editContext = null;
   }
 
   async init() {
@@ -163,6 +164,7 @@ export class ScorekeeperApp {
   }
 
   showScoring() {
+    this.editContext = null;
     this.showView('scoring');
   }
 
@@ -174,11 +176,23 @@ export class ScorekeeperApp {
     }
   }
 
-  showGoalDetails() {
+  showGoalDetails(goalId = null) {
+    if (goalId) {
+      const goal = this.data.getGoalById(goalId);
+      this.editContext = goal ? { type: 'goal', id: goalId } : null;
+    } else {
+      this.editContext = null;
+    }
     this.showView('goal-details');
   }
 
-  showPenaltyDetails() {
+  showPenaltyDetails(penaltyId = null) {
+    if (penaltyId) {
+      const penalty = this.data.getPenaltyById(penaltyId);
+      this.editContext = penalty ? { type: 'penalty', id: penaltyId } : null;
+    } else {
+      this.editContext = null;
+    }
     this.showView('penalty-details');
   }
 
@@ -265,6 +279,7 @@ export class ScorekeeperApp {
     }
     this.dialogContext = null;
     this.boundNumberKeyHandler = null;
+    this.editContext = null;
   }
 
   saveJerseyNumber() {
@@ -432,11 +447,11 @@ export class ScorekeeperApp {
     const team = main.querySelector('[data-field="team"]').value;
     const playerId = main.querySelector('[data-field="player"]').value;
     const assistId = main.querySelector('[data-field="assist"]').value;
-    const period = main.querySelector('[data-field="period"]').value;
     const shotType = main.querySelector('[data-field="shotType"]').value;
     const goalType = main.querySelector('[data-field="goalType"]').value;
-    const time = main.querySelector('[data-field="time"]').value;
+    const period = main.querySelector('[data-field="period"]').value;
     const breakaway = main.querySelector('[data-field="breakaway"]').value;
+    const time = main.querySelector('[data-field="time"]').value;
 
     if (!team || !playerId) {
       window.alert('Select a team and player before saving.');
@@ -457,30 +472,46 @@ export class ScorekeeperApp {
     const homeScore = Number((currentGame && currentGame.homeScore) || 0);
     const awayScore = Number((currentGame && currentGame.awayScore) || 0);
 
-    let teamScore = homeScore;
-    let opponentScore = awayScore;
-    if (currentGame && team === currentGame.homeTeam) {
-      teamScore = homeScore + 1;
-      opponentScore = awayScore;
-    } else if (currentGame && team === currentGame.awayTeam) {
-      teamScore = awayScore + 1;
-      opponentScore = homeScore;
-    }
+    const editContext = this.editContext;
+    const isEditing = editContext?.type === 'goal';
+    const existingGoal = isEditing ? this.data.getGoalById(editContext.id) : null;
 
-    let scoreImpact = '';
-    if (currentGame) {
-      if (teamScore === 1 && opponentScore === 0) {
-        scoreImpact = 'first goal of the game';
-      } else if (teamScore === opponentScore) {
-        scoreImpact = 'game tying goal';
-      } else if (teamScore >= opponentScore + 2) {
-        scoreImpact = 'insurance goal';
-      } else if (teamScore > opponentScore) {
-        scoreImpact = 'go ahead goal';
+    let baseHomeScore = homeScore;
+    let baseAwayScore = awayScore;
+
+    if (existingGoal) {
+      if (existingGoal.team === currentGame?.homeTeam) {
+        baseHomeScore = Math.max(0, baseHomeScore - 1);
+      } else if (existingGoal.team === currentGame?.awayTeam) {
+        baseAwayScore = Math.max(0, baseAwayScore - 1);
       }
     }
 
-    const existingGoals = Array.isArray(currentGame?.goals) ? currentGame.goals : [];
+    let teamScore = baseHomeScore;
+    let opponentScore = baseAwayScore;
+
+    if (currentGame && team === currentGame.homeTeam) {
+      teamScore = baseHomeScore + 1;
+      opponentScore = baseAwayScore;
+    } else if (currentGame && team === currentGame.awayTeam) {
+      teamScore = baseAwayScore + 1;
+      opponentScore = baseHomeScore;
+    }
+
+    let scoreImpact = '';
+    if (teamScore === 1 && opponentScore === 0) {
+      scoreImpact = 'first goal of the game';
+    } else if (teamScore === opponentScore) {
+      scoreImpact = 'game tying goal';
+    } else if (teamScore >= opponentScore + 2) {
+      scoreImpact = 'insurance goal';
+    } else if (teamScore > opponentScore) {
+      scoreImpact = 'go ahead goal';
+    }
+
+    const existingGoals = Array.isArray(currentGame?.goals)
+      ? currentGame.goals.filter((goal) => !existingGoal || goal.id !== existingGoal.id)
+      : [];
     const previousGoalsForPlayer = existingGoals.filter((goal) => goal.playerId === playerId).length;
     const totalGameGoals = previousGoalsForPlayer + 1;
     const hatTrickIndicator = totalGameGoals >= 3 ? 'yes' : 'no';
@@ -506,7 +537,7 @@ export class ScorekeeperApp {
     const assistLabel = assist ? formatPlayerLabel(assist, jerseyMap) : '';
     const assistNumber = assist ? resolvePlayerJersey(assist, jerseyMap) : '';
 
-    this.data.addGoal({
+    const payload = {
       team,
       teamScore,
       opponentScore,
@@ -531,8 +562,15 @@ export class ScorekeeperApp {
       time,
       clockSeconds,
       breakaway,
-    });
+    };
 
+    if (existingGoal) {
+      this.data.updateGoal(existingGoal.id, payload);
+    } else {
+      this.data.addGoal(payload);
+    }
+
+    this.editContext = null;
     this.showScoring();
   }
 
@@ -563,6 +601,10 @@ export class ScorekeeperApp {
     const homeScore = Number((currentGame && currentGame.homeScore) || 0);
     const awayScore = Number((currentGame && currentGame.awayScore) || 0);
 
+    const editContext = this.editContext;
+    const isEditing = editContext?.type === 'penalty';
+    const existingPenalty = isEditing ? this.data.getPenaltyById(editContext.id) : null;
+
     let teamScore = team === currentGame?.homeTeam ? homeScore : awayScore;
     let opponentScore = team === currentGame?.homeTeam ? awayScore : homeScore;
 
@@ -585,13 +627,18 @@ export class ScorekeeperApp {
     const latePenalty = isThirdPeriod && clockSeconds >= 1 && clockSeconds <= 120 ? 'yes' : 'no';
     const earlyPenalty = isFirstPeriod && clockSeconds >= 15 * 60 && clockSeconds <= 16 * 60 + 59 ? 'yes' : 'no';
     const clutchPenalty =
-      isThirdPeriod && clockSeconds <= 300 && (teamScore === opponentScore || teamScore > opponentScore) ? 'yes' : 'no';
+      isThirdPeriod && clockSeconds <= 300 && (teamScore === opponentScore || teamScore > opponentScore)
+        ? 'yes'
+        : 'no';
     const comebackThreat = isThirdPeriod && teamScore > opponentScore && scoreDiff <= 1 ? 'yes' : 'no';
 
     const existingPenalties = Array.isArray(currentGame?.penalties) ? currentGame.penalties : [];
-    const previousPenaltiesForPlayer = existingPenalties.filter((penalty) => penalty.playerId === playerId).length;
+    const penaltiesPool = existingPenalty
+      ? existingPenalties.filter((penalty) => penalty.id !== existingPenalty.id)
+      : existingPenalties;
+    const previousPenaltiesForPlayer = penaltiesPool.filter((penalty) => penalty.playerId === playerId).length;
     const penaltiesThisGame = previousPenaltiesForPlayer + 1;
-    const teamPenaltyCount = existingPenalties.filter((penalty) => penalty.team === team).length + 1;
+    const teamPenaltyCount = penaltiesPool.filter((penalty) => penalty.team === team).length + 1;
 
     const lastGoal = currentGame?.goals?.length ? currentGame.goals[currentGame.goals.length - 1] : null;
     const momentumSwing = lastGoal && lastGoal.team === team ? 'yes' : 'no';
@@ -599,7 +646,7 @@ export class ScorekeeperApp {
     const playerLabel = player ? formatPlayerLabel(player, jerseyMap) : 'Unknown';
     const playerNumber = player ? resolvePlayerJersey(player, jerseyMap) : '';
 
-    this.data.addPenalty({
+    const payload = {
       team,
       teamScore,
       opponentScore,
@@ -620,8 +667,15 @@ export class ScorekeeperApp {
       period,
       time,
       clockSeconds,
-    });
+    };
 
+    if (existingPenalty) {
+      this.data.updatePenalty(existingPenalty.id, payload);
+    } else {
+      this.data.addPenalty(payload);
+    }
+
+    this.editContext = null;
     this.showScoring();
   }
 
@@ -680,4 +734,3 @@ export class ScorekeeperApp {
     this.showStartupMenu();
   }
 }
-

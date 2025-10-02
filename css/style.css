@@ -1762,3 +1762,35 @@ tbody .stats-player-row:focus-visible {
         align-items: stretch;
     }
 }
+
+
+.event-line {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.event-line > div {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.event-edit-button {
+  background: none;
+  border: none;
+  color: var(--primary-color);
+  cursor: pointer;
+  font: inherit;
+  padding: 0;
+  text-decoration: underline;
+}
+
+.event-edit-button:hover,
+.event-edit-button:focus {
+  text-decoration: none;
+}

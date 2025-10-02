@@ -1,4 +1,4 @@
-﻿import { buildJerseyMap, formatPlayerLabel } from '../components/player-labels.js';
+import { buildJerseyMap, formatPlayerLabel } from '../components/player-labels.js';
 import { attachTimeEntry, timeEntryMarkup } from '../components/time-entry.js';
 
 export const penaltyDetailsView = {
@@ -10,58 +10,77 @@ export const penaltyDetailsView = {
       return `<div class="card"><p>No active game found.</p></div>`;
     }
 
-    const jerseyMap = buildJerseyMap(game);
+    const editContext = app.editContext;
+    const existingPenalty = editContext?.type === 'penalty' ? app.data.getPenaltyById(editContext.id) : null;
+    const isEditing = Boolean(existingPenalty);
 
-    const renderPlayerOptions = (team) => {
-      const players = app.data.getPlayersForTeam(team);
-      return ['<option value="">Select Player</option>', ...players.map((p) => `<option value="${p.id}">${formatPlayerLabel(p, jerseyMap)}</option>`)].join('');
-    };
+    const jerseyMap = buildJerseyMap(game);
+    const selectedTeam = existingPenalty?.team ?? game.homeTeam;
+    const selectedPlayerId = existingPenalty?.playerId ?? '';
+    const selectedPeriod = existingPenalty?.period ?? '1';
+    const selectedMinutes = existingPenalty?.minutes ?? 2;
+    const selectedType = existingPenalty?.type ?? 'tripping';
+
+    const playersForSelectedTeam = Array.isArray(app.data.getPlayersForTeam(selectedTeam))
+      ? app.data.getPlayersForTeam(selectedTeam)
+      : [];
+
+    const renderPlayerOptions = (players, selectedId) =>
+      [
+        `<option value=""${selectedId ? '' : ' selected'}>Select Player</option>`,
+        ...players.map((player) => {
+          const label = formatPlayerLabel(player, jerseyMap);
+          const isSelected = player.id === selectedId;
+          return `<option value="${player.id}"${isSelected ? ' selected' : ''}>${label}</option>`;
+        }),
+      ].join('');
+
+    const submitLabel = isEditing ? 'Save Penalty' : 'Add Penalty';
 
     return `
       <div class="card">
-        <h2>Add Penalty Details</h2>
+        <h2>${isEditing ? 'Edit Penalty Details' : 'Add Penalty Details'}</h2>
         <p><strong>Game:</strong> ${game.homeTeam} vs ${game.awayTeam}</p>
 
         <div class="penalty-form-grid">
           <div class="form-group">
             <label>Period:</label>
             <div class="minutes-options" data-role="period-group">
-              <button type="button" class="minutes-button" data-period="1">1</button>
-              <button type="button" class="minutes-button" data-period="2">2</button>
-              <button type="button" class="minutes-button" data-period="3">3</button>
-              <button type="button" class="minutes-button" data-period="OT">OT</button>
+              <button type="button" class="minutes-button${selectedPeriod === '1' ? ' is-active' : ''}" data-period="1">1</button>
+              <button type="button" class="minutes-button${selectedPeriod === '2' ? ' is-active' : ''}" data-period="2">2</button>
+              <button type="button" class="minutes-button${selectedPeriod === '3' ? ' is-active' : ''}" data-period="3">3</button>
+              <button type="button" class="minutes-button${selectedPeriod === 'OT' ? ' is-active' : ''}" data-period="OT">OT</button>
             </div>
-            <input type="hidden" data-field="period" value="1">
+            <input type="hidden" data-field="period" value="${selectedPeriod}">
           </div>
 
           <div class="form-group">
             <label>Team:</label>
             <div class="minutes-options" data-role="team-group">
-              <button type="button" class="minutes-button" data-team="${game.homeTeam}">${game.homeTeam}</button>
-              <button type="button" class="minutes-button" data-team="${game.awayTeam}">${game.awayTeam}</button>
+              <button type="button" class="minutes-button${selectedTeam === game.homeTeam ? ' is-active' : ''}" data-team="${game.homeTeam}">${game.homeTeam}</button>
+              <button type="button" class="minutes-button${selectedTeam === game.awayTeam ? ' is-active' : ''}" data-team="${game.awayTeam}">${game.awayTeam}</button>
             </div>
-            <input type="hidden" data-field="team" value="${game.homeTeam}">
+            <input type="hidden" data-field="team" value="${selectedTeam}">
           </div>
 
           <div class="form-group">
             <label>Player:</label>
-            <select data-field="player">
-              ${renderPlayerOptions(game.homeTeam)}
+            <select data-field="player" data-team="${selectedTeam}">
+              ${renderPlayerOptions(playersForSelectedTeam, selectedPlayerId)}
             </select>
           </div>
 
           <div class="form-group">
             <label>Penalty Type:</label>
             <select data-field="type">
-              <option value="tripping">Tripping</option>
-              <option value="hooking">Hooking</option>
-              <option value="slashing">Slashing</option>
-              <option value="high-sticking">High Sticking</option>
-              <option value="interference">Interference</option>
-              <option value="holding">Holding</option>
-              <option value="roughing">Roughing</option>
-              <option value="other">Other</option>
-
+              <option value="tripping"${selectedType === 'tripping' ? ' selected' : ''}>Tripping</option>
+              <option value="hooking"${selectedType === 'hooking' ? ' selected' : ''}>Hooking</option>
+              <option value="slashing"${selectedType === 'slashing' ? ' selected' : ''}>Slashing</option>
+              <option value="high-sticking"${selectedType === 'high-sticking' ? ' selected' : ''}>High Sticking</option>
+              <option value="interference"${selectedType === 'interference' ? ' selected' : ''}>Interference</option>
+              <option value="holding"${selectedType === 'holding' ? ' selected' : ''}>Holding</option>
+              <option value="roughing"${selectedType === 'roughing' ? ' selected' : ''}>Roughing</option>
+              <option value="other"${selectedType === 'other' ? ' selected' : ''}>Other</option>
             </select>
           </div>
 
@@ -73,16 +92,16 @@ export const penaltyDetailsView = {
           <div class="form-group">
             <label>Minutes:</label>
             <div class="minutes-options" data-role="minutes-group">
-              <button type="button" class="minutes-button" data-minutes="2">2 min</button>
-              <button type="button" class="minutes-button" data-minutes="4">4 min</button>
-              <button type="button" class="minutes-button" data-minutes="10">10 min</button>
+              <button type="button" class="minutes-button${Number(selectedMinutes) === 2 ? ' is-active' : ''}" data-minutes="2">2 min</button>
+              <button type="button" class="minutes-button${Number(selectedMinutes) === 4 ? ' is-active' : ''}" data-minutes="4">4 min</button>
+              <button type="button" class="minutes-button${Number(selectedMinutes) === 10 ? ' is-active' : ''}" data-minutes="10">10 min</button>
             </div>
-            <input type="hidden" data-field="minutes" value="2">
+            <input type="hidden" data-field="minutes" value="${selectedMinutes}">
           </div>
         </div>
 
         <div class="form-actions">
-          <button class="btn btn-success" data-action="save-penalty">Add Penalty</button>
+          <button class="btn btn-success" data-action="save-penalty">${submitLabel}</button>
           <button class="btn btn-secondary" data-action="cancel-penalty">Cancel</button>
         </div>
       </div>
@@ -92,17 +111,27 @@ export const penaltyDetailsView = {
     return '';
   },
   bind(app) {
+    const editContext = app.editContext;
+    const existingPenalty = editContext?.type === 'penalty' ? app.data.getPenaltyById(editContext.id) : null;
+
     const main = app.mainContent;
     const teamInput = main.querySelector('[data-field="team"]');
     const playerSelect = main.querySelector('[data-field="player"]');
     const timeContainer = main.querySelector('[data-time-input]');
-
-    if (timeContainer) {
-      attachTimeEntry(timeContainer);
-    }
-
     const minutesGroup = main.querySelector('[data-role="minutes-group"]');
     const minutesInput = main.querySelector('[data-field="minutes"]');
+    const periodGroup = main.querySelector('[data-role="period-group"]');
+    const periodInput = main.querySelector('[data-field="period"]');
+    const teamGroup = main.querySelector('[data-role="team-group"]');
+    const typeSelect = main.querySelector('[data-field="type"]');
+
+    if (typeSelect && existingPenalty?.type) {
+      typeSelect.value = existingPenalty.type;
+    }
+
+    if (timeContainer) {
+      attachTimeEntry(timeContainer, { initialValue: existingPenalty?.time ?? '' });
+    }
 
     const applyMinutesSelection = (value) => {
       if (!minutesGroup || !minutesInput) return;
@@ -121,13 +150,10 @@ export const penaltyDetailsView = {
       applyMinutesSelection(selected);
     });
 
-    if (minutesInput) {
-      applyMinutesSelection(minutesInput.value || 2);
+    if (existingPenalty?.minutes != null && minutesInput) {
+      minutesInput.value = `${existingPenalty.minutes}`;
     }
-
-    const periodGroup = main.querySelector('[data-role="period-group"]');
-    const periodInput = main.querySelector('[data-field="period"]');
-    const teamGroup = main.querySelector('[data-role="team-group"]');
+    applyMinutesSelection(minutesInput?.value || 2);
 
     const applyPeriodSelection = (value) => {
       if (!periodGroup || !periodInput) return;
@@ -145,17 +171,21 @@ export const penaltyDetailsView = {
       applyPeriodSelection(selected);
     });
 
-    if (periodInput) {
-      applyPeriodSelection(periodInput.value || '1');
+    if (existingPenalty?.period && periodInput) {
+      periodInput.value = existingPenalty.period;
     }
+    applyPeriodSelection(periodInput?.value || '1');
 
     const updatePlayerOptions = (team) => {
       if (!playerSelect) return;
       const jerseyMap = buildJerseyMap(app.data.currentGame);
       const players = app.data.getPlayersForTeam(team);
       const selectedPlayer = playerSelect.value;
-      playerSelect.innerHTML = ['<option value="">Select Player</option>', ...players.map((p) => `<option value="${p.id}">${formatPlayerLabel(p, jerseyMap)}</option>`)].join('');
-      if (players.some((p) => p.id === selectedPlayer)) {
+      playerSelect.innerHTML = [
+        '<option value="">Select Player</option>',
+        ...players.map((p) => `<option value="${p.id}">${formatPlayerLabel(p, jerseyMap)}</option>`),
+      ].join('');
+      if (selectedPlayer && players.some((p) => p.id === selectedPlayer)) {
         playerSelect.value = selectedPlayer;
       }
       playerSelect.dataset.team = team;
@@ -180,27 +210,25 @@ export const penaltyDetailsView = {
       applyTeamSelection(selected);
     });
 
-    applyTeamSelection(teamInput?.value || app.data.currentGame?.homeTeam);
+    if (existingPenalty && playerSelect) {
+      playerSelect.value = existingPenalty.playerId ?? '';
+    }
+
+    const defaultTeam = existingPenalty?.team ?? teamInput?.value ?? app.data.currentGame?.homeTeam;
+    applyTeamSelection(defaultTeam);
+
+    if (existingPenalty && playerSelect) {
+      playerSelect.value = existingPenalty.playerId ?? '';
+    }
 
     main
       .querySelector('[data-action="cancel-penalty"]')
-      ?.addEventListener('click', () => app.showScoring());
+      ?.addEventListener('click', () => {
+        app.editContext = null;
+        app.showScoring();
+      });
     main
       .querySelector('[data-action="save-penalty"]')
       ?.addEventListener('click', () => app.submitPenaltyForm());
   },
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
