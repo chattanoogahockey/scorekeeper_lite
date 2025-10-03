@@ -1,5 +1,19 @@
 [
   {
+    "id": "game_38",
+    "file": "data/games/2025-10-02_gold_sislo_vs_slappy-gilmores_19-00_game-38.json",
+    "fileName": "2025-10-02_gold_sislo_vs_slappy-gilmores_19-00_game-38.json",
+    "date": "2025-10-02 00:00:00",
+    "time": "19:00:00",
+    "division": "Gold",
+    "created": "2025-10-02T23:07:40.744Z",
+    "homeTeam": "Sislo",
+    "awayTeam": "Slappy Gilmores",
+    "homeScore": 7,
+    "awayScore": 0,
+    "lastUpdated": "2025-10-03T00:11:16.246Z"
+  },
+  {
     "id": "game_37",
     "file": "data/games/2025-10-01_silver_danglin-under-the-influence_vs_nets-sticks-and-chill_21-00_game-37.json",
     "fileName": "2025-10-01_silver_danglin-under-the-influence_vs_nets-sticks-and-chill_21-00_game-37.json",
