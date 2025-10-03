@@ -910,7 +910,6 @@ function computePlayerStatsByDivision(gamesByDivision) {
         });
         scorerRecord.goals += 1;
         scorerRecord.points = scorerRecord.goals + scorerRecord.assists;
-        scorerRecord.games.add(gameId);
         scorerRecord.lastContribution = weekNumber;
         if (`${goal.hatTrickIndicator ?? ''}`.toLowerCase() === 'yes') {
           scorerRecord.hatTricks += 1;
@@ -928,7 +927,6 @@ function computePlayerStatsByDivision(gamesByDivision) {
           });
           assistRecord.assists += 1;
           assistRecord.points = assistRecord.goals + assistRecord.assists;
-          assistRecord.games.add(gameId);
           assistRecord.lastContribution = weekNumber;
           participants.set(assistKey, true);
 
@@ -936,6 +934,39 @@ function computePlayerStatsByDivision(gamesByDivision) {
           assistWeekly.assists += 1;
           assistWeekly.points += 1;
         }
+      });
+
+      const attendance = Array.isArray(game.attendance) ? game.attendance : [];
+      attendance.forEach((entry) => {
+        if (!entry || typeof entry !== 'object') {
+          return;
+        }
+        if (entry.present === false) {
+          return;
+        }
+        const attendanceTeam = `${entry.team ?? ''}`.trim();
+        const attendanceName = sanitizePlayerDisplayName(entry.name, attendanceTeam);
+        if (!attendanceName) {
+          return;
+        }
+        const attendanceKey = buildPlayerKey(entry.id, attendanceName, attendanceTeam);
+        const attendanceRecord = ensurePlayerRecord(players, attendanceKey, {
+          player: attendanceName,
+          team: attendanceTeam,
+        });
+        attendanceRecord.games.add(gameId);
+        if (Number.isFinite(weekNumber)) {
+          attendanceRecord.lastContribution = attendanceRecord.lastContribution == null
+            ? weekNumber
+            : Math.max(attendanceRecord.lastContribution, weekNumber);
+        }
+        participants.set(attendanceKey, true);
+
+        const attendanceWeekly = ensureWeeklyPlayerRecord(weekly, weekNumber, attendanceKey, attendanceRecord);
+        if (!attendanceWeekly.games) {
+          attendanceWeekly.games = new Set();
+        }
+        attendanceWeekly.games.add(gameId);
       });
 
       participants.forEach((_, key) => {
@@ -1030,6 +1061,7 @@ function ensureWeeklyPlayerRecord(collection, weekNumber, key, record) {
     goals: 0,
     assists: 0,
     points: 0,
+    games: new Set(),
   };
 
   weekMap.set(key, entry);

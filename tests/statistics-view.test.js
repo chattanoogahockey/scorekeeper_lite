@@ -137,6 +137,61 @@ describe('statistics overtime handling', () => {
   });
 });
 
+  it('derives games played from attendance', () => {
+    const games = [
+      {
+        id: 'game-a',
+        division: 'Gold',
+        week: 1,
+        homeTeam: 'Slappy Gilmores',
+        awayTeam: 'Corn Stars',
+        homeScore: 2,
+        awayScore: 3,
+        goals: [],
+        penalties: [],
+        attendance: [
+          { id: 'slappy_marc_redinger', name: 'Marc Redinger', team: 'Slappy Gilmores', present: true },
+        ],
+      },
+      {
+        id: 'game-b',
+        division: 'Gold',
+        week: 2,
+        homeTeam: "Noah's Arknemesis",
+        awayTeam: 'Slappy Gilmores',
+        homeScore: 4,
+        awayScore: 5,
+        goals: [
+          { team: 'Slappy Gilmores', player: 'Marc Redinger', playerId: 'slappy_marc_redinger', period: '1', time: '10:00' },
+        ],
+        penalties: [],
+        attendance: [
+          { id: 'slappy_marc_redinger', name: 'Marc Redinger', team: 'Slappy Gilmores', present: true },
+        ],
+      },
+      {
+        id: 'game-c',
+        division: 'Gold',
+        week: 3,
+        homeTeam: 'Slappy Gilmores',
+        awayTeam: 'UTC',
+        homeScore: 1,
+        awayScore: 1,
+        goals: [],
+        penalties: [],
+        attendance: [
+          { id: 'slappy_marc_redinger', name: 'Marc Redinger', team: 'Slappy Gilmores', present: true },
+        ],
+      },
+    ];
+
+    const { standings } = computePlayerStandingsFromGames(games);
+    const gold = standings.get('Gold') ?? [];
+    const marc = gold.find((record) => record.player === 'Marc Redinger');
+    expect(marc).toBeTruthy();
+    expect(marc?.gamesPlayed).toBe(3);
+  });
+
 describe('statistics game identifiers', () => {
   it('uses game id when available to keep repeat matchups distinct', () => {
     const repeatedGames = [
@@ -159,6 +214,10 @@ describe('statistics game identifiers', () => {
             time: '12:00',
           },
         ],
+        attendance: [
+          { id: 'wolves_alex', name: 'Alex Star', team: 'Wolves', present: true },
+          { id: 'bears_sam', name: 'Sam Setter', team: 'Bears', present: true },
+        ],
       },
       {
         id: 'game-b',
@@ -179,6 +238,10 @@ describe('statistics game identifiers', () => {
             time: '10:00',
           },
         ],
+        attendance: [
+          { id: 'wolves_alex', name: 'Alex Star', team: 'Wolves', present: true },
+          { id: 'bears_sam', name: 'Sam Setter', team: 'Bears', present: true },
+        ],
       },
     ];
 
@@ -187,14 +250,15 @@ describe('statistics game identifiers', () => {
 
     const { standings, timelines } = computePlayerStandingsFromGames(repeatedGames);
     const goldPlayers = standings.get('Gold') ?? [];
-    expect(goldPlayers).toHaveLength(1);
-    const playerRecord = goldPlayers[0];
-    expect(playerRecord.player).toBe('Alex Star');
-    expect(playerRecord.gamesPlayed).toBe(2);
+    expect(goldPlayers.length).toBeGreaterThanOrEqual(1);
+
+    const alexRecord = goldPlayers.find((record) => record.player === 'Alex Star');
+    expect(alexRecord).toBeTruthy();
+    expect(alexRecord?.gamesPlayed).toBe(2);
 
     const playerTimelineMap = timelines.get('Gold');
-    const playerTimeline = playerTimelineMap ? Array.from(playerTimelineMap.values())[0] : undefined;
-    expect(playerTimeline?.[playerTimeline.length - 1]?.cumulativeGames).toBe(2);
+    const alexTimeline = playerTimelineMap?.get(alexRecord?.id ?? '');
+    expect(alexTimeline?.[alexTimeline.length - 1]?.cumulativeGames).toBe(2);
 
     const teamTimelines = computeTeamTimelinesFromGames(repeatedGames);
     const wolvesTimeline = teamTimelines.get('Gold')?.get('Wolves');

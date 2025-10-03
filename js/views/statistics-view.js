@@ -1,4 +1,4 @@
-﻿const DIVISIONS = ['Gold', 'Silver', 'Bronze'];
+const DIVISIONS = ['Gold', 'Silver', 'Bronze'];
 const DEFAULT_DIVISION = 'Gold';
 
 const TEAM_SORT_DEFAULT = Object.freeze({ key: 'points', direction: 'desc' });
@@ -137,7 +137,7 @@ function isAnonymousPlayerName(name) {
 
 
 function formatFlyoutSubtitle(parts) {
-  const bullet = 'Ã¢â‚¬Â¢';
+  const bullet = '\u2022';
   return parts
     .map((value) => `${value ?? ''}`.trim())
     .filter((value) => value.length > 0)
@@ -664,11 +664,9 @@ function computePlayerStandingsFromGames(games) {
 
       const { record, key } = playerEntry;
       record.goals += 1;
-      record.games.add(gameId);
       goalCounts.set(key, (goalCounts.get(key) ?? 0) + 1);
 
       const goalWeeklyStats = ensurePlayerWeekStats(divisionWeekly, key, weekNumber);
-      goalWeeklyStats.games.add(gameId);
       goalWeeklyStats.goals += 1;
       goalWeeklyStats.points += 1;
 
@@ -678,10 +676,8 @@ function computePlayerStandingsFromGames(games) {
         if (assistEntry) {
           const { record: assistRecord, key: assistKey } = assistEntry;
           assistRecord.assists += 1;
-          assistRecord.games.add(gameId);
 
           const assistWeeklyStats = ensurePlayerWeekStats(divisionWeekly, assistKey, weekNumber);
-          assistWeeklyStats.games.add(gameId);
           assistWeeklyStats.assists += 1;
           assistWeeklyStats.points += 1;
         }
@@ -717,13 +713,37 @@ function computePlayerStandingsFromGames(games) {
 
       const penaltyEntry = ensurePlayerRecord(divisionStats, penalty.playerId, playerName, teamName);
       if (penaltyEntry) {
-        const { record, key } = penaltyEntry;
+        const { record } = penaltyEntry;
         record.pims += minutes;
-        record.games.add(gameId);
 
-        const penaltyWeeklyStats = ensurePlayerWeekStats(divisionWeekly, key, weekNumber);
-        penaltyWeeklyStats.games.add(gameId);
       }
+    });
+
+    const attendance = Array.isArray(game.attendance) ? game.attendance : [];
+    attendance.forEach((entry) => {
+      if (!entry || typeof entry !== 'object') {
+        return;
+      }
+      if (entry.present === false) {
+        return;
+      }
+
+      const playerName = `${entry.name ?? ''}`.trim();
+      const teamName = `${entry.team ?? ''}`.trim();
+      if (!playerName) {
+        return;
+      }
+
+      const attendanceEntry = ensurePlayerRecord(divisionStats, entry.id, playerName, teamName);
+      if (!attendanceEntry) {
+        return;
+      }
+
+      const { record, key } = attendanceEntry;
+      record.games.add(gameId);
+
+      const attendanceWeeklyStats = ensurePlayerWeekStats(divisionWeekly, key, weekNumber);
+      attendanceWeeklyStats.games.add(gameId);
     });
   });
 
