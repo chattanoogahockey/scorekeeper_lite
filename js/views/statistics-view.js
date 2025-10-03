@@ -982,6 +982,7 @@ async function loadGameSummaries() {
         date: merged.date ?? entry.date ?? null,
         goals: Array.isArray(merged.goals) ? merged.goals : [],
         penalties: Array.isArray(merged.penalties) ? merged.penalties : [],
+        attendance: Array.isArray(merged.attendance) ? merged.attendance : [],
         overtimeResult: merged.overtimeResult ?? entry.overtimeResult ?? null,
         status: merged.status ?? entry.status ?? '',
         lastUpdated: merged.lastUpdated ?? entry.lastUpdated ?? null,
