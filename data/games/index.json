@@ -1,5 +1,19 @@
 [
   {
+    "id": "game_39",
+    "file": "data/games/2025-10-02_gold_noahs-arknemesis_vs_utc_20-00_game-39.json",
+    "fileName": "2025-10-02_gold_noahs-arknemesis_vs_utc_20-00_game-39.json",
+    "date": "2025-10-02 00:00:00",
+    "time": "20:00:00",
+    "division": "Gold",
+    "created": "2025-10-03T00:22:26.582Z",
+    "homeTeam": "Noah's Arknemesis",
+    "awayTeam": "UTC",
+    "homeScore": 8,
+    "awayScore": 4,
+    "lastUpdated": "2025-10-03T01:15:06.052Z"
+  },
+  {
     "id": "game_38",
     "file": "data/games/2025-10-02_gold_sislo_vs_slappy-gilmores_19-00_game-38.json",
     "fileName": "2025-10-02_gold_sislo_vs_slappy-gilmores_19-00_game-38.json",
