@@ -1,5 +1,19 @@
 [
   {
+    "id": "game_40",
+    "file": "data/games/2025-10-02_gold_corn-stars_vs_purpetrators_21-00_game-40.json",
+    "fileName": "2025-10-02_gold_corn-stars_vs_purpetrators_21-00_game-40.json",
+    "date": "2025-10-02 00:00:00",
+    "time": "21:00:00",
+    "division": "Gold",
+    "created": "2025-10-03T01:56:34.698Z",
+    "homeTeam": "Corn Stars",
+    "awayTeam": "Purpetrators",
+    "homeScore": 11,
+    "awayScore": 4,
+    "lastUpdated": "2025-10-03T02:19:28.596Z"
+  },
+  {
     "id": "game_39",
     "file": "data/games/2025-10-02_gold_noahs-arknemesis_vs_utc_20-00_game-39.json",
     "fileName": "2025-10-02_gold_noahs-arknemesis_vs_utc_20-00_game-39.json",
