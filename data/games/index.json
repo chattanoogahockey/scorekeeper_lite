@@ -1,5 +1,19 @@
 [
   {
+    "id": "game_30",
+    "file": "data/games/2025-09-26_gold_corn-stars_vs_utc_19-00_game-30.json",
+    "fileName": "2025-09-26_gold_corn-stars_vs_utc_19-00_game-30.json",
+    "date": "2025-09-26 00:00:00",
+    "time": "19:00:00",
+    "division": "Gold",
+    "created": "2025-10-03T03:24:22.589Z",
+    "homeTeam": "Corn Stars",
+    "awayTeam": "UTC",
+    "homeScore": 9,
+    "awayScore": 8,
+    "lastUpdated": "2025-10-03T03:41:47.988Z"
+  },
+  {
     "id": "game_40",
     "file": "data/games/2025-10-02_gold_corn-stars_vs_purpetrators_21-00_game-40.json",
     "fileName": "2025-10-02_gold_corn-stars_vs_purpetrators_21-00_game-40.json",
